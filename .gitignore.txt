@@ -1,6 +1,0 @@
-.idea/
-.classpath
-.project
-target/
-*.class
-bin/
