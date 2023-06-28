@@ -18,15 +18,11 @@ import helpers.DefaultDict;
 import helpers.Query;
 import helpers.Updater;
 
-public abstract class Provider<T> {
+public abstract class Provider<T> implements IsProvider<T> {
 	
 	private ArrayList<T> data;
 	private String path;
 	private Function<T, String> naturalId; //za generisanje id-a za entitet
-	
-	public abstract void loadData() throws IOException;
-	public abstract void saveData() throws IOException;
-	
 	
 	public Provider(){}
 	
@@ -85,7 +81,18 @@ public abstract class Provider<T> {
 	}
 	
 	//Vrati referencu na jedinu instancu izbrisanog entiteta za taj entitet ako nepostoji id entiteta
-	public abstract DefaultDict<String, T> getIds();
+	public DefaultDict<String, T> getIds(){
+		
+		DefaultDict<String, T> dict = new DefaultDict<>( () -> getDeletedInstance() );
+		Function<T, String> idFunction = getNaturalId();
+		
+		for(T entitet : getData()) {
+			dict.put(idFunction.apply(entitet), entitet);
+		}
+		
+		return dict;
+	}
+	public abstract T getDeletedInstance();
 	
 	
 	
@@ -180,9 +187,21 @@ public abstract class Provider<T> {
 
 
 
+	
+	protected abstract ArrayList<String[]> convertDataToString(ArrayList<T> data); 
+	protected abstract ArrayList<T> convertStringToData(ArrayList<String[]> data);
+	
+	//Check twice to see this works
+	public void loadData() throws IOException{
+		this.setData(  this.convertStringToData( loadFromCsv(this.getPath(), ",") )  );				
+	}
+		
+	public void saveData() throws IOException{
+		writeToCsv( this.convertDataToString( this.getData() ), this.getPath(), ",");
+	};
 
-    
-    protected static void writeToCsv(ArrayList<String[]> entityStrings, String path, String delimiter) throws IOException {
+	
+	protected static void writeToCsv(ArrayList<String[]> entityStrings, String path, String delimiter) throws IOException {
     	
     	try ( BufferedWriter bw = new BufferedWriter(new FileWriter(path)) ) {
             
@@ -196,7 +215,6 @@ public abstract class Provider<T> {
     		}
     	    	
     }
-    
     
     protected static ArrayList<String[]> loadFromCsv(String path, String delimiter) throws IOException {
        

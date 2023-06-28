@@ -1,5 +1,6 @@
 package dataProvajderi;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import helpers.Query;
@@ -13,7 +14,7 @@ public interface IsProvider<T> {
 	public void post(T entitet);
 	
 	
-	public void saveData();  //maby add path parameter
-	public void loadData();
+	public void saveData() throws IOException;
+	public void loadData() throws IOException;
 
 }

@@ -1,30 +1,29 @@
 package dataProvajderi;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 import entiteti.Menadzer;
-import helpers.DefaultDict;
 
 public class MenadzerProvider extends Provider<Menadzer> {
-
+	
+	private Menadzer deleted = new Menadzer() {};
 	
 	@Override
-	public void loadData() throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
+	public Menadzer getDeletedInstance() { return this.deleted; }
+	
 	@Override
-	public void saveData() throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public DefaultDict<String, Menadzer> getIds() {
+	protected ArrayList<String[]> convertDataToString(ArrayList<Menadzer> data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
+	protected ArrayList<Menadzer> convertStringToData(ArrayList<String[]> data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+
 
 	
 

@@ -1,31 +1,26 @@
 package dataProvajderi;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 import entiteti.Recepcioner;
-import helpers.DefaultDict;
 
 public class RecepcionerProvider extends Provider<Recepcioner> {
+	
+	private Recepcioner deleted = new Recepcioner() {};
 
 	@Override
-	public void loadData() throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
+	public Recepcioner getDeletedInstance() { return this.deleted; }
 
 	@Override
-	public void saveData() throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public DefaultDict<String, Recepcioner> getIds() {
+	protected ArrayList<String[]> convertDataToString(ArrayList<Recepcioner> data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	
-
+	@Override
+	protected ArrayList<Recepcioner> convertStringToData(ArrayList<String[]> data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
