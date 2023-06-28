@@ -1,38 +1,31 @@
 package dataProvajderi;
 
+import java.io.IOException;
+
 import entiteti.Menadzer;
-import helpers.Tester;
+import helpers.DefaultDict;
 
-public class MenadzerProvider implements Provider<Menadzer> {
+public class MenadzerProvider extends Provider<Menadzer> {
+
+	
+	@Override
+	public void loadData() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
-	public Menadzer get(Tester<Menadzer> selektor) {
+	public void saveData() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public DefaultDict<String, Menadzer> getIds() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public void put(Tester<Menadzer> selektor, Menadzer entitet) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void delete(Tester<Menadzer> selektor) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void post(Menadzer entitet) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Menadzer getById(int id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 }

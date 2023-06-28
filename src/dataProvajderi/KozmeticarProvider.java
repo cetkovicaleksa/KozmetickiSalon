@@ -1,38 +1,31 @@
 package dataProvajderi;
 
+import java.io.IOException;
+
 import entiteti.Kozmeticar;
-import helpers.Tester;
+import helpers.DefaultDict;
 
-public class KozmeticarProvider implements Provider<Kozmeticar> {
+public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
+
+	
+	@Override
+	public void loadData() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
-	public Kozmeticar get(Tester<Kozmeticar> selektor) {
+	public void saveData() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public DefaultDict<String, Kozmeticar> getIds() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public void put(Tester<Kozmeticar> selektor, Kozmeticar entitet) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void delete(Tester<Kozmeticar> selektor) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void post(Kozmeticar entitet) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Kozmeticar getById(int id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 }

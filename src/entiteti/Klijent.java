@@ -4,6 +4,6 @@ public class Klijent extends Korisnik {
 	
 	private boolean hasLoyaltyCard;
 	
-	//TODO: geters and seters
+	//TODO: constructor and geters and seters
 
 }
