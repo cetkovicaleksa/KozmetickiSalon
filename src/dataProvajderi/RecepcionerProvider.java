@@ -8,7 +8,7 @@ import entiteti.Recepcioner;
 
 public class RecepcionerProvider extends Provider<Recepcioner> {
 	
-	private Recepcioner deleted = new Recepcioner() {
+	private final Recepcioner deleted = new Recepcioner() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
@@ -38,6 +38,7 @@ public class RecepcionerProvider extends Provider<Recepcioner> {
 
 	@Override
 	protected ArrayList<String[]> convertDataToString(ArrayList<Recepcioner> data) {
+		
 	    ArrayList<String[]> convertedData = new ArrayList<>();        
 	    
 	    data.forEach((recepcioner) -> {
@@ -58,10 +59,12 @@ public class RecepcionerProvider extends Provider<Recepcioner> {
 	    });
 	    
 	    return convertedData;
+	    
 	}
 
 	@Override
 	protected ArrayList<Recepcioner> convertStringToData(ArrayList<String[]> data) {
+		
 	    ArrayList<Recepcioner> convertedData = new ArrayList<>();
 	    
 	    data.forEach((r) -> {
@@ -81,6 +84,7 @@ public class RecepcionerProvider extends Provider<Recepcioner> {
 	    });
 	    
 	    return convertedData;
+	    
 	}
 
 

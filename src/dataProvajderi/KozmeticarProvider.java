@@ -10,7 +10,7 @@ import helpers.DefaultDict;
 
 public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 	
-	private Kozmeticar deleted = new Kozmeticar() {
+	private final Kozmeticar deleted = new Kozmeticar() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
@@ -43,6 +43,7 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 	
 	@Override
 	protected ArrayList<String[]> convertDataToString(ArrayList<Kozmeticar> data) {  //doesn't take care of an accidental deleted treatment appereance
+		
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		
 		Provider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
@@ -73,14 +74,17 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 		});
 		
 		return convertedData;
+		
 	}
 
 	@Override
-	protected ArrayList<Kozmeticar> convertStringToData(ArrayList<String[]> data) {
+	protected ArrayList<Kozmeticar> convertStringToData(ArrayList<String[]> data) { //moraju se prvo ucitati kozmeticki tretmani ili ce svaki kozmeticar biti instanciran sa praznom listom tretmana
+		
 		ArrayList<Kozmeticar> convertedData = new ArrayList<>();
 		
 		Provider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
 		DefaultDict<String, KozmetickiTretman> tretmaniIds = tretmaniProvider.getIds();
+		KozmetickiTretman deleted = tretmaniProvider.getDeletedInstance();
 		
 		data.forEach( (k) -> {
 			Kozmeticar kozmeticar = new Kozmeticar();
@@ -101,14 +105,13 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 	        kozmeticar.setTretmani(tretmani);
 	        
 	        if(k[10].isEmpty()) {
-	        	continue;
+	        	return;
 	        }
 	        
-	        KozmetickiTretman deleted = tretmaniProvider.getDeletedInstance();
 	        String[] tretmaniStr = k[10].split("\\|");
 	        
 	        for(String id : tretmaniStr) {
-	        	KozmetickiTretman tretman = tretmaniProvider.getById(id);
+	        	KozmetickiTretman tretman = tretmaniIds.get(id);
 	        	
 	        	if(tretman != deleted) {
 	        		tretmani.add(tretman);
@@ -118,8 +121,7 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 		});
 		
 		return convertedData;
-		
-		
+			
 	}
 
 	

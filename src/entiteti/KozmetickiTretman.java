@@ -35,7 +35,7 @@ public class KozmetickiTretman {
 	
 	
 
-	public class TipTretmana{
+	public static class TipTretmana{
 		
 		private String naziv;
 		private float cijena;

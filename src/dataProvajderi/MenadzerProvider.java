@@ -8,7 +8,7 @@ import entiteti.Pol;
 
 public class MenadzerProvider extends Provider<Menadzer> {
 	
-	private Menadzer deleted = new Menadzer() {
+	private final Menadzer deleted = new Menadzer() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
@@ -39,6 +39,7 @@ public class MenadzerProvider extends Provider<Menadzer> {
 	
 	@Override
 	protected ArrayList<String[]> convertDataToString(ArrayList<Menadzer> data) {
+		
 		ArrayList<String[]> convertedData = new ArrayList<>();		
 		
 		data.forEach( (menadzer) -> {
@@ -59,10 +60,12 @@ public class MenadzerProvider extends Provider<Menadzer> {
 		});
 		
 		return convertedData;
+		
 	}
 	
 	@Override
 	protected ArrayList<Menadzer> convertStringToData(ArrayList<String[]> data) {
+		
 		ArrayList<Menadzer> convertedData = new ArrayList<>();
 		
 		data.forEach( (m) -> {
@@ -82,6 +85,7 @@ public class MenadzerProvider extends Provider<Menadzer> {
 		});
 		
 		return convertedData;
+		
 	}
 
 	

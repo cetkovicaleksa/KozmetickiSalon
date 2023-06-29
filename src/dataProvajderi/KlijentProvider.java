@@ -7,7 +7,7 @@ import entiteti.Pol;
 
 public class KlijentProvider extends Provider<Klijent> {
 	
-	private Klijent deleted = new Klijent() {  //could use reflection to make this nicer
+	private final Klijent deleted = new Klijent() {  //could use reflection to make this nicer
 		@Override
 		public void setHasLoyaltyCard(boolean hasLoyaltyCard) {}
 		@Override
@@ -33,6 +33,7 @@ public class KlijentProvider extends Provider<Klijent> {
 
 	@Override
 	protected ArrayList<String[]> convertDataToString(ArrayList<Klijent> data) {
+		
 		ArrayList<String[]> convertedData = new ArrayList<>();		
 		
 		data.forEach( (klijent) -> {
@@ -50,11 +51,13 @@ public class KlijentProvider extends Provider<Klijent> {
 		});
 		
 		return convertedData;
+		
 	}
 
 
 	@Override
 	protected ArrayList<Klijent> convertStringToData(ArrayList<String[]> data) {
+		
 		ArrayList<Klijent> convertedData = new ArrayList<>();
 		
 		data.forEach( (k) -> {
@@ -72,6 +75,7 @@ public class KlijentProvider extends Provider<Klijent> {
 		});
 		
 		return convertedData;
+		
 	}
 	
 	
