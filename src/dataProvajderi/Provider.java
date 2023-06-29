@@ -83,7 +83,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 	//Vrati referencu na jedinu instancu izbrisanog entiteta za taj entitet ako nepostoji id entiteta
 	public DefaultDict<String, T> getIds(){
 		
-		DefaultDict<String, T> dict = new DefaultDict<>( () -> getDeletedInstance() );
+		DefaultDict<String, T> dict = new DefaultDict<>( () -> getDeletedInstance() );  //either this or just pass the reference to getDeletedInstance
 		Function<T, String> idFunction = getNaturalId();
 		
 		for(T entitet : getData()) {
@@ -197,7 +197,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 	}
 		
 	public void saveData() throws IOException{
-		writeToCsv( this.convertDataToString( this.getData() ), this.getPath(), ",");
+		writeToCsv( this.convertDataToString( this.getData()), this.getPath(), ",");
 	};
 
 	
@@ -210,13 +210,11 @@ public abstract class Provider<T> implements IsProvider<T> {
                 bw.write(line);
                 bw.newLine();
             }
-    		} catch (IOException e) {
-            throw e;
-    		}
+    		} catch (IOException e) { throw e; }
     	    	
     }
     
-    protected static ArrayList<String[]> loadFromCsv(String path, String delimiter) throws IOException {
+	protected static ArrayList<String[]> loadFromCsv(String path, String delimiter) throws IOException {
        
     	ArrayList<String[]> data = new ArrayList<>();
 
@@ -227,9 +225,7 @@ public abstract class Provider<T> implements IsProvider<T> {
                 String[] entityFields = line.split(delimiter);
                 data.add(entityFields);
             }
-        } catch (IOException e) {
-            throw e;
-        }
+        } catch (IOException e) { throw e; }
 
         return data;
         

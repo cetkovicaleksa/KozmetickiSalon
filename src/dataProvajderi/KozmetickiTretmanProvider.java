@@ -1,32 +1,29 @@
 package dataProvajderi;
 
+import java.util.ArrayList;
+
 import entiteti.KozmetickiTretman;
 import helpers.Query;
 
-public class KozmetickiTretmanProvider implements IsProvider<KozmetickiTretman>{
+public class KozmetickiTretmanProvider extends ProviderExtrovert<KozmetickiTretman>{
 
 	@Override
-	public KozmetickiTretman get(Query<KozmetickiTretman> selektor) {
+	public KozmetickiTretman getDeletedInstance() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void put(Query<KozmetickiTretman> selektor, KozmetickiTretman entitet) {
+	protected ArrayList<String[]> convertDataToString(ArrayList<KozmetickiTretman> data) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
-	public void delete(Query<KozmetickiTretman> selektor) {
+	protected ArrayList<KozmetickiTretman> convertStringToData(ArrayList<String[]> data) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
-	@Override
-	public void post(KozmetickiTretman entitet) {
-		// TODO Auto-generated method stub
-		
-	}
 
 }

@@ -1,72 +1,52 @@
 package entiteti;
 
-import helpers.HasFieldsEnum;
 
-public abstract class Korisnik implements HasFieldsEnum{
+public abstract class Korisnik {
 	
 	private String ime, prezime, brojTelefona,
-	adresa, korisnickoIme, lozinka;
-	
+	  adresa, korisnickoIme, lozinka;
 	private Pol pol;
-
-	public String getIme() {
-		return ime;
+	
+	
+	public Korisnik() {}
+	
+	public Korisnik(String korisnickoIme, String lozinka) {
+		setKorisnickoIme(korisnickoIme);
+		setLozinka(lozinka);
 	}
-
-	public void setIme(String ime) {
-		this.ime = ime;
-	}
-
-	public String getPrezime() {
-		return prezime;
-	}
-
-	public void setPrezime(String prezime) {
-		this.prezime = prezime;
-	}
-
-	public String getBrojTelefona() {
-		return brojTelefona;
-	}
-
-	public void setBrojTelefona(String brojTelefona) {
-		this.brojTelefona = brojTelefona;
-	}
-
-	public String getAdresa() {
-		return adresa;
-	}
-
-	public void setAdresa(String adresa) {
-		this.adresa = adresa;
-	}
-
-	public String getKorisnickoIme() {
-		return korisnickoIme;
-	}
-
-	public void setKorisnickoIme(String korisnickoIme) {
-		this.korisnickoIme = korisnickoIme;
-	}
-
-	public String getLozinka() {
-		return lozinka;
-	}
-
-	public void setLozinka(String lozinka) {
-		this.lozinka = lozinka;
-	}
-
-	public Pol getPol() {
-		return pol;
-	}
-
-	public void setPol(Pol pol) {
-		this.pol = pol;
+	
+	public Korisnik(String ime, String prezime, String brojTelefona, String adresa, String korisnickoIme, String lozinka, Pol pol) {
+		setIme(ime);
+		setPrezime(prezime);
+		setBrojTelefona(brojTelefona);
+		setAdresa(adresa);
+		setKorisnickoIme(korisnickoIme);
+		setLozinka(lozinka);
+		setPol(pol);
 	}
 	
 	
-	//TODO:constructor getters and setters
-	
+
+	public String getIme() { return this.ime; }
+	public void setIme(String ime) { this.ime = ime; }
+
+	public String getPrezime() { return this.prezime; }
+	public void setPrezime(String prezime) { this.prezime = prezime; }
+
+	public String getBrojTelefona() { return this.brojTelefona; }
+	public void setBrojTelefona(String brojTelefona) { this.brojTelefona = brojTelefona; }
+
+	public String getAdresa() {	return adresa; }
+	public void setAdresa(String adresa) { this.adresa = adresa; }
+
+	public String getKorisnickoIme() { return korisnickoIme; }
+	public void setKorisnickoIme(String korisnickoIme) { this.korisnickoIme = korisnickoIme; }
+
+	public String getLozinka() { return lozinka; }
+	public void setLozinka(String lozinka) { this.lozinka = lozinka; }
+
+	public Pol getPol() { return pol; }
+	public void setPol(Pol pol) { this.pol = pol; }
+		
 
 }

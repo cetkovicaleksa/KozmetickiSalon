@@ -6,8 +6,50 @@ public abstract class Zaposleni extends Korisnik {
 	private double bazaPlate;
 	private NivoStrucneSpreme nivoStrucneSpreme;
 	
+	public Zaposleni() {}
 	
-	public abstract double izracunajBazuPlate();
+	public Zaposleni(
+						String ime, String prezime, String brojTelefona, String adresa,
+						String korisnickoIme, String lozinka, Pol pol, int godineStaza,
+						double bazaPlate, NivoStrucneSpreme nivoStrucneSpreme
+					) {
+		super(ime, prezime, brojTelefona, adresa, korisnickoIme, lozinka, pol);
+		setGodineStaza(godineStaza);
+		setBazaPlate(bazaPlate);
+		setNivoStrucneSpreme(nivoStrucneSpreme);	
+	}
+	
+	
+	public double izracunajBazuPlate() {
+		return 800 + getNivoStrucneSpreme().getValue() * getGodineStaza(); //izracunati bazu koja ce se kombinovati sa bonusom ako zadovoljava uslove bonusa
+	}
+	
+	
+	
+	public int getGodineStaza() {
+		return godineStaza;
+	}
 
-	//TODO: geters and seters
+	public void setGodineStaza(int godineStaza) {
+		this.godineStaza = godineStaza;
+	}
+
+	public double getBazaPlate() {
+		return bazaPlate;
+	}
+
+	public void setBazaPlate(double bazaPlate) {
+		this.bazaPlate = bazaPlate;
+	}
+
+	public NivoStrucneSpreme getNivoStrucneSpreme() {
+		return nivoStrucneSpreme;
+	}
+
+	public void setNivoStrucneSpreme(NivoStrucneSpreme nivoStrucneSpreme) {
+		this.nivoStrucneSpreme = nivoStrucneSpreme;
+	}
+
+	
+
 }

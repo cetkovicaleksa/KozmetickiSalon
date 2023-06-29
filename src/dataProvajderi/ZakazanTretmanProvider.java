@@ -1,32 +1,27 @@
 package dataProvajderi;
 
-import entiteti.ZakazanTretman;
-import helpers.Query;
+import java.util.ArrayList;
 
-public class ZakazanTretmanProvider implements IsProvider<ZakazanTretman>{
+import entiteti.ZakazanTretman;
+
+public class ZakazanTretmanProvider extends ProviderExtrovert<ZakazanTretman>{
 
 	@Override
-	public ZakazanTretman get(Query<ZakazanTretman> selektor) {
+	public ZakazanTretman getDeletedInstance() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void put(Query<ZakazanTretman> selektor, ZakazanTretman entitet) {
+	protected ArrayList<String[]> convertDataToString(ArrayList<ZakazanTretman> data) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
-	public void delete(Query<ZakazanTretman> selektor) {
+	protected ArrayList<ZakazanTretman> convertStringToData(ArrayList<String[]> data) {
 		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void post(ZakazanTretman entitet) {
-		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 }
