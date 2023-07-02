@@ -1,6 +1,8 @@
 package dataProvajderi;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
@@ -42,7 +44,10 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 
 	
 	@Override
-	protected ArrayList<String[]> convertDataToString(ArrayList<Kozmeticar> data) {  //doesn't take care of an accidental deleted treatment appereance
+	protected ArrayList<String[]> convertDataToString(ArrayList<Kozmeticar> data) {  
+		//doesn't take care of an accidental deleted treatment appereance
+		//moraju se prvo ucitati kozmeticki tretmani ili koristiti saveData sa parametrima
+		//u suprotnom ce svaki kozmeticar biti sacuvan sa praznom listom tretmana
 		
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		
@@ -65,8 +70,8 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 		    k[8] = Double.toString( kozmeticar.getBazaPlate() );
 		    k[9] = kozmeticar.getNivoStrucneSpreme().name();
 		    
-		    for(KozmetickiTretman kt: kozmeticar.getTretmani()) {
-		    	sb.append( tretmaniProvider.getId(kt) ).append("|");
+		    for(KozmetickiTretman kt: kozmeticar.getTretmani()) {      // ali getId uvijek vrati id napravi da vrati instancu ili nesto jedinstveno za deleted
+		    	sb.append( tretmaniProvider.getId(kt) ).append("|");  //dodaj if tretmaniProvider.getId(kt) == deleted da ne dodaje ili tako nesto
 		    }
 		    
 		    k[10] = sb.toString();
@@ -78,7 +83,9 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 	}
 
 	@Override
-	protected ArrayList<Kozmeticar> convertStringToData(ArrayList<String[]> data) { //moraju se prvo ucitati kozmeticki tretmani ili ce svaki kozmeticar biti instanciran sa praznom listom tretmana
+	protected ArrayList<Kozmeticar> convertStringToData(ArrayList<String[]> data) { 
+		//moraju se prvo ucitati kozmeticki tretmani ili koristiti loadData sa parametrima
+		//u suprotnom ce svaki kozmeticar biti instanciran sa praznom listom tretmana
 		
 		ArrayList<Kozmeticar> convertedData = new ArrayList<>();
 		
@@ -122,6 +129,63 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 		
 		return convertedData;
 			
+	}
+	
+	/***/
+	public void loadData(DefaultDict<String, KozmetickiTretman> tretmaniDict) throws IOException {
+		ProviderRegistry providerBackup = super.getMainProvider();
+		
+		super.setMainProvider(new ProviderRegistry() {
+			@Override
+			public KozmetickiTretmanProvider getKozmetickiTretmanProvider() {
+				return new KozmetickiTretmanProvider() {
+					@Override
+					public DefaultDict<String, KozmetickiTretman> getIds() {
+						return tretmaniDict;
+					}
+					
+					@Override
+					public KozmetickiTretman getDeletedInstance() {
+						return tretmaniDict.get("");  // think of something better
+					}
+				};
+			}
+			
+		});
+		
+		this.loadData();
+		super.setMainProvider(providerBackup);
+	}
+	
+	/***/
+	public void saveData(DefaultDict<String, KozmetickiTretman> tretmaniDict) throws IOException{
+		ProviderRegistry providerBackup = super.getMainProvider();
+		
+		super.setMainProvider(new ProviderRegistry() {
+			
+			@Override
+			public KozmetickiTretmanProvider getKozmetickiTretmanProvider() {  //TODO: finish
+				return new KozmetickiTretmanProvider() {
+					@Override
+					public String getId(KozmetickiTretman kt) {
+						for(Map.Entry<String, KozmetickiTretman> entry : tretmaniDict/*get the key/val pairs*/) {
+							
+							if(entry.getValue() == kt) {
+								return entry.getKey();
+							}
+							
+						}
+						
+						return null; //:(
+					}
+					
+				};
+			}
+			
+		});
+		
+		this.saveData();
+		super.setMainProvider(providerBackup);
 	}
 
 	
