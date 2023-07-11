@@ -24,15 +24,15 @@ import helpers.Updater;
 
 public abstract class Provider<T> implements IsProvider<T> {
 	
-	private IsProvider<T> provider;
-	private Collection<?> data;  //just a reference to the entity collection in provider
+	private IsInnerProvider<T, Collection<?>> provider;
+	//private Collection<?> data;  //just a reference to the entity collection in provider
 	private String path;
 	private final String delimiter = ",";
 	private Function<T, String> naturalId; //za generisanje id-a za entitet
 	
 	/**The default constructor sets the provider and data to use an ArrayList as the entity collection.*/	
 	public Provider(){
-		initializeProviderAndData();
+		setProvider(newProvider());
 	}
 		
 	public Provider(String path) {
@@ -47,12 +47,12 @@ public abstract class Provider<T> implements IsProvider<T> {
 	}
 	
 	
-	protected IsProvider<T> getProvider(){return this.provider;}
-	protected void setProvider(IsProvider<T> newData) {this.provider = newData;}
+	protected IsInnerProvider<T, ?> getProvider(){return this.provider;}
+	protected void setProvider(IsInnerProvider<T, ?> newProvider) {this.provider = newProvider;}
 	//protected void setData(ArrayList<T> newData) {}
 	
-	protected Collection<?> getData(){ return this.data; }
-	protected void setData(Collection<?> newData) { this.data = newData; }
+	//protected Collection<?> getData(){ return this.data; }
+	//protected void setData(Collection<?> newData) { this.data = newData; }
 	
 	public String getPath() {return this.path;}
 	protected void setPath(String path) {this.path = path;}
@@ -101,9 +101,9 @@ public abstract class Provider<T> implements IsProvider<T> {
 	public abstract T getDeletedInstance();
 	
 	
-	protected void initializeProviderAndData() {
+	protected IsInnerProvider<T, Collection<?>> newProvider() {
 		
-		this.setProvider( new IsProvider<T>() {
+		this.setProvider( new IsInnerProvider<T, ArrayList<T>>() {
 			
 			private ArrayList<T> data = new ArrayList<>();
 			
@@ -112,8 +112,8 @@ public abstract class Provider<T> implements IsProvider<T> {
 			}
 			
 			
-			private ArrayList<T> getData(){return this.data;}
-			//private void setData(ArrayList<T> newData) { this.data = newData; }
+			public ArrayList<T> getData(){return this.data;}
+			public void setData(ArrayList<T> newData) { this.data = newData; }
 			
 			@Override
 			public ArrayList<T> get(Query<T> selektor) {
@@ -130,15 +130,15 @@ public abstract class Provider<T> implements IsProvider<T> {
 			}
 			
 			@Override
-			public Iterator<T> get(){
-				return this.getData().iterator();
+			public ListIterator<T> get(){
+				return this.getData().listIterator();
 			}
 
 			@Override
 			public void put(Query<T> selektor, Updater<T> updater) throws NoPayloadDataException {
 				
 				Function<T, String> idMaker = Provider.this.getNaturalId();
-				ListIterator<T> iterator1 = this.getData().listIterator(); //zbog backup-a koristimo listiterator
+				ListIterator<T> iterator1 = this.get(); //zbog backup-a koristimo listiterator
 								
 				class Backup implements Iterable<Backup.Node>{ //maby paramatrize the class???
 					Node head;
@@ -181,17 +181,17 @@ public abstract class Provider<T> implements IsProvider<T> {
 						Node current;
 						
 						BackupIterator(){
-							current = head;
+							current = null;
 						}
 
 						@Override
 						public boolean hasNext() {
-							return current != null && current.next != null;
+							return head != null && ( current == null || current.next != null );
 						}
 
 						@Override
 						public Node next() {
-							current = current.next;
+							current = (current == null) ? head : current.next;
 							return current;
 						}
 						
@@ -326,9 +326,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 	}
 	
 	public void put(Query<T> selektor, Updater<T> updater) {
-		
-		
-		
+		getProvider().put(selektor, updater);
 	}
 	
 	//need to add id tester so we don't allow adding multiple entity with the same id aka username...
