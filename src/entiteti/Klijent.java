@@ -1,5 +1,6 @@
 package entiteti;
 
+
 public class Klijent extends Korisnik {
 	
 	private boolean hasLoyaltyCard;

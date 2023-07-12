@@ -3,9 +3,9 @@ package entiteti;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class ZakazanTretman {
+public class ZakazanTretman implements Entitet {
 	
-	private KozmetickiTretman.TipTretmana tipTretmana;
+	private KozmetickiTretman.TipTretmana tipTretmana; //no no TODO: this can't be like this because it is not supposed to change when tiptretmana changes price
 	private Kozmeticar kozmeticar;
     private Klijent klijent;
     private double cijena;

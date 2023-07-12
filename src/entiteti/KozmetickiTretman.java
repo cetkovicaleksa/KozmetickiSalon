@@ -1,7 +1,6 @@
 package entiteti;
 
-
-public class KozmetickiTretman {
+public class KozmetickiTretman implements Entitet {
 	
 	private String naziv, opis;
 	
@@ -12,7 +11,7 @@ public class KozmetickiTretman {
 		setOpis(opis);
 	}
 	
-	public TipTretmana newTipTretmana(String naziv, float cijena, int trajanje) {
+	public KozmetickiTretman.TipTretmana newTipTretmana(String naziv, float cijena, int trajanje) {
 		return new KozmetickiTretman.TipTretmana(naziv, cijena, trajanje, this);
 	}
 		
@@ -34,8 +33,8 @@ public class KozmetickiTretman {
 	
 	
 	
-
-	public static class TipTretmana{
+    
+	public static class TipTretmana implements Entitet{
 		
 		private String naziv;
 		private float cijena;

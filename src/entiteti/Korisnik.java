@@ -1,7 +1,6 @@
 package entiteti;
 
-
-public abstract class Korisnik {
+public abstract class Korisnik implements Entitet {
 	
 	private String ime, prezime, brojTelefona,
 	  adresa, korisnickoIme, lozinka;

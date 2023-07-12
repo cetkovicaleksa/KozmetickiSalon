@@ -1,6 +1,6 @@
 package entiteti;
 
-public abstract class Zaposleni extends Korisnik {
+public abstract class Zaposleni extends Korisnik implements Entitet {
 	
 	private int godineStaza;
 	private double bazaPlate;
