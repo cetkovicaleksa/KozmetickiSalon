@@ -9,7 +9,7 @@ public class Query<T> implements Predicate<T>{
 	
 	private Predicate<T> filter;
 	
-	Query(){}
+	public Query(){}
 	
 	/**Konstruktor.
 	 * @param filter referenca na objekat koji implementira Predicate<T> interfejs*/	
