@@ -1,5 +1,8 @@
 package helpers;
 
+import java.lang.reflect.InvocationTargetException;
+
+import exceptions.IncompatibleUpdaterException;
 import exceptions.NoPayloadDataException;
 //import java.lang.reflect.Method;
 
@@ -9,7 +12,7 @@ public class Updater<T> implements IsUpdater<T>{
 	/**setter ce pozivati setere objekta <T> koji se proslijedi metodi update(T entity)*/
 	private IsUpdater<T> setter;
 	
-	Updater(){}
+	public Updater(){}
 	
 	public Updater(IsUpdater<T> updater) {
 		setSetter(updater);
@@ -20,9 +23,13 @@ public class Updater<T> implements IsUpdater<T>{
 	
 
 	@Override
-	public void update(T entity) throws NoPayloadDataException {
+	public void update(T entity) throws NoPayloadDataException, IncompatibleUpdaterException {
 		if (getSetter() == null) throw new NoPayloadDataException();
-		getSetter().update(entity);
+		try {
+			getSetter().update(entity);
+		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+			throw new IncompatibleUpdaterException("", e);
+		}
 	}
 	
 	public void updateIgnore(T entity){

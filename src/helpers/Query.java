@@ -19,8 +19,7 @@ public class Query<T> implements Predicate<T>{
 	
 	@Override
 	public boolean test(T entity){
-		if (getFilter() == null) return true;
-		return getFilter().test(entity);		
+		return (getFilter() == null) ? true : getFilter().test(entity);		
 	}
 	
 	
@@ -43,7 +42,10 @@ public class Query<T> implements Predicate<T>{
 	
 	/**Metoda koja negira trenutni filter.*/
 	public Query<T> ne() {
-		setFilter( getFilter().negate() );
+		if(getFilter() != null) {
+			setFilter( getFilter().negate() );			
+		}
+		
 		return this;
 	}
 	
@@ -51,7 +53,8 @@ public class Query<T> implements Predicate<T>{
 	 * Novi filter predstavlja logicko i ova dva filtera.
 	 * @param drugiFilter mora implementirati Predicate<T>*/
 	public Query<T> i(Predicate<T> drugiFilter) {
-		setFilter(getFilter().and(drugiFilter));
+		Predicate<T> newFilter = (getFilter() == null) ? drugiFilter : getFilter().and(drugiFilter);
+		setFilter(newFilter);
 		return this;
 	}
 	
@@ -59,7 +62,8 @@ public class Query<T> implements Predicate<T>{
 	 * Novi filter predstavlja logicko ili ova dva filtera.
 	 * @param drugiFilter mora implementirati Predicate<T>*/
 	public Query<T> ili(Predicate<T> drugiFilter) {
-		setFilter(getFilter().or(drugiFilter));
+		Predicate<T> newFilter = (getFilter() == null) ? drugiFilter : getFilter().or(drugiFilter);
+		setFilter(newFilter);
 		return this;
 	}
 	
@@ -69,7 +73,8 @@ public class Query<T> implements Predicate<T>{
 	 * 
 	 * A xor B <=> (not A and B) or (A and not B)*/
 	public Query<T>  nili(Predicate<T> drugiFilter) {
-		setFilter(  getFilter().negate().and(drugiFilter).or( getFilter().and(drugiFilter.negate()) )  );
+		Predicate<T> newFilter = (getFilter() == null) ? drugiFilter : getFilter().negate().and(drugiFilter).or( getFilter().and(drugiFilter.negate()) );
+		setFilter(newFilter);
 		return this;
 		            //       not A                 B                A                    not B     
 		//this.filter = this.filter.negate().and(drugiFilter).or( this.filter.and(drugiFilter.negate()) );
@@ -82,7 +87,8 @@ public class Query<T> implements Predicate<T>{
 	 * 
 	 * x <=> y  <=>  not x and not y  or  x and y*/
 	public Query<T> akko(Predicate<T> drugiFilter){
-		setFilter(  getFilter().and(drugiFilter).or( getFilter().negate().and(drugiFilter.negate()) )  );
+		Predicate<T> newFilter = (getFilter() == null) ? drugiFilter : getFilter().and(drugiFilter).or( getFilter().negate().and(drugiFilter.negate()) );
+		setFilter(newFilter);
 		return this;
 	}
 	
@@ -92,7 +98,8 @@ public class Query<T> implements Predicate<T>{
 	 * 
 	 * x => y  <=>  not x or y*/
 	public Query<T> dodajPotrebanUslov(Predicate<T> drugiFilter) {
-		setFilter(  getFilter().or( drugiFilter.negate() )  );
+		Predicate<T> newFilter = (getFilter() == null) ? drugiFilter : getFilter().or( drugiFilter.negate() );
+		setFilter(newFilter);
 		return this;
 	}
 	
@@ -102,7 +109,8 @@ public class Query<T> implements Predicate<T>{
 	 * 
 	 * x => y  <=>  not x or y*/
 	public Query<T> dodajDovoljanUslov(Predicate<T> drugiFilter) {
-		setFilter(  getFilter().negate().or(drugiFilter)  );
+		Predicate<T> newFilter = (getFilter() == null) ? drugiFilter : getFilter().negate().or(drugiFilter);
+		setFilter(newFilter);
 		return this;
 	}
 	

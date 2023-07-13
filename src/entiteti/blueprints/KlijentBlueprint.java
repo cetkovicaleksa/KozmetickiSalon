@@ -1,49 +1,72 @@
 package entiteti.blueprints;
 
-import entiteti.Entitet;
-import helpers.Query;
-import helpers.Updater;
+import entiteti.Klijent;
+import entiteti.Pol;
 
-public class KlijentBlueprint extends Blueprint {
+public class KlijentBlueprint extends KorisnikBlueprint<Klijent> {
 	
+	public static final String[] fields = new String[] {"hasLoyaltyCard"};
 
-	@Override
-	public Blueprint buildBluePrint() {
+	
+	
+	public static KlijentBlueprint build() {
 		return new KlijentBlueprint();
 	}
-	
-	
-	public KlijentBlueprint setIme(String ime) {
-		super.add("ime", ime);
+
+
+	public KlijentBlueprint ime(String ime) {
+		super.setIme(ime);
+		return this;
+	}
+
+	public KlijentBlueprint prezime(String prezime) {
+		super.setPrezime(prezime);
+		return this;
+	}
+
+	public KlijentBlueprint adresa(String adresa) {
+		super.setAdresa(adresa);
+		return this;
+	}
+
+	public KlijentBlueprint brojTelefona(String brojTelefona) {
+		super.setBrojTelefona(brojTelefona);
+		return this;
+	}
+
+	public KlijentBlueprint korisnickoIme(String korisnickoIme) {
+		super.setKorisnickoIme(korisnickoIme);
 		return this;
 	}
 	
-	public KlijentBlueprint setPrezime(String prezime) {
-		super.add("prezime", prezime);
+	public KlijentBlueprint lozinka(String lozinka) {
+		super.setLozinka(lozinka);
 		return this;
 	}
-	//TODO: add constants for field names?!?
-	
 
-	@Override
-	public Entitet makeEntitet() {
-		// TODO Auto-generated method stub
-		return null;
+	public KlijentBlueprint pol(Pol pol) {
+		super.setPol(pol);
+		return this;
 	}
 
-	@Override
-	public Query<Entitet> getQueryToMatch() {
-		// TODO Auto-generated method stub
-		return null;
+
+	public KlijentBlueprint hasLoyaltyCard(boolean hasLoyaltyCard) {
+		super.add(fields[0], hasLoyaltyCard);
+		return this;
 	}
 
-	@Override
-	public Updater<Entitet> getUpdaterToMatch() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	
-	
 
+
+
+	@Override
+	protected Klijent getNewEntity() {
+		return new Klijent();
+	}	
+
+	@Override
+	protected String[] getAllFieldNames() {
+		int len = KorisnikBlueprint.fields.length + KlijentBlueprint.fields.length;
+		//TODO
+		return fields;
+	}
 }
