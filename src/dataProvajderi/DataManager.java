@@ -1,30 +1,33 @@
 package dataProvajderi;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.function.BiFunction;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.lang.ClassCastException;
 
 import helpers.DefaultDict;
 import helpers.Query;
 import helpers.Updater;
 import entiteti.Entitet;
 
-public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
+public abstract class DataManager<T extends Entitet, I> implements IsProvider<T> {
 	
-	private ArrayList<T> data;
+	private Data<I, T> data;	
 	private Function<T, String> idFunction;
 	
 	private String filePath;
 	private final String csvDelimiter = ",";
 	
 	{
-		setData(defaultCollection());
+		setData(defaultData());
 	}
 	
 	public DataManager() {}
@@ -34,15 +37,14 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 		setFilePath(filePath);
 	}
 	
-	
-	private ArrayList<T> getData(){
+	private Data<I, T> getData(){
 		return this.data;
 	}
 	
-	private void setData(ArrayList<T> newData) {
+	private void setData(Data<I, T> newData) {
 		this.data = newData;
 	}
-	
+		
 	protected Function<T, String> getIdFunction(){
 		return this.idFunction;
 	}
@@ -76,53 +78,16 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 	public String getCsvDelimiter(){
 		return this.csvDelimiter;
 	}
-	
+		
 	/***/
-	protected ArrayList<T> defaultCollection(){
-		return new ArrayList<>();
+	protected Data<I, T> defaultData(){
+		return new Data<>(new ArrayList<>());
 	}
 	
 	
-	//TODO: these methods below should handle the exceptions that occur if subclass doesn't override correctly
+
 	@Override
 	public List<T> get(Query<T> selektor) {
-		return defaultGet(selektor);
-	}
-	@Override
-	public Iterator<T> get() {
-		return defaultGetAll();
-	}
-	@Override
-	public void put(Query<T> selektor, Updater<T> updater) {
-		defaultPut(selektor, updater);		
-	}
-	@Override
-	public void post(T entitet) {
-		defaultPost(entitet);		
-	}
-	@Override
-	public void delete(Query<T> selektor) {
-		defaultDelete(selektor);		
-	}
-	@Override
-	public String getId(T entitet) {
-		return defaultGetId(entitet);
-	}
-	@Override
-	public T getById(String id) {
-		return defaultGetById(id);
-	}
-	@Override
-	public DefaultDict<String, T> getIds() {
-		return defaultGetIds();
-	}
-	
-	
-	
-	
-	
-	
-	protected List<T> defaultGet(Query<T> selektor){
 		ArrayList<T> found = new ArrayList<>();
 		Iterator<T> iterator = get();
 		
@@ -133,14 +98,30 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 			}
 		}
 
-		return found;		
+		return found;
 	}
 	
-	protected Iterator<T> defaultGetAll(){
-		return getData().listIterator();
+	
+	@Override
+	public Iterator<T> get() { //maby should improve safety
+		if(getData().isList()) {
+			return getData().list().listIterator();
+		}
+		
+		if(getData().isCollection()) {
+			return getData().collection().iterator();
+		}
+		
+		return null;  //TODO: throw exception bc not overriden
 	}
 	
-	protected void defaultPut(Query<T> selektor, Updater<T> updater) {
+	
+	@Override
+	public void put(Query<T> selektor, Updater<T> updater) {
+		if(!getData().isList()) {
+			return; //TODO: throw exception
+		}
+		
 		class Backup implements Iterable<Backup.Node>{ //maby paramatrize the class???
 			Node head;
 			Node tail;
@@ -233,22 +214,34 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 			
 			return; //TODO: throw exception because new id is not unique
 		}
-	}
-
 	
-	protected void defaultPost(T entitet) {
-		Function<T, String> idFunction = getIdFunction();
-		String id = idFunction.apply(entitet);
+	}
+	
+	
+	@Override
+	public void post(T entitet) {
+		if(!getData().isCollection()) {
+			return; //TODO: throw exception
+		}
+		
+		Collection<T> data = getData().collection();
+		String id = getIdFunction().apply(entitet);
 		
 		if(isIdUnique(id)) {
-			getData().add(entitet);
+			data.add(entitet);
 			return;
 		}
 				
-		return; //TODO: id not unique
+		return; //TODO: id not unique, throw exxception		
 	}
 	
-	protected void defaultDelete(Query<T> selektor) {		
+	
+	@Override
+	public void delete(Query<T> selektor) {
+		if(!getData().isList()) {
+			return; //TODO: Throw exceptino
+		}
+		
 		ListIterator<T> iterator = (ListIterator<T>) get();
 		
 		while ( iterator.hasNext() ) {
@@ -258,11 +251,15 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 		}		
 	}
 	
-	protected String defaultGetId(T entitet) {
-		return getIdFunction().apply(entitet);
+	
+	@Override
+	public String getId(T entitet) { //returns an id even if it doesn't exist in the collection
+		return getIdFunction().apply(entitet); 
 	}
 	
-	protected T defaultGetById(String id) {
+	
+	@Override
+	public T getById(String id) {
 		Function<T, String> idFunction = getIdFunction();
 		Iterator<T> iterator = get();
 		
@@ -277,7 +274,8 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 		return getDeletedInstance();
 	}
 	
-	protected DefaultDict<String, T> defaultGetIds(){
+	@Override
+	public DefaultDict<String, T> getIds() {
 		DefaultDict<String, T> ids = new DefaultDict<>(() -> getDeletedInstance());
 		Function<T, String> idFunction = getIdFunction();
 		Iterator<T> iterator = get();
@@ -290,6 +288,7 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 		return ids;
 	}
 	
+	protected abstract T getDeletedInstance();
 	
 	
 	protected boolean isIdUnique(String id) {
@@ -311,14 +310,64 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 		
 		return true;
 	}
-	
-	protected void visitAllEntities(Function<T, Void> f) {
 		
+	
+		
+	public void loadData() throws IOException{
+		setData( convertStringToData(DataManager.loadFromCsv(getFilePath(), getCsvDelimiter())) );
+	};
+	
+	public void saveData() throws IOException{
+		DataManager.writeToCsv(convertDataToString(getData()), getFilePath(), getCsvDelimiter());
 	}
 	
+	protected abstract Data<I, T> convertStringToData(ArrayList<String[]> stringData);
+	protected abstract ArrayList<String[]> convertDataToString(Data<I, T> data);
 	
 	
-	protected abstract T getDeletedInstance();
+	
+	
+	
+	//loading and saving strings to file
+	
+	protected static void writeToCsv(Iterator<String[]> entityStrings, String path, String delimiter) throws IOException{
+		ArrayList<String[]> lista = new ArrayList<>();
+		while(entityStrings.hasNext()) {
+			lista.add(entityStrings.next());
+		}
+		DataManager.writeToCsv(lista, path, delimiter);
+	}
+	
+	protected static void writeToCsv(List<String[]> entityStrings, String path, String delimiter) throws IOException {
+    	
+    	try ( BufferedWriter bw = new BufferedWriter(new FileWriter(path)) ) {
+            
+    		for ( String[] entityFields : entityStrings ) {
+                String line = String.join(delimiter, entityFields);
+                bw.write(line);
+                bw.newLine();
+            }
+    		} catch (IOException e) { throw e; }
+    	    	
+    }
+    
+	protected static ArrayList<String[]> loadFromCsv(String path, String delimiter) throws IOException {
+       
+    	ArrayList<String[]> data = new ArrayList<>();
+
+        try ( BufferedReader br = new BufferedReader(new FileReader(path)) ) {
+            String line;
+
+            while ( (line = br.readLine()) != null ) {
+                String[] entityFields = line.split(delimiter);
+                data.add(entityFields);
+            }
+        } catch (IOException e) { throw e; }
+
+        return data;
+        
+    }
+	//---
 	
 	public T copyEntity(T entity) {
 		//TODO: finish
@@ -326,5 +375,95 @@ public abstract class DataManager<T extends Entitet> implements IsProvider<T> {
 	}
 	
 	
+	
+	
+	protected enum DataType{
+		LIST, COLLECTION, MAP, NO_DATA, COLLECTION_AND_MAP, LIST_AND_MAP
+	}
+	
+	protected class Data<K, V extends Entitet> {
+		private Collection<V> collection;
+		private Map<K, V> map;
+		
+		protected Data(){}
+		
+		protected Data(Collection<V> data){
+			collection = data;
+		}
+		
+		protected Data(Map<K, V> data){
+			map = data;
+		}
+		
+		protected Data(Collection<V> collection, Map<K, V> map){
+			this.collection = collection;
+			this.map = map;
+		}
+		
+		protected void setData(Collection<V> data) {			
+			collection = data;
+		}
+		
+		protected void setData(Map<K, V> data) {			
+			map = data;
+		}
+		
+		protected Collection<V> collection(){
+			if(isCollection()) {
+				return collection;
+			}
+			
+			return null;
+		}
+		
+		protected List<V> list(){
+			if(isList()) {
+				return (List<V>) collection;
+			}
+			
+			return null; //TODO: throw exception
+		}
+		
+		protected Map<K, V> map(){
+			if(isMap()) {
+				return map;
+			}
+			
+			return null; //TODO: exception?
+		}
+		
+		protected boolean isCollection() {
+			return collection != null;
+		}
+		
+		protected boolean isList() {
+			return collection != null && collection instanceof List;
+		}
+		
+		protected boolean isMap() {
+			return map != null;
+		}
+		
+		protected boolean is() {
+			return collection != null || map != null;
+		}
+		
+		protected DataType type() {
+			if(collection == null && map == null) {
+				return DataType.NO_DATA;				
+			}
+			
+			if(collection != null && map != null) {
+				return (collection instanceof List) ? DataType.LIST_AND_MAP : DataType.COLLECTION_AND_MAP;
+			}
+			
+			if(collection == null) {
+				return DataType.MAP;
+			}
+			
+			return (collection instanceof List) ? DataType.LIST : DataType.COLLECTION;
+		}
+		
+	}
 		
 }

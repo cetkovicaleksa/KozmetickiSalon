@@ -6,7 +6,7 @@ import entiteti.Menadzer;
 import entiteti.NivoStrucneSpreme;
 import entiteti.Pol;
 
-public class MenadzerProvider extends Provider<Menadzer> {
+public class MenadzerProvider extends OutdatedProvider<Menadzer> {
 	
 	private final Menadzer deleted = new Menadzer() {
 		@Override

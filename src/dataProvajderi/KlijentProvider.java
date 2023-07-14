@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import entiteti.Klijent;
 import entiteti.Pol;
 
-public class KlijentProvider extends Provider<Klijent> {
+public class KlijentProvider extends OutdatedProvider<Klijent> {
 	
 	private final Klijent deleted = new Klijent() {  //could use reflection to make this nicer
 		@Override

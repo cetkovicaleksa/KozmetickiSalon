@@ -22,7 +22,7 @@ import helpers.DefaultDict;
 import helpers.Query;
 import helpers.Updater;
 
-public abstract class Provider<T> implements IsProvider<T> {
+public abstract class OutdatedProvider<T> implements IsProvider<T> {
 	
 	private IsInnerProvider<T, Collection<?>> provider;
 	//private Collection<?> data;  //just a reference to the entity collection in provider
@@ -31,16 +31,16 @@ public abstract class Provider<T> implements IsProvider<T> {
 	private Function<T, String> naturalId; //za generisanje id-a za entitet
 	
 	/**The default constructor sets the provider and data to use an ArrayList as the entity collection.*/	
-	public Provider(){
+	public OutdatedProvider(){
 		setProvider(newProvider());
 	}
 		
-	public Provider(String path) {
+	public OutdatedProvider(String path) {
 		this();
 		setPath(path);
 	}
 
-	public Provider(String path, Function<T, String> idFunction) {
+	public OutdatedProvider(String path, Function<T, String> idFunction) {
 		this();
 		setPath(path);
 		setNaturalId(idFunction);  //mozda ne koristiti set zato sto on provjeri da li su entiteti jedinstveni po funkciji
@@ -108,7 +108,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 			private ArrayList<T> data = new ArrayList<>();
 			
 			{
-				Provider.this.setData(this.getData());
+				OutdatedProvider.this.setData(this.getData());
 			}
 			
 			
@@ -137,7 +137,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 			@Override
 			public void put(Query<T> selektor, Updater<T> updater) throws NoPayloadDataException {
 				
-				Function<T, String> idMaker = Provider.this.getNaturalId();
+				Function<T, String> idMaker = OutdatedProvider.this.getNaturalId();
 				ListIterator<T> iterator1 = this.get(); //zbog backup-a koristimo listiterator
 								
 				class Backup implements Iterable<Backup.Node>{ //maby paramatrize the class???
@@ -211,7 +211,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 						//nasli smo entitet koji zadovoljava selektor
 						String originalId = idMaker.apply(entitet1);
 						//making a backup and updating the entity
-						backup.add(iterator1, Provider.this.deepCopy(entitet1));
+						backup.add(iterator1, OutdatedProvider.this.deepCopy(entitet1));
 						updater.update(entitet1);
 						
 						String newId = idMaker.apply(entitet1);
@@ -250,7 +250,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 			@Override
 			public void post(T entitet) {
 				
-				Function<T, String> idMaker = Provider.this.getNaturalId(); //only to make it clear which method are we calling
+				Function<T, String> idMaker = OutdatedProvider.this.getNaturalId(); //only to make it clear which method are we calling
 				String id = idMaker.apply(entitet);
 				
 				for(T entitet2 : this.getData()) {
@@ -280,13 +280,13 @@ public abstract class Provider<T> implements IsProvider<T> {
 
 			@Override
 			public String getId(T entitet) {
-				return Provider.this.getNaturalId().apply(entitet);
+				return OutdatedProvider.this.getNaturalId().apply(entitet);
 			}
 
 			@Override
 			public T getById(String id) {
 				
-				Function<T, String> idMaker = Provider.this.getNaturalId();
+				Function<T, String> idMaker = OutdatedProvider.this.getNaturalId();
 				
 				for(T entitet : this.getData()) {
 					if(  id.equals( idMaker.apply(entitet) )  ) {
@@ -294,14 +294,14 @@ public abstract class Provider<T> implements IsProvider<T> {
 					}
 				}
 				
-				return Provider.this.getDeletedInstance();
+				return OutdatedProvider.this.getDeletedInstance();
 				
 			}
 
 			@Override
 			public DefaultDict<String, T> getIds() {
-				DefaultDict<String, T> ids = new DefaultDict<>( () -> Provider.this.getDeletedInstance() );
-				Function<T, String> idMaker = Provider.this.getNaturalId();
+				DefaultDict<String, T> ids = new DefaultDict<>( () -> OutdatedProvider.this.getDeletedInstance() );
+				Function<T, String> idMaker = OutdatedProvider.this.getNaturalId();
 				
 				for(T entitet : this.getData() ) {
 					ids.put(idMaker.apply(entitet), entitet);
@@ -355,35 +355,7 @@ public abstract class Provider<T> implements IsProvider<T> {
 	};
 
 	
-	protected static void writeToCsv(List<String[]> entityStrings, String path, String delimiter) throws IOException {
-    	
-    	try ( BufferedWriter bw = new BufferedWriter(new FileWriter(path)) ) {
-            
-    		for ( String[] entityFields : entityStrings ) {
-                String line = String.join(delimiter, entityFields);
-                bw.write(line);
-                bw.newLine();
-            }
-    		} catch (IOException e) { throw e; }
-    	    	
-    }
-    
-	protected static ArrayList<String[]> loadFromCsv(String path, String delimiter) throws IOException {
-       
-    	ArrayList<String[]> data = new ArrayList<>();
-
-        try ( BufferedReader br = new BufferedReader(new FileReader(path)) ) {
-            String line;
-
-            while ( (line = br.readLine()) != null ) {
-                String[] entityFields = line.split(delimiter);
-                data.add(entityFields);
-            }
-        } catch (IOException e) { throw e; }
-
-        return data;
-        
-    }
+	
 
 
 

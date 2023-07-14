@@ -2,7 +2,7 @@ package dataProvajderi;
 
 import java.util.function.Function;
 
-public abstract class ProviderExtrovert<T> extends Provider<T> {
+public abstract class ProviderExtrovert<T> extends OutdatedProvider<T> {
 	
 	private ProviderRegistry mainProvider;
 	

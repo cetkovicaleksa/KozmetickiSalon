@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import entiteti.KozmetickiTretman;
 
-public class KozmetickiTretmanProvider extends Provider<KozmetickiTretman>{
+public class KozmetickiTretmanProvider extends OutdatedProvider<KozmetickiTretman>{
 	
 	private final KozmetickiTretman deleted = new KozmetickiTretman() {
 		@Override

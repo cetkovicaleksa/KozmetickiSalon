@@ -51,7 +51,7 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 		
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		
-		Provider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
+		OutdatedProvider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
 		StringBuilder sb = new StringBuilder();
 		
 		data.forEach( (kozmeticar) -> {
@@ -89,7 +89,7 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 		
 		ArrayList<Kozmeticar> convertedData = new ArrayList<>();
 		
-		Provider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
+		OutdatedProvider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
 		DefaultDict<String, KozmetickiTretman> tretmaniIds = tretmaniProvider.getIds();
 		KozmetickiTretman deleted = tretmaniProvider.getDeletedInstance();
 		

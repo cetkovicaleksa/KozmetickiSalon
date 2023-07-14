@@ -6,7 +6,7 @@ import entiteti.NivoStrucneSpreme;
 import entiteti.Pol;
 import entiteti.Recepcioner;
 
-public class RecepcionerProvider extends Provider<Recepcioner> {
+public class RecepcionerProvider extends OutdatedProvider<Recepcioner> {
 	
 	private final Recepcioner deleted = new Recepcioner() {
 		@Override
