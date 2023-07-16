@@ -9,8 +9,8 @@ import exceptions.NoPayloadDataException;
 /***/
 public class Updater<T> implements IsUpdater<T>{
 	
-	/**setter ce pozivati setere objekta <T> koji se proslijedi metodi update(T entity)*/
-	private IsUpdater<T> setter;
+	private static final IsUpdater<?> NULL_UPDATER = (x) -> {};
+	private IsUpdater<T> updater = getNullUpdater();
 	
 	public Updater(){}
 	
@@ -18,29 +18,26 @@ public class Updater<T> implements IsUpdater<T>{
 		setSetter(updater);
 	}
 
-	public IsUpdater<T> getSetter() { return this.setter; }
-	private void setSetter(IsUpdater<T> setter) { this.setter = setter;	}
+	public IsUpdater<T> getSetter() {
+		return this.updater;
+	}
+	
+	private void setSetter(IsUpdater<T> newUpdater) {
+		this.updater = newUpdater;
+		}
 	
 
 	@Override
 	public void update(T entity) throws NoPayloadDataException, IncompatibleUpdaterException {
-		if (getSetter() == null) throw new NoPayloadDataException();
 		try {
 			getSetter().update(entity);
 		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
 			throw new IncompatibleUpdaterException("", e);
 		}
-	}
-	
-	public void updateIgnore(T entity){
-		if (getSetter() == null) return;
-		getSetter().update(entity);
-	}
-	
-	
+	}	
 	
 	public Updater<T> clearUpdater() {
-		setSetter(null);
+		setSetter(getNullUpdater());
 		return this;
 	}
 	
@@ -48,7 +45,7 @@ public class Updater<T> implements IsUpdater<T>{
 	 * Omogucava naknadno dodavanje atributa klase <T> koji se mjenjaju metodom update.
 	 * @param noviSetter*/	
 	public void addThingsToBeChanged(IsUpdater<T> noviSetter) {
-		if (getSetter() == null) {
+		if (getSetter() == getNullUpdater()) {
 			setSetter(noviSetter);
 			return;
 		}
@@ -58,7 +55,6 @@ public class Updater<T> implements IsUpdater<T>{
 		{
 			stariSetter.update(entity);
 			noviSetter.update(entity);
-			return;
 		} );
 		
 		/*Prvi stack overflow experience :)
@@ -76,6 +72,9 @@ public class Updater<T> implements IsUpdater<T>{
 	}
 	
 	
-	
+	@SuppressWarnings("unchecked")
+	private static <T> IsUpdater<T> getNullUpdater(){
+		return (IsUpdater<T>) NULL_UPDATER;
+	}
 	
 }

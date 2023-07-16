@@ -8,30 +8,84 @@ import helpers.DefaultDict;
 import helpers.Query;
 import helpers.Updater;
 
+/**
+ * An interface representing a data provider for entities of type T.
+ *
+ * @param <T> the type of entities provided by this data provider.
+ */
 public interface IsProvider<T> {
-		
-	/**Method that returns a list of entities that satisfy the query.*/
-	public List<T> get(Query<T> selektor);
 	
-	/**Method that returns an iterator to iterate through all the entities.*/
+	/**
+     * Retrieves a list of entities that satisfy the specified query.
+     *
+     * @param selector the query used to filter the entities.
+     * @return a list of entities that match the query.
+     */
+	public List<T> get(Query<T> selector);
+	
+	
+	/**
+    * Returns an iterator to iterate through all the entities in the data provider.
+    *
+    * @return an iterator over the entities in the data provider.
+    */
 	public Iterator<T> get();
 	
-	/**Method that calls updater.update() on every entity that satisfies the crieteria given with the query.*/
-	public void put(Query<T> selektor, Updater<T> updater);
 	
-	/**Method that adds a new entity to the collection.*/
-	public void post(T entitet);
+	/**
+     * Updates entities that satisfy the specified query using the provided updater.
+     *
+     * @param selector the query used to select entities for updating.
+     * @param updater  the updater function to apply to the selected entities.
+     * @return true if any entities were updated, false otherwise.
+     */
+	public boolean put(Query<T> selector, Updater<T> updater);
 	
-	/**Method that removes all entities that satisfy the query.*/
-	public void delete(Query<T> selektor);
 	
-	/**Method that returns a string id for given entity. Doesn't require checking whether the entity exists in the system, just returns natural id for entity.*/
-	public String getId(T entitet);
+	/**
+     * Adds a new entity to the data provider.
+     *
+     * @param entity the entity to be added.
+     * @throws IdNotUniqueException if the natural ID of the new entity is not unique in the data provider.
+     */
+	public void post(T entity) throws IdNotUniqueException;
 	
-	/**Method that returns an entity with the given id. If the entity with the given id doesn't exist returns a reference to the deleted instance.*/
+	
+	/**
+     * Removes all entities that satisfy the specified query.
+     *
+     * @param selector the query used to select entities for removal.
+     * @return true if any entities were removed, false otherwise.
+     */
+	public boolean delete(Query<T> selector);
+	
+	
+	/**
+     * Returns the natural ID of the given entity.
+     * This method does not require checking whether the entity exists in the data provider.
+     *
+     * @param entity the entity to retrieve the natural ID from.
+     * @return the natural ID of the entity.
+     */
+	public String getId(T entity);
+	
+	
+	/**
+     * Retrieves an entity with the given ID.
+     * If the entity with the given ID does not exist, it returns a reference to a deleted instance.
+     *
+     * @param id the ID of the entity to retrieve.
+     * @return the entity with the specified ID, or a reference to a deleted instance if not found.
+     */
 	public T getById(String id);
 	
-	/**Method that returns a map id : entity. The map returns a reference to the deleted entity when you try to acces non existent keys.*/
+	
+	/**
+     * Returns a map of entity IDs to entities.
+     * The map returns a reference to a deleted entity when accessing non-existent keys.
+     *
+     * @return a DefaultDict containing entity IDs mapped to their respective entities.
+     */
 	public DefaultDict<String, T> getIds();
 	
 }

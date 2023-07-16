@@ -18,9 +18,25 @@ import helpers.Query;
 import helpers.Updater;
 import entiteti.Entitet;
 
-public abstract class DataManager<T extends Entitet, I> implements IsProvider<T> {
+/**
+ * An abstract base class for implementing data providers that handle entities of type <T>.
+ * The DataProvider provides CRUD (Create, Read, Update, Delete) operations for managing
+ * a collection of entities, which can be stored in various data structures such as a List or Map.
+ * Concrete subclasses should implement methods to convert data between string representation
+ * and the specific data structure used to store the entities.
+ *
+ * @param <T> The type of entities managed by this DataProvider. It should implement the Entitet marker interface.
+ * @param <I> The type of the identifier used to uniquely identify the entities when using a Map for quick acess.
+ */
+public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T> {
 	
-	private Data<I, T> data;	
+	/**
+	 * The data that stores entities.
+	 * 
+	 * @see DataProvider.Data*/
+	private Data<I, T> data;
+	
+	/**Function from entity to its natural id.*/
 	private Function<T, String> idFunction;
 	
 	private String filePath;
@@ -30,9 +46,9 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 		setData(defaultData());
 	}
 	
-	public DataManager() {}
+	public DataProvider() {}
 	
-	public DataManager(Function<T, String> idFunction, String filePath) {
+	public DataProvider(Function<T, String> idFunction, String filePath) {
 		setIdFunction(idFunction);
 		setFilePath(filePath);
 	}
@@ -53,14 +69,20 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 		this.idFunction = newIdFunction;
 	}
 	
-	public void newIdFunction(Function<T, String> newIdFunction) {
+	/**Set the idFunction while checking if it creates unique ids for already existent entities.
+	 * 
+	 * @param newIdFunction new function
+	 * @throws IdNotUniqueException if the ids are not unique with the new function*/
+	public void setNewIdFunction(Function<T, String> newIdFunction) throws IdNotUniqueException {
 		Iterator<T> iterator = get();
 		
 		while (iterator.hasNext()) {
 	        String entityId = newIdFunction.apply(iterator.next());
 	        
 	        if(!isIdUnique(entityId)) {
-	        	return; //TODO: throw exception because ids are not unique with new id function
+	        	throw new IdNotUniqueException(
+	        			"The provided function does not provide unique IDs for all entities that exist in the provider."
+	        			);
 	        }  
 	    }
 		
@@ -79,21 +101,23 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 		return this.csvDelimiter;
 	}
 		
-	/***/
+	/**Concrete class should override this method if it wants to change the default way entites are stored.
+	 * If it does so, it should make sure that the other <IsProvider> methods will work with it.
+	 * If not, any of the <IsProvider> methods should be overriden.*/
 	protected Data<I, T> defaultData(){
-		return new Data<>(new ArrayList<>());
+		return new Data<I, T>(new ArrayList<>());
 	}
 	
 	
 
 	@Override
-	public List<T> get(Query<T> selektor) {
+	public List<T> get(Query<T> selector) {
 		ArrayList<T> found = new ArrayList<>();
 		Iterator<T> iterator = get();
 		
 		while(iterator.hasNext()) {
 			T entitet = iterator.next();
-			if(selektor.test(entitet) == true) {
+			if(selector.test(entitet) == true) {
 				found.add(entitet);
 			}
 		}
@@ -103,7 +127,7 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 	
 	
 	@Override
-	public Iterator<T> get() { //maby should improve safety
+	public Iterator<T> get() {
 		if(getData().isList()) {
 			return getData().list().listIterator();
 		}
@@ -112,14 +136,14 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 			return getData().collection().iterator();
 		}
 		
-		return null;  //TODO: throw exception bc not overriden
+		throw new ProviderCompatibilityException("The default get all method is only compatible with collections.");
 	}
 	
 	
 	@Override
-	public void put(Query<T> selektor, Updater<T> updater) {
+	public boolean put(Query<T> selector, Updater<T> updater) {
 		if(!getData().isList()) {
-			return; //TODO: throw exception
+			throw new ProviderCompatibilityException("The default put method is only compatible with lists.");
 		}
 		
 		class Backup implements Iterable<Backup.Node>{ //maby paramatrize the class???
@@ -185,16 +209,18 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 		Function<T, String> idFunction = getIdFunction();
 		ListIterator<T> iterator = (ListIterator<T>) get(); //zbog backup-a koristimo listiterator
 		Backup backup = new Backup();
+		boolean ret = false;
 		
 		//prolazimo kroz sve entitete i trazimo onaj koji zadovoljava selektor
 		while (iterator.hasNext()) {
 			T entitet = iterator.next();
 			
-			if(!selektor.test(entitet)) {
+			if(!selector.test(entitet)) {
 				continue;
 			}
 			
-			//nasli smo entitet koji zadovoljava selektor			
+			//nasli smo entitet koji zadovoljava selektor
+			ret |= true;
 			String originalId = idFunction.apply(entitet);
 			//pravimo backup (u slucaju da novi natural id entiteta nije jedinstven) i updejtujemo entitet
 			backup.add(iterator, copyEntity(entitet));
@@ -212,16 +238,20 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 				bp.undo();
 			}
 			
-			return; //TODO: throw exception because new id is not unique
-		}
-	
+			throw new IdNotUniqueException(
+					"The id of entity with ID: " + originalId + 
+					" is not unique in the provider after updating. [" + newId + "].\nNo entities were updated."
+					); 
+			}
+		
+		return ret;
 	}
 	
 	
 	@Override
-	public void post(T entitet) {
+	public void post(T entitet) throws IdNotUniqueException {
 		if(!getData().isCollection()) {
-			return; //TODO: throw exception
+			throw new ProviderCompatibilityException("The default post method is only compatible with collections.");
 		}
 		
 		Collection<T> data = getData().collection();
@@ -232,28 +262,34 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 			return;
 		}
 				
-		return; //TODO: id not unique, throw exxception		
+		throw new IdNotUniqueException(
+				"The natural ID of the entity is not unique in the provider. ID:[" + getIdFunction().apply(entitet) + "]"
+				);		
 	}
 	
 	
 	@Override
-	public void delete(Query<T> selektor) {
+	public boolean delete(Query<T> selektor) {
 		if(!getData().isList()) {
-			return; //TODO: Throw exceptino
+			throw new ProviderCompatibilityException("The default delete method is only compatible with lists.");
 		}
 		
 		ListIterator<T> iterator = (ListIterator<T>) get();
+		boolean ret = false;
 		
 		while ( iterator.hasNext() ) {
 			if( selektor.test( iterator.next() ) ) {
 				iterator.remove();
+				ret |= true;
 			}			
-		}		
+		}	
+		
+		return ret;
 	}
 	
 	
 	@Override
-	public String getId(T entitet) { //returns an id even if it doesn't exist in the collection
+	public String getId(T entitet) {
 		return getIdFunction().apply(entitet); 
 	}
 	
@@ -276,7 +312,7 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 	
 	@Override
 	public DefaultDict<String, T> getIds() {
-		DefaultDict<String, T> ids = new DefaultDict<>(() -> getDeletedInstance());
+		DefaultDict<String, T> ids = new DefaultDict<>(this::getDeletedInstance);
 		Function<T, String> idFunction = getIdFunction();
 		Iterator<T> iterator = get();
 		
@@ -288,40 +324,52 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 		return ids;
 	}
 	
+	/**Returns the reference to the only instance of entity that represents a deleted entity.
+	 * 
+	 * @return the instance
+	 * */
 	protected abstract T getDeletedInstance();
 	
-	
+	/**Checks if the given id is unique in the provider.
+	 * This means that there is at most one entity with the given id.
+	 * 
+	 * @param id the string id of an entity that may or may not exist in the provider*/
 	protected boolean isIdUnique(String id) {
 		Iterator<T> iterator = get();
 		Function<T, String> idFunction = getIdFunction();
-		int numOfRepeats = 0;
+		boolean foundMatch = false;
 		
-		while(iterator.hasNext()) {
-			String checkEntityId = idFunction.apply(iterator.next());
-			
-			if(!id.equals(checkEntityId)) {
+		while(iterator.hasNext()) {			
+			if( !id.equals(idFunction.apply(iterator.next())) ) {
 				continue;
 			}
 			
-			if(++numOfRepeats > 1) {
-				return false;				
+			if(foundMatch) {
+				return false;
 			}
+			
+			foundMatch = true; // will only happen once
 		}
 		
 		return true;
 	}
 		
 	
-		
+	/***/
 	public void loadData() throws IOException{
-		setData( convertStringToData(DataManager.loadFromCsv(getFilePath(), getCsvDelimiter())) );
+		ArrayList<String[]> lista = DataProvider.loadFromCsv(getFilePath(), getCsvDelimiter());
+		setData( convertStringToData(lista) );
 	};
 	
+	/***/
 	public void saveData() throws IOException{
-		DataManager.writeToCsv(convertDataToString(getData()), getFilePath(), getCsvDelimiter());
+		ArrayList<String[]> lista = convertDataToString(getData());
+		DataProvider.writeToCsv(lista, getFilePath(), getCsvDelimiter());
 	}
 	
+	/***/
 	protected abstract Data<I, T> convertStringToData(ArrayList<String[]> stringData);
+	/***/
 	protected abstract ArrayList<String[]> convertDataToString(Data<I, T> data);
 	
 	
@@ -335,7 +383,7 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 		while(entityStrings.hasNext()) {
 			lista.add(entityStrings.next());
 		}
-		DataManager.writeToCsv(lista, path, delimiter);
+		DataProvider.writeToCsv(lista, path, delimiter);
 	}
 	
 	protected static void writeToCsv(List<String[]> entityStrings, String path, String delimiter) throws IOException {
@@ -377,11 +425,12 @@ public abstract class DataManager<T extends Entitet, I> implements IsProvider<T>
 	
 	
 	
-	protected enum DataType{
-		LIST, COLLECTION, MAP, NO_DATA, COLLECTION_AND_MAP, LIST_AND_MAP
+	protected static enum DataType{
+		LIST, COLLECTION, MAP, COLLECTION_AND_MAP, LIST_AND_MAP, NO_DATA
 	}
 	
-	protected class Data<K, V extends Entitet> {
+	/***/
+	protected static class Data<K, V extends Entitet> {
 		private Collection<V> collection;
 		private Map<K, V> map;
 		

@@ -6,16 +6,23 @@ import java.util.function.Supplier;
 
 public class DefaultDict<K, V> {
 	
-    private final Map<K, V> map;
+    private final Map<K, V> map = new HashMap<>();
     private final Supplier<V> defaultValueSupplier;
-    
+        
     public DefaultDict() {
     	this( () -> null );
     }
 
     public DefaultDict(Supplier<V> defaultValueSupplier) {
-        this.map = new HashMap<>();
         this.defaultValueSupplier = defaultValueSupplier;
+    }
+    
+    public DefaultDict(V defaultValue) {
+    	this.defaultValueSupplier = () -> defaultValue;
+    }
+    
+    public V getDefaultValue() {
+    	return defaultValueSupplier.get();
     }
 
     public V get(K key) {

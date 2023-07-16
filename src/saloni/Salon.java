@@ -2,7 +2,7 @@ package saloni;
 
 import java.util.HashMap;
 
-import dataProvajderi.DataManager;
+import dataProvajderi.DataProvider;
 import entiteti.Korisnik;
 import helpers.Query;
 import exceptions.PasswordMissmatchException;
@@ -12,7 +12,7 @@ public class Salon {
 	
 	private String nazivSalona;
 	
-	private DataManager dataManager;
+	private DataProvider dataManager;
 	
 	
 	
@@ -40,7 +40,7 @@ public class Salon {
 		
 	}
 	
-	private DataManager speakToTheManager() {
+	private DataProvider speakToTheManager() {
 		return this.dataManager;
 	}
 	
