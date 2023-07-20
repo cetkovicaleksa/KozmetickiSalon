@@ -1,278 +1,289 @@
 package entiteti.blueprints;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import entiteti.Entitet;
-import entiteti.Klijent;
 import helpers.Query;
+import helpers.IsUpdater;
 import helpers.Updater;
 
 public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	
-	private final HashSet<Field<?>> fields;
+	private Query<T> query; // = new Query<>();
+	private Updater<T> updater; // = new Updater<>();
+	
+	private boolean forQuery = false; // if we are not building for query nor we are building for updater, we are building for entity
+	private boolean forUpdater = false;
+
+	private final ArrayList<Function<T, Void>> builder = new ArrayList<>();
+	private BiFunction<Predicate<T>, Query<T>, Query<T>> currentCombiningLogic; //for adding new conditions to query
+	
 	{
-		@SuppressWarnings("serial")
-		class AkiSet<E> extends HashSet<E>{
-			@Override
-			public boolean add(E e) {
-				if (contains(e)) {
-					remove(e);
-			    }
-			    return super.add(e);
-			}
-		}
-		
-		this.fields = new AkiSet<>();
-	}	
-	
-	public Blueprint() {}
-	
-	//shallow copies all the values from entitet to make new blueprint
-	public Blueprint(T entitet) {
-		Class<?> clazz = entitet.getClass();
-		
-		for(String fieldName : getAllFieldNames()) {
-			try {
-				Method getter = clazz.getMethod(fieldName);
-				this.add(fieldName, getter.invoke(entitet));
-				
-			} catch (NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-			}		
-		}
+		and();  // sets the currentCombiningLogic to be logical and
 	}
 	
-	private HashSet<Field<?>> getFields(){
-		return this.fields;
-	}
-		
-	protected abstract T getNewEntity();
-	protected abstract String[] getAllFieldNames();
+	public Blueprint() {}	
 	
-	protected void add(String name, Object value) {
-		getFields().add(new Field<>(name, value));
-	}
 	
-	public T constructEntity() {
-		T entitet = getNewEntity();
-		
-		for(Field<?> field : getFields()) {
-			try {
-				Method setter = entitet.getClass().getMethod(field.getSetterName(), field.type());
-				setter.invoke(entitet, field.getValue());
-			}catch(Exception e) {
-				//should handle various exceptions TODO
-			}
-		}
-		return entitet;
-	};
 	
-	/**Returns a query that tests positive if an entity matches the blueprint.*/
-	public Query<T> getQueryToMatch(){
-		Query<T> query = new Query<>();
-		
-		for(Field<?> field : getFields()) {
-			try {
-				
-				Method getter = getNewEntity().getClass().getMethod(field.getGetterName());
-				Object value = field.getValue();
-				
-				query.i( x -> {
-					try {
-						return Relations.equals(getter.invoke(x), value);
-					}catch(InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
-						return false;
-					}
-				});
-				
-			}catch(NoSuchMethodException e) {
-				//handle all exceptions!!
-			}
-		}
-		
+	protected Query<T> getQuery() {
 		return query;
 	}
 	
-	public Updater<T> getUpdaterToMatch(){
-		class Setter<X>{
-			public Method method;
-			public X value;
-			
-			public Setter(Method method, X value) {
-				this.method = method;
-				this.value = value;
-			}
-			
-			public void update(T entitet) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-				this.method.invoke(entitet, this.value);
-			}
-		}
-		
-		Updater<T> updater = new Updater<>();
-		ArrayList<Setter<?>> setters = new ArrayList<>();
-		Class<?> clazz = getNewEntity().getClass();
-		
-		for(Field<?> field : getFields()) {
-			try{
-				Method setter = clazz.getMethod(field.getSetterName(), field.type());
-				setters.add(new Setter<>(setter, field.getValue()));
-			}catch(NoSuchMethodException e) {
-				//TODO
-			}
-		}
-		
-		updater.addThingsToBeChanged((entitet) -> {
-			
-			for(Setter<?> s : setters) {
-				try {
-					s.update(entitet);
-				}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					//id what to do?
-				}
-			}
-		});
-		
+	protected void setQuery(Query<T> query) {
+		this.query = query;
+	}
+	
+
+	protected Updater<T> getUpdater() {
 		return updater;
-	};
+	}
+	
+	protected void setUpdater(Updater<T> updater) {
+		this.updater = updater;
+	}
+	
+
+	protected BiFunction<Predicate<T>, Query<T>, Query<T>> getCurrentCombiningLogic() {
+		return currentCombiningLogic;
+	}
+	
+	protected void setCurrentCombiningLogic(BiFunction<Predicate<T>, Query<T>, Query<T>> currentCombiningLogic) {
+		this.currentCombiningLogic = currentCombiningLogic;
+	}
 
 	
+	protected ArrayList<Function<T, Void>> getBuilder() {
+		return builder;
+	}
 	
 	
-	static class Relations{
-		
-		public static boolean equals(Object x, Object criteria) {
-			return x.equals(criteria);
+	
+	protected abstract T getNewEntity();
+	
+	
+	
+	protected boolean isForQuery() {
+		return forQuery;
+	}
+	
+	protected boolean isForUpdater() {
+		return forUpdater;
+	}
+	
+	protected boolean isForBuilder() {
+		return !(forQuery || forUpdater);
+	}
+	
+	//all the methods that use the builder pattern should be overriden in concrete classes to ensure that the return type is more precise
+	public Blueprint<T> forUpdater() {
+		if(getUpdater() == null) {
+			setUpdater(new Updater<>());
 		}
 		
-		public static boolean lowerThan(Number x, Number criteria) {
-			return x.doubleValue() < criteria.doubleValue();			
+		forUpdater |= true;
+		return this;
+	}
+	
+	public Blueprint<T> forQuery() {
+		if(getQuery() == null){
+			setQuery(new Query<>());
 		}
 		
-		public static boolean lowerThan(LocalDate x, LocalDate criteria) {
-			return x.compareTo(criteria) < 0;
+		forQuery |= true;
+		return this;
+	}
+	
+	
+	public Blueprint<T> notForUpdater() {
+		forUpdater &= false;
+		return this;
+	}
+	
+	public Blueprint<T> notForQuery() {
+		forQuery &= false;
+		return this;
+	}
+	
+	
+	
+	@Override
+	public T build() {
+		T entity = getNewEntity();
+		getBuilder().forEach( (setter) -> setter.apply(entity) );
+		return entity;
+	}
+	
+	@Override
+	public Query<T> query(){
+		return getQuery();
+		//setQuery(new Query<>()); //TODO: deepcopy the query
+	}
+	
+	@Override
+	public Updater<T> updater(){
+		return getUpdater();
+		//TODO: deepcopy the updater
+	}
+	
+	
+	
+	//see if this overriding will work?!
+	protected void add(Function<T, Void> setter) {
+		getBuilder().add(setter);
+	}
+	
+	protected void add(IsUpdater<T> function) {
+		getUpdater().addThingsToBeChanged(function);
+	}
+	
+	protected void add(Predicate<T> relation) {
+		getCurrentCombiningLogic().apply(relation, getQuery());
+	}
+	
+	
+	
+	public void and() {
+		setCurrentCombiningLogic((newCondition, query) -> CombiningLogic.and(newCondition, query));		
+	}
+	public void or() {
+		setCurrentCombiningLogic((newCondition, query) -> CombiningLogic.or(newCondition, query));
+	}
+	public void xor() {
+		setCurrentCombiningLogic((newCondition, query) -> CombiningLogic.xor(newCondition, query));
+	}
+	public void equivalent() {
+		setCurrentCombiningLogic((newCondition, query) -> CombiningLogic.equivalent(newCondition, query));
+	}
+	
+	public void reset() {
+	}
+	
+	
+	
+	@SuppressWarnings("unused")
+	private static class CombiningLogic{
+		
+		static <T> Query<T> and(Predicate<T> newCondition, Query<T> query){
+			return query.i(newCondition);
 		}
 		
-		public static boolean lowerThan(LocalDateTime x, LocalDateTime criteria) {
-			return x.compareTo(criteria) < 0;
+		static <T> Query<T> or(Predicate<T> newCondition, Query<T> query){
+			return query.ili(newCondition);
 		}
 		
-		public static boolean greaterThan(Comparable<Object> x, Comparable<Object> criteria) {
-			return x.compareTo(criteria) > 0;
+		static <T> Query<T> xor(Predicate<T> newCondition, Query<T> query){
+			return query.nili(newCondition);
 		}
 		
-		public static boolean greaterThan(LocalDate x, LocalDate criteria) {
-			return x.compareTo(criteria) > 0;
+		static <T> Query<T> equivalent(Predicate<T> newCondition, Query<T> query){
+			return query.akko(newCondition);
 		}
 		
-			
+		static <T> Query<T> isImplied(Predicate<T> newCondition, Query<T> query){
+			return query.dodajPotrebanUslov(newCondition);
+		}
+		
+		static <T> Query<T> implies(Predicate<T> newCondition, Query<T> query){
+			return query.dodajDovoljanUslov(newCondition);
+		}
 	}
 	
 	
 	
 	
-	protected class Field<V>{
-		private String name;
-		private V value;
+	public static class Field<E extends Entitet, V>{
+		private String name;  //name of the field, which is used to get the getter and setter methods (assumes conventional naming)
+		private V value;  //the value of the field that can be any type
+		private Class<E> clazz; //to know that the Field is for the right entity class
+		private BiFunction<V, V, Boolean> relation; //only for tester purposes
 		
-		@SuppressWarnings("unused")
-		private Field() {}
+		
+		public Field() {}
 		
 		public Field(String name, V value) {
-			this.name = name;
-			this.value = value;
+			setName(name);
+			setValue(value);
+		}
+		
+		public Field(String name, V value, BiFunction<V, V, Boolean> relation) {
+			this(name, value);
+			setRelation(relation);
 		}
 		
 		public String getName() {
 			return this.name;
 		}
+		public void setName(String newName) {
+			this.name = newName;
+		}
 		
 		public V getValue() {
 			return this.value;
 		}
-		
-		public void setValue(V newValue) { //allows to change to subclass value
+		public void setValue(V newValue) {
 			this.value = newValue;
 		}
 		
-		public Class<?> type(){
-			return getValue().getClass();
+		public BiFunction<V, V, Boolean> getRelation(){
+			return this.relation;
+		}
+		public void setRelation(BiFunction<V, V, Boolean> newRelation) {
+			this.relation = newRelation;
+		}
+		
+		
+		
+		public Class<V> getValueClass(){
+			return Field.getValueClass(getValue());
 		}
 		
 		public String getGetterName() {
-			return "get" + name();
+			return "get" + Field.name(getName());
 		}
 		
 		public String getSetterName() {
-			return "set" + name();
+			return "set" + Field.name(getName());
 		}
 		
-		private String name() {
-			return Character.toUpperCase(getName().charAt(0)) + getName().substring(1);
+		public boolean isForTester() {
+			return getRelation() == null;
 		}
 		
-		@Override
-		public int hashCode() {
-			return Objects.hashCode(getName());
+		public boolean isForSetter() {
+			return ! isForTester();
 		}
 		
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
+		//in the outer class???
+		public Predicate<V> getTester(Class<V> clazz) {
+			if(isForTester()) {
+				
 			}
-			if (obj == null || obj.getClass() != getClass()) {
-				return false;
-			}			
-			Field<?> other = (Field<?>) obj;
-			if (other.type() != type()) {
-				return false;
+			
+			return null;
+		}
+		
+		public Updater<V> getSetter(Class<V> clazz) {
+			if(isForSetter()) {
+				
 			}
-			return other.getName().equals(getName());
-		}	
+			
+			return null;
+		}
+
+		
+		private static <T> Class<T> getValueClass(T value){
+			return (Class<T>) value.getClass();
+		}
+		
+		private static String name(String fieldName) {
+			return Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+		}
 		
 	}
-		
-		
-		
-	public static void main(String[] args) {
-		
-		Klijent aleksa = new Klijent();
-		aleksa.setPrezime("cetkovic");
-		aleksa.setHasLoyaltyCard(true);
-	
-		KlijentBlueprint bp = new KlijentBlueprint();
-		
-		
-		System.out.println(bp.getClass());
-		//System.out.println(bp.getFields());
-		bp.ime("Aleksa").ime("Ana");
-		//System.out.println(bp.getFields());
-		Klijent ana = bp.constructEntity();
-		System.out.println(ana.getIme() +"|"+ ana.getPrezime());
-		System.out.println(ana);
-		
-		
-		Query<Klijent> tester = bp.getQueryToMatch().ne().ne().akko((e) -> e != aleksa).clearQuery().ne();//.ili((e) -> e == ana);
-		aleksa.setIme("Aleksa");
-		
-		System.out.println(tester.test(ana));
-		System.out.println(tester.test(aleksa));
-		//System.out.println(bp.getFields());
-	}
-		
 	
 
 }

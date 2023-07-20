@@ -20,7 +20,7 @@ import entiteti.Entitet;
 
 /**
  * An abstract base class for implementing data providers that handle entities of type <T>.
- * The DataProvider provides CRUD (Create, Read, Update, Delete) operations for managing
+ * The DataProvider provides basic CRUD (Create, Read, Update, Delete) operations for managing
  * a collection of entities, which can be stored in various data structures such as a List or Map.
  * Concrete subclasses should implement methods to convert data between string representation
  * and the specific data structure used to store the entities.

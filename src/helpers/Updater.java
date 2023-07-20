@@ -15,29 +15,32 @@ public class Updater<T> implements IsUpdater<T>{
 	public Updater(){}
 	
 	public Updater(IsUpdater<T> updater) {
-		setSetter(updater);
+		setUpdater(updater);
 	}
 
-	public IsUpdater<T> getSetter() {
+	public IsUpdater<T> getUpdater() {
 		return this.updater;
 	}
-	
-	private void setSetter(IsUpdater<T> newUpdater) {
+	private void setUpdater(IsUpdater<T> newUpdater) {
 		this.updater = newUpdater;
 		}
 	
 
+	public boolean isNull() {
+		return getUpdater() == Updater.getNullUpdater();
+	}
+	
 	@Override
 	public void update(T entity) throws NoPayloadDataException, IncompatibleUpdaterException {
 		try {
-			getSetter().update(entity);
+			getUpdater().update(entity);
 		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
 			throw new IncompatibleUpdaterException("", e);
 		}
 	}	
 	
 	public Updater<T> clearUpdater() {
-		setSetter(getNullUpdater());
+		setUpdater(getNullUpdater());
 		return this;
 	}
 	
@@ -45,13 +48,13 @@ public class Updater<T> implements IsUpdater<T>{
 	 * Omogucava naknadno dodavanje atributa klase <T> koji se mjenjaju metodom update.
 	 * @param noviSetter*/	
 	public void addThingsToBeChanged(IsUpdater<T> noviSetter) {
-		if (getSetter() == getNullUpdater()) {
-			setSetter(noviSetter);
+		if (isNull()) {
+			setUpdater(noviSetter);
 			return;
 		}
 		
-		IsUpdater<T> stariSetter = getSetter();
-		setSetter( entity -> 
+		IsUpdater<T> stariSetter = getUpdater();
+		setUpdater( entity -> 
 		{
 			stariSetter.update(entity);
 			noviSetter.update(entity);

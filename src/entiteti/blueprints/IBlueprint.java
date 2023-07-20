@@ -4,7 +4,7 @@ import helpers.Query;
 import helpers.Updater;
 
 public interface IBlueprint<T> {
-	public T constructEntity();
-	public Query<T> getQueryToMatch();
-	public Updater<T> getUpdaterToMatch();
+	public T build();
+	public Query<T> query();
+	public Updater<T> updater();
 }
