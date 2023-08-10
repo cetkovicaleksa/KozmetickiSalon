@@ -6,7 +6,7 @@ import entiteti.NivoStrucneSpreme;
 import entiteti.Pol;
 import entiteti.Recepcioner;
 
-public class RecepcionerProvider extends OutdatedProvider<Recepcioner> {
+public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 	
 	private final Recepcioner deleted = new Recepcioner() {
 		@Override
@@ -36,38 +36,13 @@ public class RecepcionerProvider extends OutdatedProvider<Recepcioner> {
 	@Override
 	public Recepcioner getDeletedInstance() { return this.deleted; }
 
-	@Override
-	protected ArrayList<String[]> convertDataToString(ArrayList<Recepcioner> data) {
-		
-	    ArrayList<String[]> convertedData = new ArrayList<>();        
-	    
-	    data.forEach((recepcioner) -> {
-	        String[] r = new String[10];
-	        convertedData.add(r);
-	        
-	        r[0] = recepcioner.getIme();
-	        r[1] = recepcioner.getPrezime();
-	        r[2] = recepcioner.getBrojTelefona();
-	        r[3] = recepcioner.getAdresa();
-	        r[4] = recepcioner.getKorisnickoIme();
-	        r[5] = recepcioner.getLozinka();
-	        r[6] = recepcioner.getPol().name();
-	        
-	        r[7] = Integer.toString(recepcioner.getGodineStaza());
-	        r[8] = Double.toString(recepcioner.getBazaPlate());
-	        r[9] = recepcioner.getNivoStrucneSpreme().name();
-	    });
-	    
-	    return convertedData;
-	    
-	}
 
 	@Override
-	protected ArrayList<Recepcioner> convertStringToData(ArrayList<String[]> data) {
-		
-	    ArrayList<Recepcioner> convertedData = new ArrayList<>();
-	    
-	    data.forEach((r) -> {
+	protected Data<String, Recepcioner> convertStringToData(ArrayList<String[]> stringData) {
+		ArrayList<Recepcioner> convertedData = new ArrayList<>();
+		Data<String, Recepcioner> data = new Data<>(convertedData);
+				
+		stringData.forEach((r) -> {
 	        Recepcioner recepcioner = new Recepcioner();
 	        convertedData.add(recepcioner);
 	        
@@ -77,14 +52,39 @@ public class RecepcionerProvider extends OutdatedProvider<Recepcioner> {
 	        recepcioner.setAdresa(r[3]);
 	        recepcioner.setKorisnickoIme(r[4]);
 	        recepcioner.setLozinka(r[5]);
+	        
 	        recepcioner.setPol(Pol.valueOf(r[6]));
 	        recepcioner.setGodineStaza(Integer.parseInt(r[7]));
 	        recepcioner.setBazaPlate(Double.parseDouble(r[8]));
 	        recepcioner.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(r[9]));
 	    });
-	    
-	    return convertedData;
-	    
+		
+		return data;
+	}
+
+
+	@Override
+	protected ArrayList<String[]> convertDataToString(Data<String, Recepcioner> data) {
+		ArrayList<String[]> convertedData = new ArrayList<>();
+		
+		data.list().forEach((recepcioner) -> {
+	        String[] r = new String[10];
+	        convertedData.add(r);
+	        
+	        r[0] = recepcioner.getIme();
+	        r[1] = recepcioner.getPrezime();
+	        r[2] = recepcioner.getBrojTelefona();
+	        r[3] = recepcioner.getAdresa();
+	        r[4] = recepcioner.getKorisnickoIme();
+	        r[5] = recepcioner.getLozinka();
+	        
+	        r[6] = recepcioner.getPol().name();
+	        r[7] = Integer.toString(recepcioner.getGodineStaza());
+	        r[8] = Double.toString(recepcioner.getBazaPlate());
+	        r[9] = recepcioner.getNivoStrucneSpreme().name();
+	    });
+		
+		return convertedData;
 	}
 
 

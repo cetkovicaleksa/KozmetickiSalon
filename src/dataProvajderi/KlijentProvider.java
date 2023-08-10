@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import entiteti.Klijent;
 import entiteti.Pol;
 
-public class KlijentProvider extends OutdatedProvider<Klijent> {
+public class KlijentProvider extends DataProvider<Klijent, String> {
 	
 	private final Klijent deleted = new Klijent() {  //could use reflection to make this nicer
 		@Override
@@ -28,15 +28,14 @@ public class KlijentProvider extends OutdatedProvider<Klijent> {
 	
 	
 	@Override
-	public Klijent getDeletedInstance() { return this.deleted; }
+	public Klijent getDeletedInstance() { return deleted; }
 
 
 	@Override
-	protected ArrayList<String[]> convertDataToString(ArrayList<Klijent> data) {
+	protected ArrayList<String[]> convertDataToString(Data<String, Klijent> data) {
+		ArrayList<String[]> convertedData = new ArrayList<>();
 		
-		ArrayList<String[]> convertedData = new ArrayList<>();		
-		
-		data.forEach( (klijent) -> {
+		data.list().forEach( (klijent) -> {
 			String[] k = new String[8];
 			convertedData.add(k);
 			
@@ -51,16 +50,15 @@ public class KlijentProvider extends OutdatedProvider<Klijent> {
 		});
 		
 		return convertedData;
-		
 	}
 
 
 	@Override
-	protected ArrayList<Klijent> convertStringToData(ArrayList<String[]> data) {
-		
+	protected Data<String, Klijent> convertStringToData(ArrayList<String[]> stringData) {
 		ArrayList<Klijent> convertedData = new ArrayList<>();
-		
-		data.forEach( (k) -> {
+		Data<String, Klijent> data = new Data<>(convertedData);
+				
+		stringData.forEach( (k) -> {
 			Klijent klijent = new Klijent();
 			convertedData.add(klijent);
 			
@@ -74,8 +72,7 @@ public class KlijentProvider extends OutdatedProvider<Klijent> {
 		    klijent.setHasLoyaltyCard(Boolean.parseBoolean(k[7]));
 		});
 		
-		return convertedData;
-		
+		return data;
 	}
 	
 	

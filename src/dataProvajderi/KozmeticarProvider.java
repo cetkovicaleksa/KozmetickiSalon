@@ -3,6 +3,7 @@ package dataProvajderi;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.Function;
 
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
@@ -10,7 +11,9 @@ import entiteti.NivoStrucneSpreme;
 import entiteti.Pol;
 import helpers.DefaultDict;
 
-public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
+public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
+	
+	private String msg = "Hmm vidi kako rjesiti ovo sa komunikacijom providera!!!!";
 	
 	private final Kozmeticar deleted = new Kozmeticar() {
 		@Override
@@ -40,11 +43,58 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 	};
 
 	@Override
-	public Kozmeticar getDeletedInstance() { return this.deleted; }
+	public Kozmeticar getDeletedInstance() { return deleted; }
+	
+	public void loaddData(DefaultDict<String, KozmetickiTretman> tretmaniIds) throws IOException {
+		ArrayList<String[]> loadedData = DataProvider.loadFromCsv(super.getFilePath(), DataProvider.CSV_DELIMITER);
+		ArrayList<Kozmeticar> initializedData = new ArrayList<>();
+		KozmetickiTretman deleted = tretmaniIds.getDefaultValue();
+		super.setData(new Data<>(initializedData));
+		
+		loadedData.forEach(k -> {
+			Kozmeticar kozmeticar = new Kozmeticar();
+			initializedData.add(kozmeticar);
+			
+			kozmeticar.setIme(k[0]);
+	        kozmeticar.setPrezime(k[1]);
+	        kozmeticar.setBrojTelefona(k[2]);
+	        kozmeticar.setAdresa(k[3]);
+	        kozmeticar.setKorisnickoIme(k[4]);
+	        kozmeticar.setLozinka(k[5]);
+	        
+	        kozmeticar.setPol(Pol.valueOf(k[6]));
+	        kozmeticar.setGodineStaza(Integer.parseInt(k[7]));
+	        kozmeticar.setBazaPlate(Double.parseDouble(k[8]));
+	        kozmeticar.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(k[9]));	
+	        
+	        ArrayList<KozmetickiTretman> tretmani = new ArrayList<>();
+	        kozmeticar.setTretmani(tretmani);
+	        
+	        if(k[10].isEmpty()) {
+	        	return;
+	        }
+	        
+	        String[] tretmaniStr = k[10].split(DataProvider.CSV_INNER_DELIMITER);
+	        
+	        for(String id : tretmaniStr) {
+	        	KozmetickiTretman tretman = tretmaniIds.get(id);
+	        	
+	        	if(tretman != deleted) {
+	        		tretmani.add(tretman);
+	        	}
+	        }
+	        //TODO: finish
+		});
+		
+	}
+	
+	public void saveeData(Function<KozmetickiTretman, String> getTretmanId) throws IOException {
+		
+	}
 
 	
 	@Override
-	protected ArrayList<String[]> convertDataToString(ArrayList<Kozmeticar> data) {  
+	protected ArrayList<String[]> aa(ArrayList<Kozmeticar> data) {  
 		//doesn't take care of an accidental deleted treatment appereance
 		//moraju se prvo ucitati kozmeticki tretmani ili koristiti saveData sa parametrima
 		//u suprotnom ce svaki kozmeticar biti sacuvan sa praznom listom tretmana
@@ -187,7 +237,6 @@ public class KozmeticarProvider extends ProviderExtrovert<Kozmeticar> {
 		this.saveData();
 		super.setMainProvider(providerBackup);
 	}
-
 	
 
 	

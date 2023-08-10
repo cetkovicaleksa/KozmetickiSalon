@@ -17,8 +17,9 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	
 	private boolean forQuery = false; // if we are not building for query nor we are building for updater, we are building for entity
 	private boolean forUpdater = false;
+	private boolean forBuilder = true;
 
-	private final ArrayList<Function<T, Void>> builder = new ArrayList<>();
+	private final ArrayList<Function<? extends T, Void>> builder = new ArrayList<>();
 	private BiFunction<Predicate<T>, Query<T>, Query<T>> currentCombiningLogic; //for adding new conditions to query
 	
 	{
@@ -56,7 +57,7 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	}
 
 	
-	protected ArrayList<Function<T, Void>> getBuilder() {
+	protected ArrayList<Function<? extends T, Void>> getBuilder() {
 		return builder;
 	}
 	
@@ -75,7 +76,7 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	}
 	
 	protected boolean isForBuilder() {
-		return !(forQuery || forUpdater);
+		return forBuilder;
 	}
 	
 	//all the methods that use the builder pattern should be overriden in concrete classes to ensure that the return type is more precise
@@ -97,6 +98,11 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 		return this;
 	}
 	
+	public Blueprint<T> forBuilder(){
+		forBuilder |= true;
+		return this;
+	}
+	
 	
 	public Blueprint<T> notForUpdater() {
 		forUpdater &= false;
@@ -105,6 +111,11 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	
 	public Blueprint<T> notForQuery() {
 		forQuery &= false;
+		return this;
+	}
+	
+	public Blueprint<T> notForBuilder(){
+		forBuilder &= false;
 		return this;
 	}
 	
@@ -132,14 +143,15 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	
 	
 	//see if this overriding will work?!
-	protected void add(Function<T, Void> setter) {
+	/**@param setter Function<T, Void>*/
+	protected void add(Function<? extends T, Void> setter) {
 		getBuilder().add(setter);
 	}
-	
-	protected void add(IsUpdater<T> function) {
-		getUpdater().addThingsToBeChanged(function);
+	/**@param updater IsUpdater<T>*/
+	protected void add(IsUpdater<T> updater) {
+		getUpdater().addThingsToBeChanged(updater);
 	}
-	
+	/**@param relation Predicate<T>*/
 	protected void add(Predicate<T> relation) {
 		getCurrentCombiningLogic().apply(relation, getQuery());
 	}
@@ -161,6 +173,7 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	
 	public void reset() {
 	}
+	
 	
 	
 	
@@ -193,7 +206,9 @@ public abstract class Blueprint<T extends Entitet> implements IBlueprint<T>{
 	}
 	
 	
-	
+	public static class Relations{
+		
+	}
 	
 	public static class Field<E extends Entitet, V>{
 		private String name;  //name of the field, which is used to get the getter and setter methods (assumes conventional naming)

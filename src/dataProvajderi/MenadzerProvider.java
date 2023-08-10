@@ -6,7 +6,7 @@ import entiteti.Menadzer;
 import entiteti.NivoStrucneSpreme;
 import entiteti.Pol;
 
-public class MenadzerProvider extends OutdatedProvider<Menadzer> {
+public class MenadzerProvider extends DataProvider<Menadzer, String> {
 	
 	private final Menadzer deleted = new Menadzer() {
 		@Override
@@ -32,43 +32,18 @@ public class MenadzerProvider extends OutdatedProvider<Menadzer> {
 		@Override
 		public double izracunajBazuPlate() {return 0;}
 	};
-	
-	
+
+
 	@Override
-	public Menadzer getDeletedInstance() { return this.deleted; }
-	
+	protected Menadzer getDeletedInstance() { return deleted; }
+
+
 	@Override
-	protected ArrayList<String[]> convertDataToString(ArrayList<Menadzer> data) {
-		
-		ArrayList<String[]> convertedData = new ArrayList<>();		
-		
-		data.forEach( (menadzer) -> {
-			String[] m = new String[10];
-			convertedData.add(m);
-			
-			m[0] = menadzer.getIme();
-			m[1] = menadzer.getPrezime();
-			m[2] = menadzer.getBrojTelefona();
-			m[3] = menadzer.getAdresa();
-		    m[4] = menadzer.getKorisnickoIme();
-		    m[5] = menadzer.getLozinka();
-		    m[6] = menadzer.getPol().name();
-		    
-		    m[7] = Integer.toString( menadzer.getGodineStaza() );
-		    m[8] = Double.toString( menadzer.getBazaPlate() );
-		    m[9] = menadzer.getNivoStrucneSpreme().name();
-		});
-		
-		return convertedData;
-		
-	}
-	
-	@Override
-	protected ArrayList<Menadzer> convertStringToData(ArrayList<String[]> data) {
-		
+	protected Data<String, Menadzer> convertStringToData(ArrayList<String[]> stringData) {
 		ArrayList<Menadzer> convertedData = new ArrayList<>();
-		
-		data.forEach( (m) -> {
+		Data<String, Menadzer> data = new Data<>(convertedData);
+				
+		stringData.forEach( (m) -> {
 			Menadzer menadzer = new Menadzer();
 			convertedData.add(menadzer);
 			
@@ -78,14 +53,39 @@ public class MenadzerProvider extends OutdatedProvider<Menadzer> {
 	        menadzer.setAdresa(m[3]);
 	        menadzer.setKorisnickoIme(m[4]);
 	        menadzer.setLozinka(m[5]);
+	        
 	        menadzer.setPol(Pol.valueOf(m[6]));
 	        menadzer.setGodineStaza(Integer.parseInt(m[7]));
 	        menadzer.setBazaPlate(Double.parseDouble(m[8]));
 	        menadzer.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(m[9]));
 		});
 		
-		return convertedData;
+		return data;
+	}
+
+
+	@Override
+	protected ArrayList<String[]> convertDataToString(Data<String, Menadzer> data) {
+		ArrayList<String[]> convertedData = new ArrayList<>();
 		
+		data.list().forEach( (menadzer) -> {
+			String[] m = new String[10];
+			convertedData.add(m);
+			
+			m[0] = menadzer.getIme();
+			m[1] = menadzer.getPrezime();
+			m[2] = menadzer.getBrojTelefona();
+			m[3] = menadzer.getAdresa();
+		    m[4] = menadzer.getKorisnickoIme();
+		    m[5] = menadzer.getLozinka();
+		    
+		    m[6] = menadzer.getPol().name();		    
+		    m[7] = Integer.toString( menadzer.getGodineStaza() );
+		    m[8] = Double.toString( menadzer.getBazaPlate() );
+		    m[9] = menadzer.getNivoStrucneSpreme().name();
+		});
+		
+		return convertedData;
 	}
 
 	

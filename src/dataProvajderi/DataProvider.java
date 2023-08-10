@@ -40,7 +40,9 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	private Function<T, String> idFunction;
 	
 	private String filePath;
-	private final String csvDelimiter = ",";
+	public static final String CSV_DELIMITER = ",";
+	public final static String CSV_INNER_DELIMITER = "\t";
+	public static final String ID_DELIMITER = "_";
 	
 	{
 		setData(defaultData());
@@ -53,11 +55,11 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		setFilePath(filePath);
 	}
 	
-	private Data<I, T> getData(){
+	protected Data<I, T> getData(){
 		return this.data;
 	}
 	
-	private void setData(Data<I, T> newData) {
+	protected void setData(Data<I, T> newData) {
 		this.data = newData;
 	}
 		
@@ -97,9 +99,6 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		this.filePath = newFilePath;
 	}
 	
-	public String getCsvDelimiter(){
-		return this.csvDelimiter;
-	}
 		
 	/**Concrete class should override this method if it wants to change the default way entites are stored.
 	 * If it does so, it should make sure that the other <IsProvider> methods will work with it.
@@ -357,14 +356,14 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	
 	/***/
 	public void loadData() throws IOException{
-		ArrayList<String[]> lista = DataProvider.loadFromCsv(getFilePath(), getCsvDelimiter());
+		ArrayList<String[]> lista = DataProvider.loadFromCsv(getFilePath(), CSV_DELIMITER);
 		setData( convertStringToData(lista) );
 	};
 	
 	/***/
 	public void saveData() throws IOException{
 		ArrayList<String[]> lista = convertDataToString(getData());
-		DataProvider.writeToCsv(lista, getFilePath(), getCsvDelimiter());
+		DataProvider.writeToCsv(lista, getFilePath(), CSV_DELIMITER);
 	}
 	
 	/***/
@@ -383,6 +382,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		while(entityStrings.hasNext()) {
 			lista.add(entityStrings.next());
 		}
+		
 		DataProvider.writeToCsv(lista, path, delimiter);
 	}
 	
