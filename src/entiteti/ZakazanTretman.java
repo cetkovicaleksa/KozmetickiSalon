@@ -5,11 +5,12 @@ import java.time.LocalTime;
 
 public class ZakazanTretman implements Entitet {
 	
-	private KozmetickiTretman.TipTretmana tipTretmana; //no no TODO: this can't be like this because it is not supposed to change when tiptretmana changes price
+	private KozmetickiTretman.TipTretmana tipTretmana;
 	private Kozmeticar kozmeticar;
     private Klijent klijent;
-    private double cijena;
     
+    private float cijena;
+	private int trajanje;
     private LocalDate datum;
     private LocalTime vrijeme;
     
@@ -18,13 +19,22 @@ public class ZakazanTretman implements Entitet {
     public ZakazanTretman() {}
     
     public ZakazanTretman(
+			KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Klijent klijent,
+			LocalDate datum, LocalTime vrijeme
+		 ) {
+    	this(tipTretmana, kozmeticar, klijent, datum, vrijeme, StatusTretmana.ZAKAZAN);
+    }
+    
+    public ZakazanTretman(
     						KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Klijent klijent,
-    						double cijena, LocalDate datum, LocalTime vrijeme, StatusTretmana status
-    					 ) {
+    						LocalDate datum, LocalTime vrijeme, StatusTretmana status
+    					 ) {    	
     	setTipTretmana(tipTretmana);
+    	setCijena(tipTretmana.getCijena());
+    	setTrajanje(tipTretmana.getTrajanje());
+    	
     	setKozmeticar(kozmeticar);
     	setKlijent(klijent);
-    	setCijena(cijena);
     	setDatum(datum);
     	setVrijeme(vrijeme);
     	setStatus(status);
@@ -58,8 +68,16 @@ public class ZakazanTretman implements Entitet {
 		return cijena;
 	}
 
-	public void setCijena(double cijena) {
+	public void setCijena(float cijena) {
 		this.cijena = cijena;
+	}
+	
+	public int getTrajanje() {
+		return trajanje;
+	}
+	
+	public void setTrajanje(int trajanje) {
+		this.trajanje = trajanje;
 	}
 
 	public LocalDate getDatum() {
@@ -86,6 +104,23 @@ public class ZakazanTretman implements Entitet {
 		this.status = status;
 	}
 	
+	
+	public float getCijena(boolean _getOld) {
+		return getTipTretmana().getCijena();
+	}
+	
+	public int getTrajanje(boolean _getOld) {
+		return getTipTretmana().getTrajanje();
+	}
+	
+	
+	public String getNaziv() {
+		return getTipTretmana().getNaziv();
+	}
+	
+	public KozmetickiTretman getTretman() {
+		return getTipTretmana().getTretman();
+	}
 	
 
 }

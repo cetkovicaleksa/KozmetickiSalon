@@ -38,7 +38,7 @@ public class KozmetickiTretman implements Entitet {
 		
 		private String naziv;
 		private float cijena;
-		private int trajanje;
+		private int trajanje; //minutes
 		private KozmetickiTretman tretman;
 		
 		public TipTretmana() {}
@@ -76,4 +76,5 @@ public class KozmetickiTretman implements Entitet {
 		}
 	}
 
+	
 }

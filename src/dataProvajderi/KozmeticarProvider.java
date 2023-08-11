@@ -2,7 +2,6 @@ package dataProvajderi;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.function.Function;
 
 import entiteti.Kozmeticar;
@@ -15,7 +14,7 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 	
 	private String msg = "Hmm vidi kako rjesiti ovo sa komunikacijom providera!!!!";
 	
-	private final Kozmeticar deleted = new Kozmeticar() {
+	private static final Kozmeticar DELETED = new Kozmeticar() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
@@ -43,9 +42,9 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 	};
 
 	@Override
-	public Kozmeticar getDeletedInstance() { return deleted; }
+	public Kozmeticar getDeletedInstance() { return DELETED; }
 	
-	public void loaddData(DefaultDict<String, KozmetickiTretman> tretmaniIds) throws IOException {
+	public void loadData(DefaultDict<String, KozmetickiTretman> tretmaniIds) throws IOException {
 		ArrayList<String[]> loadedData = DataProvider.loadFromCsv(super.getFilePath(), DataProvider.CSV_DELIMITER);
 		ArrayList<Kozmeticar> initializedData = new ArrayList<>();
 		KozmetickiTretman deleted = tretmaniIds.getDefaultValue();
@@ -88,23 +87,12 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		
 	}
 	
-	public void saveeData(Function<KozmetickiTretman, String> getTretmanId) throws IOException {
-		
-	}
-
-	
-	@Override
-	protected ArrayList<String[]> aa(ArrayList<Kozmeticar> data) {  
-		//doesn't take care of an accidental deleted treatment appereance
-		//moraju se prvo ucitati kozmeticki tretmani ili koristiti saveData sa parametrima
-		//u suprotnom ce svaki kozmeticar biti sacuvan sa praznom listom tretmana
-		
+	public void saveData(Function<KozmetickiTretman, String> getTretmanId) throws IOException {
+		Data<String, Kozmeticar> data = super.getData();
 		ArrayList<String[]> convertedData = new ArrayList<>();
-		
-		OutdatedProvider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
 		StringBuilder sb = new StringBuilder();
 		
-		data.forEach( (kozmeticar) -> {
+		data.list().forEach(kozmeticar -> {
 			String[] k = new String[11];
 			convertedData.add(k);
 			
@@ -121,124 +109,18 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		    k[9] = kozmeticar.getNivoStrucneSpreme().name();
 		    
 		    for(KozmetickiTretman kt: kozmeticar.getTretmani()) {      // ali getId uvijek vrati id napravi da vrati instancu ili nesto jedinstveno za deleted
-		    	sb.append( tretmaniProvider.getId(kt) ).append("|");  //dodaj if tretmaniProvider.getId(kt) == deleted da ne dodaje ili tako nesto
+		    	sb.append( getTretmanId.apply(kt) ).append("|");  //dodaj if tretmaniProvider.getId(kt) == deleted da ne dodaje ili tako nesto
 		    }
 		    
 		    k[10] = sb.toString();
 		    sb.setLength(0);
 		});
 		
-		return convertedData;
-		
+		DataProvider.writeToCsv(convertedData, super.getFilePath(), DataProvider.CSV_DELIMITER);
 	}
 
-	@Override
-	protected ArrayList<Kozmeticar> convertStringToData(ArrayList<String[]> data) { 
-		//moraju se prvo ucitati kozmeticki tretmani ili koristiti loadData sa parametrima
-		//u suprotnom ce svaki kozmeticar biti instanciran sa praznom listom tretmana
-		
-		ArrayList<Kozmeticar> convertedData = new ArrayList<>();
-		
-		OutdatedProvider<KozmetickiTretman> tretmaniProvider = super.getMainProvider().getKozmetickiTretmanProvider();
-		DefaultDict<String, KozmetickiTretman> tretmaniIds = tretmaniProvider.getIds();
-		KozmetickiTretman deleted = tretmaniProvider.getDeletedInstance();
-		
-		data.forEach( (k) -> {
-			Kozmeticar kozmeticar = new Kozmeticar();
-			convertedData.add(kozmeticar);
-			
-			kozmeticar.setIme(k[0]);
-	        kozmeticar.setPrezime(k[1]);
-	        kozmeticar.setBrojTelefona(k[2]);
-	        kozmeticar.setAdresa(k[3]);
-	        kozmeticar.setKorisnickoIme(k[4]);
-	        kozmeticar.setLozinka(k[5]);
-	        kozmeticar.setPol(Pol.valueOf(k[6]));
-	        kozmeticar.setGodineStaza(Integer.parseInt(k[7]));
-	        kozmeticar.setBazaPlate(Double.parseDouble(k[8]));
-	        kozmeticar.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(k[9]));		
-	        
-	        ArrayList<KozmetickiTretman> tretmani = new ArrayList<>();
-	        kozmeticar.setTretmani(tretmani);
-	        
-	        if(k[10].isEmpty()) {
-	        	return;
-	        }
-	        
-	        String[] tretmaniStr = k[10].split("\\|");
-	        
-	        for(String id : tretmaniStr) {
-	        	KozmetickiTretman tretman = tretmaniIds.get(id);
-	        	
-	        	if(tretman != deleted) {
-	        		tretmani.add(tretman);
-	        	}
-	        }
-			
-		});
-		
-		return convertedData;
-			
-	}
 	
-	/***/
-	public void loadData(DefaultDict<String, KozmetickiTretman> tretmaniDict) throws IOException {
-		ProviderRegistry providerBackup = super.getMainProvider();
-		
-		super.setMainProvider(new ProviderRegistry() {
-			@Override
-			public KozmetickiTretmanProvider getKozmetickiTretmanProvider() {
-				return new KozmetickiTretmanProvider() {
-					@Override
-					public DefaultDict<String, KozmetickiTretman> getIds() {
-						return tretmaniDict;
-					}
-					
-					@Override
-					public KozmetickiTretman getDeletedInstance() {
-						return tretmaniDict.get("");  // think of something better
-					}
-				};
-			}
-			
-		});
-		
-		this.loadData();
-		super.setMainProvider(providerBackup);
-	}
-	
-	/***/
-	public void saveData(DefaultDict<String, KozmetickiTretman> tretmaniDict) throws IOException{
-		ProviderRegistry providerBackup = super.getMainProvider();
-		
-		super.setMainProvider(new ProviderRegistry() {
-			
-			@Override
-			public KozmetickiTretmanProvider getKozmetickiTretmanProvider() {  //TODO: finish
-				return new KozmetickiTretmanProvider() {
-					@Override
-					public String getId(KozmetickiTretman kt) {
-						for(Map.Entry<String, KozmetickiTretman> entry : tretmaniDict/*get the key/val pairs*/) {
-							
-							if(entry.getValue() == kt) {
-								return entry.getKey();
-							}
-							
-						}
-						
-						return null; //:(
-					}
-					
-				};
-			}
-			
-		});
-		
-		this.saveData();
-		super.setMainProvider(providerBackup);
-	}
 	
 
-	
 
 }

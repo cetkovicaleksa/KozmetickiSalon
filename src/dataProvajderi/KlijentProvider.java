@@ -7,7 +7,7 @@ import entiteti.Pol;
 
 public class KlijentProvider extends DataProvider<Klijent, String> {
 	
-	private final Klijent deleted = new Klijent() {  //could use reflection to make this nicer
+	private static final Klijent DELETED = new Klijent() {
 		@Override
 		public void setHasLoyaltyCard(boolean hasLoyaltyCard) {}
 		@Override
@@ -28,7 +28,7 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 	
 	
 	@Override
-	public Klijent getDeletedInstance() { return deleted; }
+	public Klijent getDeletedInstance() { return DELETED; }
 
 
 	@Override

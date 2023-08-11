@@ -8,7 +8,7 @@ import entiteti.Recepcioner;
 
 public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 	
-	private final Recepcioner deleted = new Recepcioner() {
+	private static final Recepcioner DELETED = new Recepcioner() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
@@ -34,7 +34,7 @@ public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 	};
 
 	@Override
-	public Recepcioner getDeletedInstance() { return this.deleted; }
+	public Recepcioner getDeletedInstance() { return DELETED; }
 
 
 	@Override

@@ -288,8 +288,17 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	
 	
 	@Override
-	public String getId(T entitet) {
-		return getIdFunction().apply(entitet); 
+	public String getId(T entitet) {  //TODO: problem when entity is not in the collection??!! add custom id for deleted that will be the same for all entities
+		//return getIdFunction().apply(entitet);
+		
+		Iterator<T> iterator = get();
+		while(iterator.hasNext()) {
+			if(iterator.next() == entitet) {
+				return getIdFunction().apply(entitet);
+			}
+		}
+		
+		return "THE RESERVED ID FOR DELETED INSTANCE?????";
 	}
 	
 	

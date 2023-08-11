@@ -24,6 +24,10 @@ public abstract class XDataProvider<T extends Entitet, I> extends DataProvider<T
 		super.setData(newData);
 	}
 	
+	protected Data<I, T> getData() {
+		return super.getData();
+	}
+	
 	public String getFilePath() {
 		return super.getFilePath();
 	}

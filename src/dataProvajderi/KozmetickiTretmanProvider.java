@@ -6,7 +6,7 @@ import entiteti.KozmetickiTretman;
 
 public class KozmetickiTretmanProvider extends OutdatedProvider<KozmetickiTretman>{
 	
-	private final KozmetickiTretman deleted = new KozmetickiTretman() {
+	private static final KozmetickiTretman DELETED = new KozmetickiTretman() {
 		@Override
 		public void setNaziv(String naziv) {}
 		@Override
@@ -17,7 +17,7 @@ public class KozmetickiTretmanProvider extends OutdatedProvider<KozmetickiTretma
 	
 
 	@Override
-	public KozmetickiTretman getDeletedInstance() { return this.deleted; }
+	public KozmetickiTretman getDeletedInstance() { return DELETED; }
 
 	@Override
 	protected ArrayList<String[]> convertDataToString(ArrayList<KozmetickiTretman> data) {

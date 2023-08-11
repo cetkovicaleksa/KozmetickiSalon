@@ -8,7 +8,7 @@ import entiteti.Pol;
 
 public class MenadzerProvider extends DataProvider<Menadzer, String> {
 	
-	private final Menadzer deleted = new Menadzer() {
+	private static final Menadzer DELETED = new Menadzer() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
@@ -35,7 +35,7 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 
 
 	@Override
-	protected Menadzer getDeletedInstance() { return deleted; }
+	protected Menadzer getDeletedInstance() { return DELETED; }
 
 
 	@Override
