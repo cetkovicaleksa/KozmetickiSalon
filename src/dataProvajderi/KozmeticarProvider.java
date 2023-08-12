@@ -20,6 +20,8 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		@Override
 		public void setBazaPlate(double bazaPlate) {}
 		@Override
+		public void setBonus(boolean bonus) {}
+		@Override
 		public void setNivoStrucneSpreme(NivoStrucneSpreme nivoStrucneSpreme) {}
 		@Override
 		public void setIme(String ime) {}
@@ -64,16 +66,17 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 	        kozmeticar.setPol(Pol.valueOf(k[6]));
 	        kozmeticar.setGodineStaza(Integer.parseInt(k[7]));
 	        kozmeticar.setBazaPlate(Double.parseDouble(k[8]));
-	        kozmeticar.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(k[9]));	
+	        kozmeticar.setBonus(Boolean.parseBoolean(k[9]));
+	        kozmeticar.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(k[10]));	
 	        
 	        ArrayList<KozmetickiTretman> tretmani = new ArrayList<>();
 	        kozmeticar.setTretmani(tretmani);
 	        
-	        if(k[10].isEmpty()) {
+	        if(k[11].isEmpty()) {
 	        	return;
 	        }
 	        
-	        String[] tretmaniStr = k[10].split(DataProvider.CSV_INNER_DELIMITER);
+	        String[] tretmaniStr = k[11].split(DataProvider.CSV_INNER_DELIMITER);
 	        
 	        for(String id : tretmaniStr) {
 	        	KozmetickiTretman tretman = tretmaniIds.get(id);
@@ -92,7 +95,7 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		StringBuilder sb = new StringBuilder();
 		
 		super.getData().list().forEach(kozmeticar -> {
-			String[] k = new String[11];
+			String[] k = new String[12];
 			convertedData.add(k);
 			
 			k[0] = kozmeticar.getIme();
@@ -103,9 +106,10 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		    k[5] = kozmeticar.getLozinka();
 		    k[6] = kozmeticar.getPol().name();
 		    
-		    k[7] = Integer.toString( kozmeticar.getGodineStaza() );
-		    k[8] = Double.toString( kozmeticar.getBazaPlate() );
-		    k[9] = kozmeticar.getNivoStrucneSpreme().name();
+		    k[7] = Integer.toString(kozmeticar.getGodineStaza());
+		    k[8] = Double.toString(kozmeticar.getBazaPlate());
+		    k[9] = Boolean.toString(kozmeticar.hasBonus());
+		    k[10] = kozmeticar.getNivoStrucneSpreme().name();
 		    
 		    ArrayList<KozmetickiTretman> tretmani = kozmeticar.getTretmani();
 		    int size = tretmani.size();
@@ -121,7 +125,7 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		    	}
 		    }
 		    
-		    k[10] = sb.toString(); //TODO: check if empty sb returns an empty string, and recheck this method
+		    k[11] = sb.toString(); //TODO: check if empty sb returns an empty string, and recheck this method
 		    sb.setLength(0);
 		});
 		

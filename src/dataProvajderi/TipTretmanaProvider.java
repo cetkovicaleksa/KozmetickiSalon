@@ -50,13 +50,12 @@ public class TipTretmanaProvider extends XDataProvider<KozmetickiTretman.TipTret
 			convertedData.add(tt);
 			
 			tt[0] = tipTretmana.getNaziv();
-			tt[1] = Float.toString(tipTretmana.getCijena());
+			tt[1] = Double.toString(tipTretmana.getCijena());
 			tt[2] = Integer.toString(tipTretmana.getTrajanje());
 			tt[3] = getKozmetickiTretmanId.apply(tipTretmana.getTretman()); //TODO: see what to do when it is deleted?
 		});
 		
 		DataProvider.writeToCsv(convertedData, super.getFilePath(), DataProvider.CSV_DELIMITER);
-		
 	}
 
 }

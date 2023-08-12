@@ -37,13 +37,13 @@ public class KozmetickiTretman implements Entitet {
 	public static class TipTretmana implements Entitet{
 		
 		private String naziv;
-		private float cijena;
+		private double cijena;
 		private int trajanje; //minutes
 		private KozmetickiTretman tretman;
 		
 		public TipTretmana() {}
 		
-		public TipTretmana(String naziv, float cijena, int trajanje, KozmetickiTretman tretman) {
+		public TipTretmana(String naziv, double cijena, int trajanje, KozmetickiTretman tretman) {
 			setNaziv(naziv);
 			setCijena(cijena);
 			setTrajanje(trajanje);
@@ -56,10 +56,10 @@ public class KozmetickiTretman implements Entitet {
 		public void setNaziv(String naziv) {
 			this.naziv = naziv;
 		}
-		public float getCijena() {
+		public double getCijena() {
 			return cijena;
 		}
-		public void setCijena(float cijena) {
+		public void setCijena(double cijena) {
 			this.cijena = cijena;
 		}
 		public int getTrajanje() {

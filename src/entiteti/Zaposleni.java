@@ -4,6 +4,7 @@ public abstract class Zaposleni extends Korisnik implements Entitet {
 	
 	private int godineStaza;
 	private double bazaPlate;
+	private boolean bonus;
 	private NivoStrucneSpreme nivoStrucneSpreme;
 	
 	public Zaposleni() {}
@@ -40,6 +41,14 @@ public abstract class Zaposleni extends Korisnik implements Entitet {
 
 	public void setBazaPlate(double bazaPlate) {
 		this.bazaPlate = bazaPlate;
+	}
+	
+	public boolean hasBonus() {
+		return bonus;
+	}
+	
+	public void setBonus(boolean bonus) {
+		this.bonus = bonus;
 	}
 
 	public NivoStrucneSpreme getNivoStrucneSpreme() {

@@ -13,7 +13,7 @@ public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, S
 		public void setOpis(String opis) {}
 		@Override
 		public TipTretmana newTipTretmana(String naziv, float cijena, int trajanje) { //TODO
-			throw new UnsupportedOperationException("Can't create new tip tretmana for the deleted instance.");
+			throw new UnsupportedOperationException("Can't create new TipTretmana for the deleted instance.");
 		}
 	};
 	
@@ -25,7 +25,7 @@ public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, S
 		@Override
 		public void setNaziv(String naziv) {}
 		@Override
-		public void setCijena(float cijena) {}
+		public void setCijena(double cijena) {}
 		@Override
 		public void setTrajanje(int trajanje) {}
 		@Override

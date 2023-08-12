@@ -14,6 +14,8 @@ public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 		@Override
 		public void setBazaPlate(double bazaPlate) {}
 		@Override
+		public void setBonus(boolean bonus) {}
+		@Override
 		public void setNivoStrucneSpreme(NivoStrucneSpreme nivoStrucneSpreme) {}
 		@Override
 		public void setIme(String ime) {}
@@ -56,7 +58,8 @@ public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 	        recepcioner.setPol(Pol.valueOf(r[6]));
 	        recepcioner.setGodineStaza(Integer.parseInt(r[7]));
 	        recepcioner.setBazaPlate(Double.parseDouble(r[8]));
-	        recepcioner.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(r[9]));
+	        recepcioner.setBonus(Boolean.parseBoolean(r[9]));
+	        recepcioner.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(r[10]));
 	    });
 		
 		return data;
@@ -68,7 +71,7 @@ public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		
 		data.list().forEach((recepcioner) -> {
-	        String[] r = new String[10];
+	        String[] r = new String[11];
 	        convertedData.add(r);
 	        
 	        r[0] = recepcioner.getIme();
@@ -81,7 +84,8 @@ public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 	        r[6] = recepcioner.getPol().name();
 	        r[7] = Integer.toString(recepcioner.getGodineStaza());
 	        r[8] = Double.toString(recepcioner.getBazaPlate());
-	        r[9] = recepcioner.getNivoStrucneSpreme().name();
+	        r[9] = Boolean.toString(recepcioner.hasBonus());
+	        r[10] = recepcioner.getNivoStrucneSpreme().name();
 	    });
 		
 		return convertedData;

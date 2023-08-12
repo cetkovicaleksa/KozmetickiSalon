@@ -14,6 +14,8 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 		@Override
 		public void setBazaPlate(double bazaPlate) {}
 		@Override
+		public void setBonus(boolean bonus) {}
+		@Override
 		public void setNivoStrucneSpreme(NivoStrucneSpreme nivoStrucneSpreme) {}
 		@Override
 		public void setIme(String ime) {}
@@ -57,7 +59,8 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 	        menadzer.setPol(Pol.valueOf(m[6]));
 	        menadzer.setGodineStaza(Integer.parseInt(m[7]));
 	        menadzer.setBazaPlate(Double.parseDouble(m[8]));
-	        menadzer.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(m[9]));
+	        menadzer.setBonus(Boolean.parseBoolean(m[9]));
+	        menadzer.setNivoStrucneSpreme(NivoStrucneSpreme.valueOf(m[10]));
 		});
 		
 		return data;
@@ -69,7 +72,7 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		
 		data.list().forEach( (menadzer) -> {
-			String[] m = new String[10];
+			String[] m = new String[11];
 			convertedData.add(m);
 			
 			m[0] = menadzer.getIme();
@@ -82,7 +85,8 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 		    m[6] = menadzer.getPol().name();		    
 		    m[7] = Integer.toString( menadzer.getGodineStaza() );
 		    m[8] = Double.toString( menadzer.getBazaPlate() );
-		    m[9] = menadzer.getNivoStrucneSpreme().name();
+		    m[9] = Boolean.toString(menadzer.hasBonus());
+		    m[10] = menadzer.getNivoStrucneSpreme().name();
 		});
 		
 		return convertedData;

@@ -7,9 +7,9 @@ public class ZakazanTretman implements Entitet {
 	
 	private KozmetickiTretman.TipTretmana tipTretmana;
 	private Kozmeticar kozmeticar;
-    private Klijent klijent;
+    private Korisnik klijent;
     
-    private float cijena;
+    private double cijena;
 	private int trajanje;
     private LocalDate datum;
     private LocalTime vrijeme;
@@ -19,14 +19,14 @@ public class ZakazanTretman implements Entitet {
     public ZakazanTretman() {}
     
     public ZakazanTretman(
-			KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Klijent klijent,
+			KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent,
 			LocalDate datum, LocalTime vrijeme
 		 ) {
     	this(tipTretmana, kozmeticar, klijent, datum, vrijeme, StatusTretmana.ZAKAZAN);
     }
     
     public ZakazanTretman(
-    						KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Klijent klijent,
+    						KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent,
     						LocalDate datum, LocalTime vrijeme, StatusTretmana status
     					 ) {    	
     	setTipTretmana(tipTretmana);
@@ -56,11 +56,11 @@ public class ZakazanTretman implements Entitet {
 		this.kozmeticar = kozmeticar;
 	}
 
-	public Klijent getKlijent() {
+	public Korisnik getKlijent() {
 		return klijent;
 	}
 
-	public void setKlijent(Klijent klijent) {
+	public void setKlijent(Korisnik klijent) {
 		this.klijent = klijent;
 	}
 
@@ -68,7 +68,7 @@ public class ZakazanTretman implements Entitet {
 		return cijena;
 	}
 
-	public void setCijena(float cijena) {
+	public void setCijena(double cijena) {
 		this.cijena = cijena;
 	}
 	
@@ -105,7 +105,7 @@ public class ZakazanTretman implements Entitet {
 	}
 	
 	
-	public float getCijena(boolean _getOld) {
+	public double getCijena(boolean _getOld) {
 		return getTipTretmana().getCijena();
 	}
 	
