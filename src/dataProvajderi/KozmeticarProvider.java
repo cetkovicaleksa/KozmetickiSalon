@@ -12,9 +12,9 @@ import helpers.DefaultDict;
 
 public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 	
-	private String msg = "Hmm vidi kako rjesiti ovo sa komunikacijom providera!!!!";
+	//private String msg = "Hmm vidi kako rjesiti ovo sa komunikacijom providera!!!!";
 	
-	private static final Kozmeticar DELETED = new Kozmeticar() {
+	public static final Kozmeticar DELETED = new Kozmeticar() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
@@ -88,11 +88,10 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 	}
 	
 	public void saveData(Function<KozmetickiTretman, String> getTretmanId) throws IOException {
-		Data<String, Kozmeticar> data = super.getData();
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
 		
-		data.list().forEach(kozmeticar -> {
+		super.getData().list().forEach(kozmeticar -> {
 			String[] k = new String[11];
 			convertedData.add(k);
 			
@@ -108,11 +107,21 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		    k[8] = Double.toString( kozmeticar.getBazaPlate() );
 		    k[9] = kozmeticar.getNivoStrucneSpreme().name();
 		    
-		    for(KozmetickiTretman kt: kozmeticar.getTretmani()) {      // ali getId uvijek vrati id napravi da vrati instancu ili nesto jedinstveno za deleted
-		    	sb.append( getTretmanId.apply(kt) ).append("|");  //dodaj if tretmaniProvider.getId(kt) == deleted da ne dodaje ili tako nesto
+		    ArrayList<KozmetickiTretman> tretmani = kozmeticar.getTretmani();
+		    int size = tretmani.size();
+		    
+		    for(int i = 0; i < size; i++) {  
+		    	String id = getTretmanId.apply(tretmani.get(i));
+		    	
+		    	if(id != DataProvider.DELETED_ID) {
+		    		sb.append(id);
+		    		if(i < size - 1){ //if we are at the last treatment we don't add the delimiter
+		    			sb.append(DataProvider.CSV_INNER_DELIMITER);
+		    		}
+		    	}
 		    }
 		    
-		    k[10] = sb.toString();
+		    k[10] = sb.toString(); //TODO: check if empty sb returns an empty string, and recheck this method
 		    sb.setLength(0);
 		});
 		

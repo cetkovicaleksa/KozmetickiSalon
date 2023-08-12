@@ -40,6 +40,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	private Function<T, String> idFunction;
 	
 	private String filePath;
+	public final static String DELETED_ID = "";
 	public static final String CSV_DELIMITER = ",";
 	public final static String CSV_INNER_DELIMITER = "\t";
 	public static final String ID_DELIMITER = "_";
@@ -298,7 +299,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 			}
 		}
 		
-		return "THE RESERVED ID FOR DELETED INSTANCE?????";
+		return DELETED_ID;
 	}
 	
 	

@@ -4,52 +4,68 @@ import java.util.ArrayList;
 
 import entiteti.KozmetickiTretman;
 
-public class KozmetickiTretmanProvider extends OutdatedProvider<KozmetickiTretman>{
+public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, String>{
 	
-	private static final KozmetickiTretman DELETED = new KozmetickiTretman() {
+	public static final KozmetickiTretman DELETED = new KozmetickiTretman() {
 		@Override
 		public void setNaziv(String naziv) {}
 		@Override
 		public void setOpis(String opis) {}
 		@Override
-		public TipTretmana newTipTretmana(String naziv, float cijena, int trajanje) { return null; }
+		public TipTretmana newTipTretmana(String naziv, float cijena, int trajanje) { //TODO
+			throw new UnsupportedOperationException("Can't create new tip tretmana for the deleted instance.");
+		}
+	};
+	
+	public static final KozmetickiTretman.TipTretmana DELETED_TIP_TRETMANA = new KozmetickiTretman.TipTretmana() {
+		{
+			super.setTretman(DELETED); //idk if it needs the super keyword?
+		}
+		
+		@Override
+		public void setNaziv(String naziv) {}
+		@Override
+		public void setCijena(float cijena) {}
+		@Override
+		public void setTrajanje(int trajanje) {}
+		@Override
+		public void setTretman(KozmetickiTretman tretman) {}
 	};
 	
 
 	@Override
 	public KozmetickiTretman getDeletedInstance() { return DELETED; }
 
-	@Override
-	protected ArrayList<String[]> convertDataToString(ArrayList<KozmetickiTretman> data) {
-		
-		ArrayList<String[]> convertedData = new ArrayList<>();		
-		
-		data.forEach( tretman -> {
-			String[] t = new String[2];
-			convertedData.add(t);
-			
-			t[0] = tretman.getNaziv();
-			t[1] = tretman.getOpis();
-		});
-		
-		return convertedData;
-		
-	}
 
 	@Override
-	protected ArrayList<KozmetickiTretman> convertStringToData(ArrayList<String[]> data) {
+	protected ArrayList<String[]> convertDataToString(Data<String, KozmetickiTretman> data) {
+		ArrayList<String[]> convertedData = new ArrayList<>();
 		
-		ArrayList<KozmetickiTretman> convertedData = new ArrayList<>();
-		
-		data.forEach( t -> {
-			KozmetickiTretman tretman = new KozmetickiTretman();
-			convertedData.add(tretman);
+		data.list().forEach(kozmetickiTretman -> {
+			String[] kt = new String[2];
+			convertedData.add(kt);
 			
-			tretman.setNaziv(t[0]);
-			tretman.setOpis(t[1]);
+			kt[0] = kozmetickiTretman.getNaziv();
+			kt[1] = kozmetickiTretman.getOpis();
 		});
 		
 		return convertedData;
+	}
+
+
+	@Override
+	protected Data<String, KozmetickiTretman> convertStringToData(ArrayList<String[]> data) {
+		ArrayList<KozmetickiTretman> convertedData = new ArrayList<>();
+		
+		data.forEach( kt -> {
+			KozmetickiTretman kozmetickiTretman = new KozmetickiTretman();
+			convertedData.add(kozmetickiTretman);
+			
+			kozmetickiTretman.setNaziv(kt[0]);
+			kozmetickiTretman.setOpis(kt[1]);
+		});
+		
+		return new DataProvider.Data<>(convertedData);
 		
 	}
 
