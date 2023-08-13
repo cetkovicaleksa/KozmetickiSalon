@@ -17,7 +17,7 @@ public interface ICRUDManager<T extends Entitet> {
 	
 	public Iterator<T> readAll();
 	
-	public boolean update(Query<T> selector, Updater<T> updater);
+	public boolean update(Query<T> selector, Updater<T> updater) throws IdNotUniqueException;
 	
 	public boolean delete(Query<T> selector);
 	

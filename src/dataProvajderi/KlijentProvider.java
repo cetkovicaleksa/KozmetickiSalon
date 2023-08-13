@@ -11,6 +11,8 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 		@Override
 		public void setHasLoyaltyCard(boolean hasLoyaltyCard) {}
 		@Override
+		public void setUkupnoPotrosio(double ukupnoPotrosio) {}
+		@Override
 		public void setIme(String ime) {}
 		@Override
 		public void setPrezime(String prezime) {}
@@ -36,7 +38,7 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		
 		data.list().forEach( (klijent) -> {
-			String[] k = new String[8];
+			String[] k = new String[9];
 			convertedData.add(k);
 			
 			k[0] = klijent.getIme();
@@ -46,7 +48,8 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 		    k[4] = klijent.getKorisnickoIme();
 		    k[5] = klijent.getLozinka();
 		    k[6] = klijent.getPol().name();
-		    k[7] = Boolean.toString(klijent.getHasLoyaltyCard());
+		    k[7] = Double.toString(klijent.getUkupnoPotrosio());
+		    k[8] = Boolean.toString(klijent.getHasLoyaltyCard());
 		});
 		
 		return convertedData;
@@ -69,12 +72,13 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 		    klijent.setKorisnickoIme(k[4]);
 		    klijent.setLozinka(k[5]);
 		    klijent.setPol(Pol.valueOf(k[6]));
-		    klijent.setHasLoyaltyCard(Boolean.parseBoolean(k[7]));
+		    klijent.setUkupnoPotrosio(Double.parseDouble(k[7]));
+		    klijent.setHasLoyaltyCard(Boolean.parseBoolean(k[8]));
 		});
 		
 		return data;
 	}
-	
+		
 	
 	
 }

@@ -34,7 +34,7 @@ public class Updater<T> implements IsUpdater<T>{
 	public void update(T entity) throws NoPayloadDataException, IncompatibleUpdaterException {
 		try {
 			getUpdater().update(entity);
-		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+		}catch (IllegalArgumentException e){//(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
 			throw new IncompatibleUpdaterException("", e);
 		}
 	}	

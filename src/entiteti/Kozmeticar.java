@@ -11,9 +11,9 @@ public class Kozmeticar extends Zaposleni{
 	public Kozmeticar(
 			String ime, String prezime, String brojTelefona, String adresa,
 			String korisnickoIme, String lozinka, Pol pol, int godineStaza,
-			double bazaPlate, NivoStrucneSpreme nivoStrucneSpreme, ArrayList<KozmetickiTretman> tretmani
+			double bazaPlate, boolean bonus, NivoStrucneSpreme nivoStrucneSpreme, ArrayList<KozmetickiTretman> tretmani
 		) {
-		super(ime, prezime, brojTelefona, adresa, korisnickoIme, lozinka, pol, godineStaza, bazaPlate, nivoStrucneSpreme);
+		super(ime, prezime, brojTelefona, adresa, korisnickoIme, lozinka, pol, godineStaza, bazaPlate, bonus, nivoStrucneSpreme);
 		setTretmani(tretmani);		
 	}
 	

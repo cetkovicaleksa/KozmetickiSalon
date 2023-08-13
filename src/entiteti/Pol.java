@@ -2,6 +2,6 @@ package entiteti;
 
 public enum Pol {
 	
-	MUSKI, ZENSKI
+	MUSKI, ZENSKI, NIJE_NAVEDEN
 
 }

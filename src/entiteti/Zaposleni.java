@@ -7,21 +7,24 @@ public abstract class Zaposleni extends Korisnik implements Entitet {
 	private boolean bonus;
 	private NivoStrucneSpreme nivoStrucneSpreme;
 	
-	public Zaposleni() {}
+	public Zaposleni() {
+		setNivoStrucneSpreme(NivoStrucneSpreme.SKOLE_BEZ);
+	}
 	
 	public Zaposleni(
 						String ime, String prezime, String brojTelefona, String adresa,
 						String korisnickoIme, String lozinka, Pol pol, int godineStaza,
-						double bazaPlate, NivoStrucneSpreme nivoStrucneSpreme
+						double bazaPlate, boolean bonus, NivoStrucneSpreme nivoStrucneSpreme
 					) {
 		super(ime, prezime, brojTelefona, adresa, korisnickoIme, lozinka, pol);
 		setGodineStaza(godineStaza);
 		setBazaPlate(bazaPlate);
+		setBonus(bonus);
 		setNivoStrucneSpreme(nivoStrucneSpreme);	
 	}
 	
 	
-	public double izracunajBazuPlate() {
+	public double izracunajPlatu() {
 		return 800 + getNivoStrucneSpreme().getValue() * getGodineStaza(); //izracunati bazu koja ce se kombinovati sa bonusom ako zadovoljava uslove bonusa
 	}
 	

@@ -38,7 +38,7 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		@Override
 		public void setPol(Pol pol) {}
 		@Override
-		public double izracunajBazuPlate() {return 0;}
+		public double izracunajPlatu() {return 0;}
 		@Override
 		public void setTretmani(ArrayList<KozmetickiTretman> t) {}
 	};

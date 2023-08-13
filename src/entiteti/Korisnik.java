@@ -7,9 +7,12 @@ public abstract class Korisnik implements Entitet {
 	private Pol pol;
 	
 	
-	public Korisnik() {}
+	public Korisnik() {
+		setPol(Pol.NIJE_NAVEDEN);
+	}
 	
 	public Korisnik(String korisnickoIme, String lozinka) {
+		this();
 		setKorisnickoIme(korisnickoIme);
 		setLozinka(lozinka);
 	}

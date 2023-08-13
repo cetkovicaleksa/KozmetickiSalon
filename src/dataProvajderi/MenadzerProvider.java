@@ -32,7 +32,7 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 		@Override
 		public void setPol(Pol pol) {}
 		@Override
-		public double izracunajBazuPlate() {return 0;}
+		public double izracunajPlatu() {return 0;}
 	};
 
 

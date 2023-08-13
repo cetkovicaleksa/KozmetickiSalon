@@ -2,6 +2,7 @@ package dataProvajderi;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,8 +42,8 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	
 	private String filePath;
 	public final static String DELETED_ID = "";
-	public static final String CSV_DELIMITER = ",";
-	public final static String CSV_INNER_DELIMITER = "\t";
+	public static final String CSV_DELIMITER = "\t";
+	public final static String CSV_INNER_DELIMITER = ",";
 	public static final String ID_DELIMITER = "_";
 	
 	{
@@ -77,6 +78,10 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	 * @param newIdFunction new function
 	 * @throws IdNotUniqueException if the ids are not unique with the new function*/
 	public void setNewIdFunction(Function<T, String> newIdFunction) throws IdNotUniqueException {
+		if(newIdFunction.apply(getDeletedInstance()) == null) {
+			//hmmmmmmm TODO
+		}
+		
 		Iterator<T> iterator = get();
 		
 		while (iterator.hasNext()) {
@@ -141,7 +146,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	
 	
 	@Override
-	public boolean put(Query<T> selector, Updater<T> updater) {
+	public boolean put(Query<T> selector, Updater<T> updater) throws IdNotUniqueException{
 		if(!getData().isList()) {
 			throw new ProviderCompatibilityException("The default put method is only compatible with lists.");
 		}
@@ -269,7 +274,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	
 	
 	@Override
-	public boolean delete(Query<T> selektor) {
+	public boolean delete(Query<T> selector) {
 		if(!getData().isList()) {
 			throw new ProviderCompatibilityException("The default delete method is only compatible with lists.");
 		}
@@ -278,7 +283,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		boolean ret = false;
 		
 		while ( iterator.hasNext() ) {
-			if( selektor.test( iterator.next() ) ) {
+			if( selector.test( iterator.next() ) ) {
 				iterator.remove();
 				ret |= true;
 			}			
@@ -290,8 +295,6 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	
 	@Override
 	public String getId(T entitet) {  //TODO: problem when entity is not in the collection??!! add custom id for deleted that will be the same for all entities
-		//return getIdFunction().apply(entitet);
-		
 		Iterator<T> iterator = get();
 		while(iterator.hasNext()) {
 			if(iterator.next() == entitet) {
@@ -311,7 +314,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		while(iterator.hasNext()) {
 			T entitet = iterator.next();
 			
-			if(id.equals(idFunction.apply(entitet))) {
+			if(idFunction.apply(entitet).equals(id)) {
 				return entitet;
 			}
 		}
@@ -349,7 +352,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		boolean foundMatch = false;
 		
 		while(iterator.hasNext()) {			
-			if( !id.equals(idFunction.apply(iterator.next())) ) {
+			if( !idFunction.apply(iterator.next()).equals(id) ) {
 				continue;
 			}
 			
@@ -397,23 +400,33 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	}
 	
 	protected static void writeToCsv(List<String[]> entityStrings, String path, String delimiter) throws IOException {
-    	
-    	try ( BufferedWriter bw = new BufferedWriter(new FileWriter(path)) ) {
-            
+		File file = new File(path);
+		if(!file.exists()) {
+			try {
+				file.createNewFile();
+			}catch(IOException e) {   //maby change this
+				throw e;
+			}
+		}
+		    	
+    	try ( BufferedWriter bw = new BufferedWriter(new FileWriter(file)) ) {
+    
     		for ( String[] entityFields : entityStrings ) {
                 String line = String.join(delimiter, entityFields);
                 bw.write(line);
                 bw.newLine();
             }
-    		} catch (IOException e) { throw e; }
-    	    	
+    		} catch (IOException e) { throw e; }    	    	
     }
     
 	protected static ArrayList<String[]> loadFromCsv(String path, String delimiter) throws IOException {
+		File file = new File(path);
+		if(!file.exists()) {
+			throw new IOException("File doesn't exist! [ " + path + " ]");
+		}
        
     	ArrayList<String[]> data = new ArrayList<>();
-
-        try ( BufferedReader br = new BufferedReader(new FileReader(path)) ) {
+        try ( BufferedReader br = new BufferedReader(new FileReader(file)) ) {
             String line;
 
             while ( (line = br.readLine()) != null ) {
@@ -423,13 +436,12 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
         } catch (IOException e) { throw e; }
 
         return data;
-        
     }
 	//---
 	
 	public T copyEntity(T entity) {
 		//TODO: finish
-		return null;		
+		return entity;		
 	}
 	
 	
