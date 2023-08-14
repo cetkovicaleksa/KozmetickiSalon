@@ -6,7 +6,9 @@ public class Kozmeticar extends Zaposleni{
 	
 	ArrayList<KozmetickiTretman> tretmani;
 	
-	public Kozmeticar() {}
+	public Kozmeticar() {
+		setTretmani(new ArrayList<>());
+	}
 	
 	public Kozmeticar(
 			String ime, String prezime, String brojTelefona, String adresa,

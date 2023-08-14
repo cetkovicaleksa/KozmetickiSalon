@@ -340,7 +340,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	 * 
 	 * @return the instance
 	 * */
-	protected abstract T getDeletedInstance();
+	public abstract T getDeletedInstance();
 	
 	/**Checks if the given id is unique in the provider.
 	 * This means that there is at most one entity with the given id.

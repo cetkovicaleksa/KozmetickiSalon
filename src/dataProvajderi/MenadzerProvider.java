@@ -37,7 +37,7 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 
 
 	@Override
-	protected Menadzer getDeletedInstance() { return DELETED; }
+	public Menadzer getDeletedInstance() { return DELETED; }
 
 
 	@Override

@@ -1,93 +1,171 @@
 package crudMenadzeri;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.function.Function;
+import java.util.List;
 
 import dataProvajderi.DataProvider;
-import dataProvajderi.KlijentProvider;
-import dataProvajderi.RecepcionerProvider;
-import entiteti.Klijent;
+import dataProvajderi.IdNotUniqueException;
+import dataProvajderi.ZakazanTretmanProvider;
+import entiteti.Entitet;
+import entiteti.Korisnik;
+import entiteti.ZakazanTretman;
 import helpers.Query;
 import helpers.Updater;
 
-public abstract class Manager {
+public abstract class Manager<T extends Entitet> implements ICRUDManager<T> {
+	
+	private DataProvider<T, ?> mainProvider;
+	private ZakazanTretmanProvider zakazanTretmanProvider;
 	
 	
-	public static void test() {
-		Function<Klijent, String> f = k -> (k.getIme() == null) ? DataProvider.DELETED_ID : k.getIme();
-		
-		//KlijentProvider kp = new KlijentProvider(f, "");
-		kp.setNewIdFunction(f);
-		kp.setFilePath("resources/test.txt");
-		
-		try {
-			kp.loadData();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		Iterator<Klijent> iter = kp.get();
-		while (iter.hasNext()) {
-			System.out.println(iter.next().getIme());
-		}
-		System.out.println(kp.get(new Query<>(x -> true)).size());
+	public Manager() {}
+	
+	public Manager(DataProvider<T, ?> mainProvider, ZakazanTretmanProvider zakazanTretmanProvider) {
+		setMainProvider(mainProvider);
+		setZakazanTretmanProvider(zakazanTretmanProvider);
 	}
 	
-	public static void main(String[] args) {
-		test();
+	
+	protected void setMainProvider(DataProvider<T, ?> mainProvider) {
+		this.mainProvider = mainProvider;
+	}
+	
+	protected DataProvider<T, ?> getMainProvider(){
+		return mainProvider;
+	}
+	
+	protected void setZakazanTretmanProvider(ZakazanTretmanProvider zakazanTretmanProvider) {
+		this.zakazanTretmanProvider = zakazanTretmanProvider;
+	}
+	
+	protected ZakazanTretmanProvider getZakazanTretmanProvider() {
+		return zakazanTretmanProvider;
+	}
+	
+	
+	
+	@Override
+	public void create(T entitet) throws IdNotUniqueException {
+		getMainProvider().post(entitet);
+	}
+	
+	
+	@Override
+	public List<T> read(Query<T> selector) {
+		return getMainProvider().get(selector);
+	}
+	
+	
+	@Override
+	public Iterator<T> readAll() {
+		return getMainProvider().get();
+	}
+	
+	
+	@Override
+	public boolean update(Query<T> selector, Updater<T> updater) throws IdNotUniqueException {
+		return getMainProvider().put(selector, updater);
+	}
+	
+	
+	@Override
+	public boolean delete(Query<T> selector) {
+		return getMainProvider().delete(selector);
+	}
+	
+	
+	@Override
+	public void load() throws IOException {
+		getMainProvider().loadData();		
+	}
+	
+	
+	
+	/**A class that helps with removing clients from their zakazaniTretman-i when deleting them.
+	 * Should be made without parameter just using Korisnik but constructors won't work for some reason??*/
+	public class KlijentFromZTRemover<E extends Korisnik>{
+		private Iterator<E> klijentIterator;
+		private ZakazanTretmanProvider zakazanTretmanProvider;
+		private E trenutniKlijent, placeholderKlijent;
+		private int numRemoved = 0;
 		
-		Klijent aki = new Klijent();
-		aki.setIme("Aleksa");
-		Klijent ana = new Klijent();
-		ana.setIme("Ana");
-		Klijent m = new Klijent();
-		m.setIme("M");
-		Klijent t = new Klijent();
-		t.setIme("T");
+		private final Query<ZakazanTretman> Q = new Query<>(zt -> {
+			return zt.getKlijent() == trenutniKlijent;
+		});
 		
-		Function<Klijent, String> f = k -> (k.getIme() == null) ? DataProvider.DELETED_ID : k.getIme();
-		System.out.println(f.apply(aki));
-		KlijentProvider kp = new KlijentProvider();
-		kp.setFilePath("resources/test.txt");
-		kp.setNewIdFunction(f);
+		private final Updater<ZakazanTretman> U = new Updater<>(zt -> {
+			zt.setKlijent(placeholderKlijent);
+			numRemoved++;
+		});
 		
-		kp.post(aki);
-		//kp.post(new Klijent());
-		kp.post(ana);
-		kp.post(m);
-		System.out.println(kp.getId(ana));
-		Iterator<Klijent> iter = kp.get();
-		while(iter.hasNext()) {
-			System.out.println(iter.next().getIme());
+		public KlijentFromZTRemover() {}
+		
+		public KlijentFromZTRemover(ZakazanTretmanProvider zakazanTretmanProvider, E klijent, E placeholderKorisnik) {
+			this(zakazanTretmanProvider, Collections.singletonList(klijent).iterator(), placeholderKorisnik);
 		}
-		kp.post(t);
-		iter = kp.get();
-		//kp.post(t); iter is not usable if we change the data after it has been initialized: throws concurent exception
 		
-		while(iter.hasNext()) {
-			System.out.println(iter.next().getIme());
+		public KlijentFromZTRemover(ZakazanTretmanProvider zakazanTretmanProvider, List<E> klijentList, E placeholderKorisnik) {
+			this(zakazanTretmanProvider, klijentList.iterator(), placeholderKorisnik);
 		}
 		
-		System.out.println("____");
-		kp.put(new Query<>(k -> k == aki), new Updater<>());
-		iter = kp.get();
-		kp.put(new Query<>(k -> true | k == ana), new Updater<>(k -> k.setPrezime("Cetkovic")));
-		while(iter.hasNext()) {
-			System.out.println(iter.next().getPrezime());
+		public KlijentFromZTRemover(ZakazanTretmanProvider zakazanTretmanProvider, Iterator<E> klijentIterator, E placeholderKorisnik) {
+			setZakazanTretmanProvider(zakazanTretmanProvider);
+			setKlijentIterator(klijentIterator);
+			setPlaceholderKlijent(placeholderKlijent);
 		}
 		
-		try {
-			kp.saveData();
-		}catch (IOException e){
-			System.out.println("Uh, oh!");
-			
+
+		public Iterator<E> getKlijentIterator() {
+			return klijentIterator;
 		}
 
-				
+		public void setKlijentIterator(Iterator<E> klijentIterator) {
+			this.klijentIterator = klijentIterator;
+		}
+
+		public ZakazanTretmanProvider getZakazanTretmanProvider() {
+			return zakazanTretmanProvider;
+		}
+
+		public void setZakazanTretmanProvider(ZakazanTretmanProvider zakazanTretmanProvider) {
+			this.zakazanTretmanProvider = zakazanTretmanProvider;
+		}
+
+		public E getTrenutniKlijent() {
+			return trenutniKlijent;
+		}
+
+		public void setTrenutniKlijent(E trenutniKlijent) {
+			this.trenutniKlijent = trenutniKlijent;
+		}
+
+		public Korisnik getPlaceholderKlijent() {
+			return placeholderKlijent;
+		}
+
+		public void setPlaceholderKlijent(E placeholderKlijent) {
+			this.placeholderKlijent = placeholderKlijent;
+		}
 		
+		/**Returnes the number of ZakazanTretman that had their Korisnik klijent substituted for placeholderKlijent.*/
+		public int run() {
+			Iterator<E> iter = getKlijentIterator();
+			ZakazanTretmanProvider ztp = getZakazanTretmanProvider();
+			
+			while(iter.hasNext()) {
+				ztp.put(Q, U);
+			}
+			
+			int n = numRemoved;
+			numRemoved = 0;
+			return n;
+		}
 		
 	}
+	
+	
+	
 	
 }

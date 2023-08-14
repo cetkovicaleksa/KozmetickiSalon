@@ -1,65 +1,34 @@
 package crudMenadzeri;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
-import dataProvajderi.IdNotUniqueException;
 import dataProvajderi.RecepcionerProvider;
+import dataProvajderi.ZakazanTretmanProvider;
 import entiteti.Recepcioner;
 import helpers.Query;
-import helpers.Updater;
 
-public class RecepcionerMenadzer implements ICRUDManager<Recepcioner> {
-	
-	private RecepcionerProvider recepcionerProvider;
-	
-	
-	public RecepcionerMenadzer() {}
-	
+public class RecepcionerMenadzer extends Manager<Recepcioner> {
+			
 	public RecepcionerMenadzer(RecepcionerProvider recepcionerProvider) {
-		setRecepcionerProvider(recepcionerProvider);
+		super();
+		super.setMainProvider(recepcionerProvider);
 	}
 	
-
-	public RecepcionerProvider getRecepcionerProvider() {
-		return recepcionerProvider;
-	}
-
-	public void setRecepcionerProvider(RecepcionerProvider recepcionerProvider) {
-		this.recepcionerProvider = recepcionerProvider;
-	}
-	
-
-	
-	@Override
-	public void create(Recepcioner entitet) throws IdNotUniqueException {
-		getRecepcionerProvider().post(entitet);;
-	}
-
-	@Override
-	public List<Recepcioner> read(Query<Recepcioner> selector) {
-		return getRecepcionerProvider().get(selector);
-	}
-
-	@Override
-	public Iterator<Recepcioner> readAll() {
-		return getRecepcionerProvider().get();
-	}
-
-	@Override
-	public boolean update(Query<Recepcioner> selector, Updater<Recepcioner> updater) throws IdNotUniqueException {
-		return getRecepcionerProvider().put(selector, updater);
+	public RecepcionerMenadzer(RecepcionerProvider recepcionerProvider, ZakazanTretmanProvider zakazanTretmanProvider) {
+		super(recepcionerProvider, zakazanTretmanProvider);
 	}
 
 	@Override
 	public boolean delete(Query<Recepcioner> selector) {
-		return getRecepcionerProvider().delete(selector);
-	}
-
-	@Override
-	public void load() throws IOException {
-		getRecepcionerProvider().loadData();
+		ZakazanTretmanProvider ztp = super.getZakazanTretmanProvider();		
+		if(ztp == null) {
+			return super.delete(selector);			
+		}
+		
+		List<Recepcioner> recepcioneri = super.getMainProvider().get(selector);
+		super.getMainProvider().delete(selector);
+		
+		return new KlijentFromZTRemover<>(ztp, recepcioneri, super.getMainProvider().getDeletedInstance()).run() != 0;
 	}
 
 }
