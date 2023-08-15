@@ -60,6 +60,10 @@ public interface IsProvider<T> {
 	public boolean delete(Query<T> selector);
 	
 	
+	/**Removes the given entity from the provider*/
+	public boolean delete(T entitet);
+	
+	
 	/**
      * Returns the natural ID of the given entity.
      * This method does not require checking whether the entity exists in the data provider.

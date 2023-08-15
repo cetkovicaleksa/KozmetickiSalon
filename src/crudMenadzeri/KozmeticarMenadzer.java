@@ -14,25 +14,26 @@ import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
 import helpers.Query;
 
-public class KozmeticarMenadzer extends Manager<Kozmeticar> { //TODO: replace KozmetickiTretmanProvider with KozmetickiTretmanManager
+public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 	
-	private KozmetickiTretmanProvider kozmetickiTretmanProvider;
+	private KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer;
 	
-	public KozmeticarMenadzer(KozmeticarProvider kozmeticarProvider, KozmetickiTretmanProvider kozmetickTretmanProvider, ZakazanTretmanProvider zakazanTretmanProvider) {
-		super(kozmeticarProvider, zakazanTretmanProvider);
-		setKozmetickiTretmanProvider(kozmetickTretmanProvider);
-	}
-	
-	protected KozmetickiTretmanProvider getKozmetickiTretmanProvider() {
-		return kozmetickiTretmanProvider;
-	}
-	
-	protected void setKozmetickiTretmanProvider(KozmetickiTretmanProvider kozmetickiTretmanProvider) {
-		this.kozmetickiTretmanProvider = kozmetickiTretmanProvider;
+	public KozmeticarMenadzer(KozmeticarProvider kozmeticarProvider, KozmetickiTretmanMenadzer kozmetickTretmanMenadzer, ZakazanTretmanMenadzer zakazanTretmanMenadzer) {
+		super(kozmeticarProvider, zakazanTretmanMenadzer);
+		setKozmetickiTretmanMenadzer(kozmetickTretmanMenadzer);
 	}
 	
 	
-	protected KozmeticarProvider getKozmeticarProvider() {
+	protected KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer() {
+		return kozmetickiTretmanMenadzer;
+	}
+	
+	protected void setKozmetickiTretmanMenadzer(KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer) {
+		this.kozmetickiTretmanMenadzer = kozmetickiTretmanMenadzer;
+	}
+	
+	
+	private KozmeticarProvider getKozmeticarProvider() {
 		return (KozmeticarProvider) super.getMainProvider();
 	}
 
@@ -40,14 +41,18 @@ public class KozmeticarMenadzer extends Manager<Kozmeticar> { //TODO: replace Ko
 	
 	@Override
 	public void create(Kozmeticar entitet) throws IdNotUniqueException {
+		KozmeticarProvider kozmeticarProvider = getKozmeticarProvider();
+		
+		if(entitet == null || kozmeticarProvider.getDeletedInstance().equals(entitet)) {
+			
+		}
 		super.create(entitet);
 		
-		//provjeravamo da li postoje tretmani za koje je entitet obucen, a da ne postoje u KozmetickiTretmanProvider
-		KozmeticarProvider kozmeticarProvider = getKozmeticarProvider();
-		KozmetickiTretmanProvider kozmetickiTretmanProvider = getKozmetickiTretmanProvider();
+		//provjeravamo da li postoje tretmani za koje je kozmeticar obucen, a da ne postoje u KozmetickiTretmanProvider
+		//ako ne postoje dodajemo ih
 		
+		KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer = kozmetickiTretmanMenadzer();		
 		entitet.getTretmani().forEach(tretman -> {
-			
 			Iterator<Kozmeticar> iter = kozmeticarProvider.get();
 			boolean foundTretman = false;
 			
@@ -59,14 +64,8 @@ public class KozmeticarMenadzer extends Manager<Kozmeticar> { //TODO: replace Ko
 			}
 			
 			if(!foundTretman) {
-				kozmetickiTretmanProvider.post(tretman); //may throw exception
-			}
-			
-			//Query<Kozmeticar> q = new Query<>(k -> k.getTretmani().contains(tretman));
-			
-			//if( !kozmeticarProvider.get(q).isEmpty() ) {
-				//kozmetickiTretmanProvider.post(tretman);
-			//}			
+				kozmetickiTretmanMenadzer.create(tretman); //may throw exception
+			}		
 		});
 	}
 
@@ -78,24 +77,7 @@ public class KozmeticarMenadzer extends Manager<Kozmeticar> { //TODO: replace Ko
 			return false;
 		}
 		
-		LinkedList<KozmetickiTretman> tretmani = new LinkedList<>();
-		
-		kozmeticari.forEach(kozmeticar1 -> {
-			kozmeticari.forEach(kozmeticar2 -> {
-				
-			});
-		});
-		
-		kozmeticari.forEach(kozmeticar -> {
-			
-			kozmeticar.getTretmani().forEach(tretman -> {
-				if (tretmani.contains(tretman)) {
-					
-				}
-				tretmani.add(tretman);
-			});
-			
-		});
+		//TODO: finish
 		
 		return true;
 	}
@@ -103,7 +85,7 @@ public class KozmeticarMenadzer extends Manager<Kozmeticar> { //TODO: replace Ko
 	
 	@Override
 	public void load() throws IOException {
-		getKozmeticarProvider().loadData(getKozmetickiTretmanProvider().getIds());;
+		getKozmeticarProvider().loadData(kozmetickiTretmanMenadzer().getIds());;
 	}
 
 }

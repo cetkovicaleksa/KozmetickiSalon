@@ -7,13 +7,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
 import entiteti.KozmetickiTretman.TipTretmana;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
+import helpers.Converter;
 import helpers.DefaultDict;
 
 public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String>{
@@ -42,7 +42,33 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 		public void setVrijeme(LocalTime vrijeme) {}
 		@Override
 		public void setStatus(StatusTretmana status) {}
+		@Override
+		public boolean equals(Object obj) {
+			return (this == obj);
+		}
 	};
+	
+	
+	public static final Converter<ZakazanTretman, String[]> TO_CSV = zakazanTretman -> {
+		String[] zt = new String[7];
+		
+		zt[3] = Double.toString(zakazanTretman.getCijena());
+		zt[4] = Integer.toString(zakazanTretman.getTrajanje());
+		zt[5] = zakazanTretman.getDatum().format(FORMATER_DATUMA);
+		zt[6] = zakazanTretman.getStatus().name();
+	    return zt;
+	};
+	
+	public static final Converter<String[], ZakazanTretman> FROM_CSV = zt -> {
+		ZakazanTretman zakazanTretman = new ZakazanTretman();
+		
+		zakazanTretman.setCijena(Float.parseFloat(zt[3]));
+		zakazanTretman.setTrajanje(Integer.parseInt(zt[4]));
+		zakazanTretman.setDatum(LocalDate.parse(zt[5], FORMATER_DATUMA));
+		zakazanTretman.setStatus(StatusTretmana.valueOf(zt[6]));
+	    return zakazanTretman;
+	};
+	
 	
 
 	@Override
@@ -58,19 +84,15 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 		super.setData(new Data<>(initializedData));
 		
 		loadedData.forEach(zt -> {
-			ZakazanTretman zakazanTretman = new ZakazanTretman();
+			ZakazanTretman zakazanTretman = FROM_CSV.convert(zt);
 			initializedData.add(zakazanTretman);
 			
 			zakazanTretman.setTipTretmana(tipoviTretmanaIds.get(zt[0])); //may be a deleted TipTretmana or Kozmeticar or Korisnik
 			zakazanTretman.setKozmeticar(kozmeticariIds.get(zt[1]));
-			zakazanTretman.setKlijent(klijentiIds.get(zt[2]));
-			
-			zakazanTretman.setCijena(Float.parseFloat(zt[3]));
-			zakazanTretman.setTrajanje(Integer.parseInt(zt[4]));
-			zakazanTretman.setDatum(LocalDate.parse(zt[5], FORMATER_DATUMA));
-			zakazanTretman.setStatus(StatusTretmana.valueOf(zt[6]));			
+			zakazanTretman.setKlijent(klijentiIds.get(zt[2]));			
 		});			
 	}
+	
 	
 	public void saveData(
 			Function<Korisnik, String> getKorisnikId, Function<Kozmeticar, String> getKozmeticarId,
@@ -79,17 +101,12 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 		ArrayList<String[]> convertedData = new ArrayList<>();
 		
 		super.getData().list().forEach(zakazanTretman -> {
-			String[] zt = new String[7];
+			String[] zt = TO_CSV.convert(zakazanTretman);	
 			convertedData.add(zt);
 			
 			zt[0] = getTipTretmanaId.apply(zakazanTretman.getTipTretmana());
 			zt[1] = getKozmeticarId.apply(zakazanTretman.getKozmeticar());
 			zt[2] = getKorisnikId.apply(zakazanTretman.getKlijent());
-			
-			zt[3] = Double.toString(zakazanTretman.getCijena());
-			zt[4] = Integer.toString(zakazanTretman.getTrajanje());
-			zt[5] = zakazanTretman.getDatum().format(FORMATER_DATUMA);
-			zt[6] = zakazanTretman.getStatus().name();
 		});
 		
 		DataProvider.writeToCsv(convertedData, super.getFilePath(), DataProvider.CSV_DELIMITER);

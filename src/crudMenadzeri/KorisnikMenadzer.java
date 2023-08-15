@@ -1,85 +1,52 @@
 package crudMenadzeri;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import dataProvajderi.DataProvider;
-import dataProvajderi.IdNotUniqueException;
-import dataProvajderi.ZakazanTretmanProvider;
-import entiteti.Entitet;
 import entiteti.Korisnik;
 import entiteti.ZakazanTretman;
 import helpers.Query;
 import helpers.Updater;
 
-public abstract class Manager<T extends Entitet> implements ICRUDManager<T> {
+public abstract class KorisnikMenadzer<T extends Korisnik> extends Menadzer<T> {
 	
 	private DataProvider<T, ?> mainProvider;
-	private ZakazanTretmanProvider zakazanTretmanProvider;
+	private ZakazanTretmanMenadzer zakazanTretmanMenadzer;
 	
 	
-	public Manager() {}
+	public KorisnikMenadzer() {}
 	
-	public Manager(DataProvider<T, ?> mainProvider, ZakazanTretmanProvider zakazanTretmanProvider) {
+	public KorisnikMenadzer(DataProvider<T, ?> mainProvider, ZakazanTretmanMenadzer zakazanTretmanProvider) {
+		super();
 		setMainProvider(mainProvider);
-		setZakazanTretmanProvider(zakazanTretmanProvider);
+		setZakazanTretmanMenadzer(zakazanTretmanProvider);
 	}
 	
+	
+	@Override
+	protected DataProvider<T, ?> getMainProvider(){
+		return mainProvider;
+	}
 	
 	protected void setMainProvider(DataProvider<T, ?> mainProvider) {
 		this.mainProvider = mainProvider;
 	}
 	
-	protected DataProvider<T, ?> getMainProvider(){
-		return mainProvider;
+	
+	protected void setZakazanTretmanMenadzer(ZakazanTretmanMenadzer zakazanTretmanProvider) {
+		this.zakazanTretmanMenadzer = zakazanTretmanProvider;
 	}
 	
-	protected void setZakazanTretmanProvider(ZakazanTretmanProvider zakazanTretmanProvider) {
-		this.zakazanTretmanProvider = zakazanTretmanProvider;
-	}
-	
-	protected ZakazanTretmanProvider getZakazanTretmanProvider() {
-		return zakazanTretmanProvider;
+	protected ZakazanTretmanMenadzer getZakazanTretmanMenadzer() {
+		return zakazanTretmanMenadzer;
 	}
 	
 	
 	
-	@Override
-	public void create(T entitet) throws IdNotUniqueException {
-		getMainProvider().post(entitet);
-	}
+
 	
-	
-	@Override
-	public List<T> read(Query<T> selector) {
-		return getMainProvider().get(selector);
-	}
-	
-	
-	@Override
-	public Iterator<T> readAll() {
-		return getMainProvider().get();
-	}
-	
-	
-	@Override
-	public boolean update(Query<T> selector, Updater<T> updater) throws IdNotUniqueException {
-		return getMainProvider().put(selector, updater);
-	}
-	
-	
-	@Override
-	public boolean delete(Query<T> selector) {
-		return getMainProvider().delete(selector);
-	}
-	
-	
-	@Override
-	public void load() throws IOException {
-		getMainProvider().loadData();		
-	}
 	
 	
 	
@@ -87,7 +54,7 @@ public abstract class Manager<T extends Entitet> implements ICRUDManager<T> {
 	 * Should be made without parameter just using Korisnik but constructors won't work for some reason??*/
 	public class KlijentFromZTRemover<E extends Korisnik>{
 		private Iterator<E> klijentIterator;
-		private ZakazanTretmanProvider zakazanTretmanProvider;
+		private ZakazanTretmanMenadzer zakazanTretmanProvider;
 		private E trenutniKlijent, placeholderKlijent;
 		private int numRemoved = 0;
 		
@@ -102,16 +69,16 @@ public abstract class Manager<T extends Entitet> implements ICRUDManager<T> {
 		
 		public KlijentFromZTRemover() {}
 		
-		public KlijentFromZTRemover(ZakazanTretmanProvider zakazanTretmanProvider, E klijent, E placeholderKorisnik) {
+		public KlijentFromZTRemover(ZakazanTretmanMenadzer zakazanTretmanProvider, E klijent, E placeholderKorisnik) {
 			this(zakazanTretmanProvider, Collections.singletonList(klijent).iterator(), placeholderKorisnik);
 		}
 		
-		public KlijentFromZTRemover(ZakazanTretmanProvider zakazanTretmanProvider, List<E> klijentList, E placeholderKorisnik) {
+		public KlijentFromZTRemover(ZakazanTretmanMenadzer zakazanTretmanProvider, List<E> klijentList, E placeholderKorisnik) {
 			this(zakazanTretmanProvider, klijentList.iterator(), placeholderKorisnik);
 		}
 		
-		public KlijentFromZTRemover(ZakazanTretmanProvider zakazanTretmanProvider, Iterator<E> klijentIterator, E placeholderKorisnik) {
-			setZakazanTretmanProvider(zakazanTretmanProvider);
+		public KlijentFromZTRemover(ZakazanTretmanMenadzer zakazanTretmanProvider, Iterator<E> klijentIterator, E placeholderKorisnik) {
+			setZakazanTretmanMenadzer(zakazanTretmanProvider);
 			setKlijentIterator(klijentIterator);
 			setPlaceholderKlijent(placeholderKlijent);
 		}
@@ -125,11 +92,11 @@ public abstract class Manager<T extends Entitet> implements ICRUDManager<T> {
 			this.klijentIterator = klijentIterator;
 		}
 
-		public ZakazanTretmanProvider getZakazanTretmanProvider() {
+		public ZakazanTretmanMenadzer getZakazanTretmanMenadzer() {
 			return zakazanTretmanProvider;
 		}
 
-		public void setZakazanTretmanProvider(ZakazanTretmanProvider zakazanTretmanProvider) {
+		public void setZakazanTretmanMenadzer(ZakazanTretmanMenadzer zakazanTretmanProvider) {
 			this.zakazanTretmanProvider = zakazanTretmanProvider;
 		}
 
@@ -152,10 +119,10 @@ public abstract class Manager<T extends Entitet> implements ICRUDManager<T> {
 		/**Returnes the number of ZakazanTretman that had their Korisnik klijent substituted for placeholderKlijent.*/
 		public int run() {
 			Iterator<E> iter = getKlijentIterator();
-			ZakazanTretmanProvider ztp = getZakazanTretmanProvider();
+			ZakazanTretmanMenadzer ztm = getZakazanTretmanMenadzer();
 			
 			while(iter.hasNext()) {
-				ztp.put(Q, U);
+				ztm.update(Q, U);
 			}
 			
 			int n = numRemoved;

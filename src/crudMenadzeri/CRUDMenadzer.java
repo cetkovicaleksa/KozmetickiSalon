@@ -9,7 +9,7 @@ import entiteti.Entitet;
 import helpers.Query;
 import helpers.Updater;
 
-public interface ICRUDManager<T extends Entitet> {
+public interface CRUDMenadzer<T extends Entitet> {
 	
 	public void create(T entitet) throws IdNotUniqueException;
 	

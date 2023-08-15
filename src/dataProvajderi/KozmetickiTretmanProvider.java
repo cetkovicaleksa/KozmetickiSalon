@@ -3,6 +3,7 @@ package dataProvajderi;
 import java.util.ArrayList;
 
 import entiteti.KozmetickiTretman;
+import helpers.Converter;
 
 public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, String>{
 	
@@ -14,6 +15,10 @@ public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, S
 		@Override
 		public TipTretmana newTipTretmana(String naziv, float cijena, int trajanje) { //TODO
 			throw new UnsupportedOperationException("Can't create new TipTretmana for the deleted instance.");
+		}
+		@Override
+		public boolean equals(Object obj) {
+			return (this == obj);
 		}
 	};
 	
@@ -30,9 +35,31 @@ public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, S
 		public void setTrajanje(int trajanje) {}
 		@Override
 		public void setTretman(KozmetickiTretman tretman) {}
+		@Override
+		public boolean equals(Object obj) {
+			return (this == obj);
+		}
+	};
+	
+	
+	public static final Converter<KozmetickiTretman, String[]> TO_CSV = kozmetickiTretman -> {
+		String[] kt = new String[2];
+	
+		kt[0] = kozmetickiTretman.getNaziv();
+		kt[1] = kozmetickiTretman.getOpis();
+	    return kt;
+	};
+	
+	public static final Converter<String[], KozmetickiTretman> FROM_CSV = kt -> {
+		KozmetickiTretman kozmetickiTretman = new KozmetickiTretman();
+		
+		kozmetickiTretman.setNaziv(kt[0]);
+		kozmetickiTretman.setOpis(kt[1]);
+	    return kozmetickiTretman;
 	};
 	
 
+	
 	@Override
 	public KozmetickiTretman getDeletedInstance() { return DELETED; }
 
@@ -40,13 +67,9 @@ public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, S
 	@Override
 	protected ArrayList<String[]> convertDataToString(Data<String, KozmetickiTretman> data) {
 		ArrayList<String[]> convertedData = new ArrayList<>();
-		
+	
 		data.list().forEach(kozmetickiTretman -> {
-			String[] kt = new String[2];
-			convertedData.add(kt);
-			
-			kt[0] = kozmetickiTretman.getNaziv();
-			kt[1] = kozmetickiTretman.getOpis();
+			convertedData.add(TO_CSV.convert(kozmetickiTretman));
 		});
 		
 		return convertedData;
@@ -58,11 +81,7 @@ public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, S
 		ArrayList<KozmetickiTretman> convertedData = new ArrayList<>();
 		
 		data.forEach( kt -> {
-			KozmetickiTretman kozmetickiTretman = new KozmetickiTretman();
-			convertedData.add(kozmetickiTretman);
-			
-			kozmetickiTretman.setNaziv(kt[0]);
-			kozmetickiTretman.setOpis(kt[1]);
+			convertedData.add(FROM_CSV.convert(kt));
 		});
 		
 		return new DataProvider.Data<>(convertedData);

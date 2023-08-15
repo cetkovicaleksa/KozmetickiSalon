@@ -78,7 +78,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	 * @param newIdFunction new function
 	 * @throws IdNotUniqueException if the ids are not unique with the new function*/
 	public void setNewIdFunction(Function<T, String> newIdFunction) throws IdNotUniqueException {
-		if(newIdFunction.apply(getDeletedInstance()) == null) {
+		if( !DELETED_ID.equals(newIdFunction.apply(getDeletedInstance())) ) {
 			//hmmmmmmm TODO
 		}
 		
@@ -255,6 +255,10 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	
 	@Override
 	public void post(T entitet) throws IdNotUniqueException {
+		if(getDeletedInstance().equals(entitet)) {
+			throw new UnsupportedOperationException("Can't post the deleted instance.");
+		}
+		
 		if(!getData().isCollection()) {
 			throw new ProviderCompatibilityException("The default post method is only compatible with collections.");
 		}
@@ -268,7 +272,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		}
 				
 		throw new IdNotUniqueException(
-				"The natural ID of the entity is not unique in the provider. ID:[" + getIdFunction().apply(entitet) + "]"
+				"The natural ID of the entity is not unique in the provider. ID:[" + id + "]"
 				);		
 	}
 	
@@ -290,6 +294,15 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		}	
 		
 		return ret;
+	}
+	
+	@Override
+	public boolean delete(T entitet) {  //sceptical about this
+		if(!getData().isList()) {
+			throw new ProviderCompatibilityException("The default delete method is only compatible with lists.");
+		}
+		
+		return getData().list().remove(entitet);
 	}
 	
 	
@@ -349,6 +362,11 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	protected boolean isIdUnique(String id) {
 		Iterator<T> iterator = get();
 		Function<T, String> idFunction = getIdFunction();
+		
+		if(id == null || idFunction.apply(getDeletedInstance()).equals(id)) {
+			return false;
+		}
+		
 		boolean foundMatch = false;
 		
 		while(iterator.hasNext()) {			

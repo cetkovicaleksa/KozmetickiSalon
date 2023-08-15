@@ -33,6 +33,17 @@ public class DefaultDict<K, V> {
         map.put(key, value);
     }
 
+    
+	protected Map<K, V> getMap() {
+		return map;
+	}
+
+	protected Supplier<V> getDefaultValueSupplier() {
+		return defaultValueSupplier;
+	}
+	
+	
+
  
 }
 
