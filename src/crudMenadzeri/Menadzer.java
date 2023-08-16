@@ -50,25 +50,50 @@ public abstract class Menadzer<T extends Entitet> implements CRUDMenadzer<T> {
 	
 	
 	@Override
-	public void load() throws IOException {
+	public void load() throws IOException, UnsupportedOperationException {
 		getMainProvider().loadData();		
 	}
+	
+	
+	public void save() throws IOException, UnsupportedOperationException {
+		getMainProvider().loadData();
+	}
+	
 	
 	
 	DefaultDict<String, T> getIds(){
 		return getMainProvider().getIds();
 	}
 	
+	
 	String getId(T entitet) {
 		return getMainProvider().getId(entitet);
 	}
+	
 	
 	T getById(String id) {
 		return getMainProvider().getById(id);
 	}
 	
+	
 	T getDeletedInstance() {
 		return getMainProvider().getDeletedInstance();
+	}
+	
+	
+	boolean exists(T entitet) {
+		if(entitet == null || getMainProvider().getDeletedInstance().equals(entitet)) {
+			return false;
+		}
+		
+		Iterator<T> iter = getMainProvider().get();
+		while(iter.hasNext()) {
+			if(iter.next().equals(entitet)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 }

@@ -1,11 +1,10 @@
 package crudMenadzeri;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
-import dataProvajderi.DataProvider;
 import dataProvajderi.IdNotUniqueException;
 import dataProvajderi.TipTretmanaProvider;
 import entiteti.KozmetickiTretman;
@@ -16,7 +15,7 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 
 	private TipTretmanaProvider mainProvider;
 	private KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer;
-	private ZakazanTretmanMenadzer zakazanTretmanMenadzer;
+	//private ZakazanTretmanMenadzer zakazanTretmanMenadzer;
 
 
 
@@ -29,7 +28,7 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 	
 	
 	@Override
-	protected DataProvider<TipTretmana, ?> getMainProvider() {
+	protected TipTretmanaProvider getMainProvider() {
 		return mainProvider;
 	}
 	
@@ -67,64 +66,71 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 			throw new IllegalArgumentException("Can't add new TipTretmana that has a deleted KozmetickiTretman or null as its treatment.");
 		}
 		
-		//prolazimo kroz kozmeticke tretmane i gledamo da li postoji tretman datog entiteta
-		Iterator<KozmetickiTretman> iter = getKozmetickiTretmanMenadzer().readAll();		
-		while(iter.hasNext()) {
-			if(tretman.equals(iter.next())) {
-				super.create(entitet);
-				return;
-			}
+		if(!getKozmetickiTretmanMenadzer().exists(tretman)) {
+			throw new IllegalArgumentException("Can't add a TipTretmana when it belongs to a non existent KozmetickiTretman.");
 		}
 		
-		throw new IllegalArgumentException("Can't add a TipTretmana when it belongs to a non existent KozmetickiTretman.");
+		getMainProvider().post(entitet);
 	}
-
+	
 
 	@Override
 	public boolean delete(Query<TipTretmana> selector) {
-		List<TipTretmana> tipoviTretmana = getMainProvider().get(selector);
+		TipTretmanaProvider mainProvider = getMainProvider();
+		List<TipTretmana> tipoviTretmanaZaBrisanje = mainProvider.get(selector);
 		
-		if(tipoviTretmana.isEmpty()) {
+		if(tipoviTretmanaZaBrisanje.isEmpty() || !mainProvider.delete(selector)) { 
 			return false;
 		}
 		
-		KozmetickiTretmanMenadzer ktm = getKozmetickiTretmanMenadzer();
-		ListIterator<TipTretmana> iter = tipoviTretmana.listIterator();
-		//za svaki tip tretmana koji treba izbrisati gledamo da li njegov odgovarajuci tretman posjeduje jos tipova tretmana,
-		//ako ne onda i njega brisemo
-		while(iter.hasNext()) {
-			TipTretmana tipTretmana= iter.next();
+		//izbrisali smo tipove tretmana, sada provjeravamo da li su neki kozmeticki tretmani ostali bez tipova tretmana i
+		//brisemo one koji jesu
+		List<KozmetickiTretman> kozmetickiTretmaniZaBrisanje = new ArrayList<>();
+		KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer = getKozmetickiTretmanMenadzer();
+		KozmetickiTretman deletedKozmetickiTretman = kozmetickiTretmanMenadzer.getDeletedInstance();
+		
+		for(TipTretmana tipTretmana : tipoviTretmanaZaBrisanje) {
 			KozmetickiTretman tretman = tipTretmana.getTretman();
 			
-			if(tretman == null || ktm.getDeletedInstance().equals(tretman)) {
+			if(tretman == null || deletedKozmetickiTretman.equals(tretman)) { //should never happen
 				continue;
 			}
 			
-			//trazimo bar jedan tip tretmana da pripada tretmanu trenutnog tipa, ako ne postoji brisemo tretman
-			if(getMainProvider().get(new Query<>(tt -> tretman.equals(tt.getTretman()))).isEmpty()) {
-				iter.remove();
+			Iterator<TipTretmana> sviTipoviTretmanaIter = mainProvider.get();
+			boolean foundTipTretmanaForTretman = false;
+			
+			while(sviTipoviTretmanaIter.hasNext()) {
+				if(tretman.equals(sviTipoviTretmanaIter.next().getTretman())) {
+					foundTipTretmanaForTretman = true;
+					break;
+				}
+			}
+			
+			if( !foundTipTretmanaForTretman ) {
+				kozmetickiTretmaniZaBrisanje.add(tretman);
 			}
 		}
 		
-		boolean hasRemoved = (tipoviTretmana.isEmpty()) ? false : true;
+		if( !kozmetickiTretmaniZaBrisanje.isEmpty() ) {
+			kozmetickiTretmanMenadzer.delete(
+					new Query<>(kozmetickiTretman -> kozmetickiTretmaniZaBrisanje.contains(kozmetickiTretman))
+			);
+		}
 		
-		tipoviTretmana.forEach(tipTretmana -> {
-			KozmetickiTretman tretman = tipTretmana.getTretman();
-			ktm.delete(new Query<>(kt -> tretman.equals(kt)));
-		});
-		
-		return hasRemoved;
+		return true;		
 	}
+	
 
 
 	@Override
 	public void load() throws IOException {
-		((TipTretmanaProvider) getMainProvider()).loadData(getKozmetickiTretmanMenadzer().getIds());
+		getMainProvider().loadData(getKozmetickiTretmanMenadzer().getIds());
 	}
 	
-
-	
-	
+	@Override
+	public void save() throws IOException {
+		getMainProvider().saveData(getKozmetickiTretmanMenadzer()::getId);
+	}
 	
 
 }

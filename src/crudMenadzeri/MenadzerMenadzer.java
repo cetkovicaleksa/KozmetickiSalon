@@ -24,9 +24,13 @@ public class MenadzerMenadzer extends KorisnikMenadzer<Menadzer> {
 		}
 		
 		List<Menadzer> menadzeri = super.getMainProvider().get(selector);
-		super.getMainProvider().delete(selector);
+		if(menadzeri.isEmpty()) {
+			return false;
+		}
 		
-		return new KlijentFromZTRemover<>(ztm, menadzeri, super.getMainProvider().getDeletedInstance()).run() != 0;
+		super.getMainProvider().delete(selector);
+		super.removeKlijentiFromZakazaniTretmani(menadzeri);
+		return true;
 	}
 
 }

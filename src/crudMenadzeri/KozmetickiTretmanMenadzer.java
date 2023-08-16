@@ -4,7 +4,6 @@ import java.util.List;
 
 import dataProvajderi.IdNotUniqueException;
 import dataProvajderi.KozmetickiTretmanProvider;
-import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
 import helpers.Query;
 
@@ -54,18 +53,21 @@ public class KozmetickiTretmanMenadzer extends Menadzer<KozmetickiTretman> {
 	
 	
 	@Override
+	/**Adds the new kozmeticki tretman if there is a kozmeticar that has it in its list of treatments.*/
 	public void create(KozmetickiTretman entitet) throws IdNotUniqueException {
 		if(entitet == null || getMainProvider().getDeletedInstance().equals(entitet)) {
 			throw new IllegalArgumentException("KozmetickiTretman can't be null or deleted kozmeticki tretman.");
 		}
 		
-		List<Kozmeticar> obuceniKozmeticari = getKozmeticarMenadzer().read( new Query<>(k -> k.getTretmani().contains(entitet)) );
-		
-		if(obuceniKozmeticari.isEmpty()) {
+		if( !getKozmeticarMenadzer().kozmeticarThatCenPreformTreatmentExists(entitet) ) {
 			throw new IllegalArgumentException("Can't add a KozmetickiTretman that doesn't have a Kozmeticar that can preform it.");
 		}
 			
-		super.create(entitet);
+		getMainProvider().post(entitet);
+	}
+	
+	void createKozmetickiTretman(KozmetickiTretman entitet) throws IdNotUniqueException{
+		getMainProvider().post(entitet);
 	}
 
 	
@@ -77,9 +79,20 @@ public class KozmetickiTretmanMenadzer extends Menadzer<KozmetickiTretman> {
 			return false;
 		}
 		//brisemo sve tipove tretmana koji pripadaju tretmaniZaBrisanje
-		Query<KozmetickiTretman.TipTretmana> q = new Query<>(kt -> tretmaniZaBrisanje.contains(kt.getTretman()));
-		getTipTretmanaMenadzer().delete(q);		
+		getTipTretmanaMenadzer().delete(
+				new Query<>(
+						kt -> tretmaniZaBrisanje.contains(kt.getTretman())
+					)
+		);		
+		
+		//izbacujemo tretmani iz tretmana za koje su kozmeticari obuceni
+		getKozmeticarMenadzer().removeTretmaniFromAllKozmeticari( tretmaniZaBrisanje.toArray(new KozmetickiTretman[0]) );
 		return true;
+	}
+	
+	
+	List<KozmetickiTretman.TipTretmana> tipoviTretmana(KozmetickiTretman kozmetickiTretman) {
+		return null;
 	}
 
 	

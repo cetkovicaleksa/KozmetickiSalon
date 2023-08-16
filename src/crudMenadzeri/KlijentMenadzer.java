@@ -18,10 +18,15 @@ public class KlijentMenadzer extends KorisnikMenadzer<Klijent> {
 	@Override
 	public boolean delete(Query<Klijent> selector) {
 		List<Klijent> klijenti = super.getMainProvider().get(selector);
+		if(klijenti.isEmpty()) {
+			return false;
+		}
 		super.getMainProvider().delete(selector);
 		
 		//brisemo klijenta iz svih njegovi zakazanih tretmana
-		return new KlijentFromZTRemover<>(super.getZakazanTretmanMenadzer(), klijenti, super.getMainProvider().getDeletedInstance()).run() != 0;
+		//new KlijentFromZTRemover<>(super.getZakazanTretmanMenadzer(), klijenti, super.getMainProvider().getDeletedInstance()).run();
+		super.removeKlijentiFromZakazaniTretmani(klijenti);
+		return true;
 	}
 
 }

@@ -1,14 +1,15 @@
 package crudMenadzeri;
 
 import java.io.IOException;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import dataProvajderi.DataProvider;
 import dataProvajderi.IdNotUniqueException;
 import dataProvajderi.ZakazanTretmanProvider;
 import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Kozmeticar;
-import entiteti.KozmetickiTretman;
-import entiteti.KozmetickiTretman.TipTretmana;
 import entiteti.Recepcioner;
 import entiteti.Menadzer;
 import entiteti.ZakazanTretman;
@@ -25,9 +26,102 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 	private RecepcionerMenadzer recepcionerMenadzer;
 	private MenadzerMenadzer menadzerMenadzer;
 	
+	private final Function<Korisnik, String> GET_ID_FOR_KORISNIK;
+	private final DefaultDict<String, Korisnik> KORISNIK_IDS_DICT;
+	
+	//setting up the id getter and from id getter
+	{
+		GET_ID_FOR_KORISNIK = k -> {
+			
+			return 	(k instanceof Klijent) ? getKlijentMenadzer().getId((Klijent) k) :
+				    (k instanceof Kozmeticar) ? getKozmeticarMenadzer().getId((Kozmeticar) k) :
+				    (k instanceof Recepcioner) ? getRecepcionerMenadzer().getId((Recepcioner) k) :
+				    (k instanceof Menadzer) ? getMenadzerMenadzer().getId((Menadzer) k) : DataProvider.DELETED_ID;
+		};
+		
+		
+		Query<Korisnik> isKorisnikDeletedQuery = new Query<>(korisnik -> {
+			return getKlijentMenadzer().getDeletedInstance().equals(korisnik) ||
+				   getKozmeticarMenadzer().getDeletedInstance().equals(korisnik) ||
+				   getRecepcionerMenadzer() != null && getRecepcionerMenadzer().getDeletedInstance().equals(korisnik) ||
+				   getMenadzerMenadzer() != null && getMenadzerMenadzer().getDeletedInstance().equals(korisnik);
+		});
+		
+		Korisnik deletedKorisnik = new Korisnik(){
+			@Override
+			public boolean equals(Object obj) {
+				if(obj == null) {
+					return false;
+				}
+				
+				if(this == obj) {
+					return true;
+				}
+				
+				if( !(obj instanceof Korisnik) ) {
+					return false;
+				}
+				
+				Korisnik korisnik = (Korisnik) obj;
+				return isKorisnikDeletedQuery.test(korisnik);	
+			}	
+		};
+		
+		Supplier<DefaultDict<String, Korisnik>> getIdFromKorisnik = () -> {
+			class D extends DefaultDict<String, Korisnik>{
+				
+				@Override
+				public Korisnik get(String key) {
+					Korisnik korisnik = getKlijentMenadzer().getById(key);
+					if( !isKorisnikDeletedQuery.test(korisnik)) {
+						return korisnik;
+					}
+					
+					korisnik = getKozmeticarMenadzer().getById(key);
+					if( !isKorisnikDeletedQuery.test(korisnik)) {
+						return korisnik;
+					}
+					
+					korisnik = (getRecepcionerMenadzer() == null) ? deletedKorisnik : getRecepcionerMenadzer().getById(key);
+					if( !isKorisnikDeletedQuery.test(korisnik)) {
+						return korisnik;
+					}
+					
+					korisnik = (getMenadzerMenadzer() == null) ? deletedKorisnik : getMenadzerMenadzer().getById(key); 
+					if( !isKorisnikDeletedQuery.test(korisnik) ) {
+						return korisnik;
+					}
+					
+					return deletedKorisnik;
+				}
+				
+				@Override
+				public void put(String key, Korisnik value) {
+					throw new UnsupportedOperationException("This ids dictionary is read only.");
+				}
+				
+				@Override
+				public Korisnik getDefaultValue() {
+					return deletedKorisnik;
+				}	
+			}
+			
+			return new D();
+		};
+		
+		
+		KORISNIK_IDS_DICT = getIdFromKorisnik.get();
+	}
 
-	//public ZakazanTretmanMenadzer() TODO: see if you should make it so that you don't need to have recepcioner and menadzer?
-
+	
+	
+	
+	public ZakazanTretmanMenadzer(
+			ZakazanTretmanProvider zakazanTretmanProvider, TipTretmanaMenadzer tipTretmanaMenadzer,
+			KlijentMenadzer klijentMenadzer, KozmeticarMenadzer kozmeticarMenadzer) {
+		
+	}
+	
 	public ZakazanTretmanMenadzer(
 			ZakazanTretmanProvider zakazanTretmanProvider, TipTretmanaMenadzer tipTretmanaMenadzer,
 			KlijentMenadzer klijentMenadzer, KozmeticarMenadzer kozmeticarMenadzer,
@@ -100,166 +194,50 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 	
 	
 	@Override
-	public void create(ZakazanTretman entitet) throws IdNotUniqueException {
-		TipTretmana tretman = entitet.getTipTretmana();
+	public void create(ZakazanTretman entitet) throws IdNotUniqueException, IllegalArgumentException {
 		
-		if( tretman != null && !getTipTretmanaMenadzer().read(new Query<TipTretmana>(x -> x.equals(tretman))).isEmpty() ){
-			
+		if( !getTipTretmanaMenadzer().exists(entitet.getTipTretmana())) {
+			throw new IllegalArgumentException("Can't create a ZakazanTretman ["+ getMainProvider().getId(entitet) + "] that has a non existent TipTretmana as its treatment.");
 		}
 		
-		super.create(entitet);
+		Kozmeticar kozmeticar = entitet.getKozmeticar();
+		if( !getKozmeticarMenadzer().exists(kozmeticar) ) {
+			throw new IllegalArgumentException("Can't create a ZakazanTretman that has a non existent Kozmeticar as its kozmeticar.");
+		}
+		
+		Korisnik klijent = entitet.getKlijent();
+		
+		if(kozmeticar.equals(klijent)) {
+			throw new IllegalArgumentException("Can't create a ZakazanTretman that has the same Korisnik as the kozmeticar and klijent.");
+		}		
+		
+		if( !klijentExists(klijent) ) {
+			throw new IllegalArgumentException("Can't create a ZakazanTretman that has a non existent Korisnik as its klijent.");
+		}
+			
+		getMainProvider().post(entitet);
 	}
 
 
 
 	@Override
 	public void load() throws IOException {
-		Dict korisniciIds = new Dict(getKlijentMenadzer().getIds(), getKozmeticarMenadzer().getIds(), getRecepcionerMenadzer().getIds(), getMenadzerMenadzer().getIds());
-		getMainProvider().loadData(korisniciIds, getKozmeticarMenadzer().getIds(), getTipTretmanaMenadzer().getIds());
+		getMainProvider().loadData(KORISNIK_IDS_DICT, getKozmeticarMenadzer().getIds(), getTipTretmanaMenadzer().getIds());
+	}
+	
+	
+	@Override
+	public void save() throws IOException {
+		getMainProvider().saveData(GET_ID_FOR_KORISNIK, getKozmeticarMenadzer()::getId, getTipTretmanaMenadzer()::getId);
 	}
 	
 	
 	
-	
-	
-	//need this if we want to be able to schedule appointments for all Korisnik
-	private class Dict extends DefaultDict<String, Korisnik>{
-		private DefaultDict<String, Klijent> klijentiIds;
-		private DefaultDict<String, Kozmeticar> kozmeticariIds;
-		private DefaultDict<String, Recepcioner> recepcioneriIds;
-		private DefaultDict<String, Menadzer> menadzeriIds;
-		private Query<Korisnik> deletedQuery;
-		
-		
-
-		private Dict() {}
-		
-		private Dict(DefaultDict<String, Klijent> klijentiIds, DefaultDict<String, Kozmeticar> kozmeticariIds,
-				DefaultDict<String, Recepcioner> recepcioneriIds, DefaultDict<String, Menadzer> menadzeriIds) {
-			
-		}
-
-		
-
-		@Override
-		public Korisnik getDefaultValue() {
-			return new Korisnik(){
-				{
-					if(getDeletedQuery() == null) {						
-						Query<Korisnik> deletedQuery = new Query<>();
-						
-						if(getKlijentiIds() != null){
-							deletedQuery.ili(k -> getKlijentiIds().getDefaultValue().equals(k));							
-						}
-						if(getKozmeticariIds() != null){
-							deletedQuery.ili(k -> getKozmeticariIds().getDefaultValue().equals(k));							
-						}
-						if(getRecepcioneriIds() != null){
-							deletedQuery.ili(k -> getRecepcioneriIds().getDefaultValue().equals(k));							
-						}
-						if(getMenadzeriIds() != null){
-							deletedQuery.ili(k -> getMenadzeriIds().getDefaultValue().equals(k));							
-						}
-						
-						setDeletedQuery(deletedQuery);						
-					}
-				}
-
-				@Override
-				public boolean equals(Object obj) {
-					if(obj instanceof Korisnik) {
-						Korisnik korisnik = (Korisnik) obj;
-						return getDeletedQuery().test(korisnik);						
-					}
-					
-					return false;
-				}	
-			};
-		}
-
-		
-		@Override
-		public Korisnik get(String key) {
-			Korisnik deleted = getDefaultValue();
-			Korisnik korisnik;
-			
-			if(getKlijentiIds() != null) {
-				korisnik = getKlijentiIds().get(key);
-				if(!deleted.equals(korisnik)) {
-					return korisnik;
-				}
-			}
-			
-			if(getKozmeticariIds() != null) {
-				korisnik = getKozmeticariIds().get(key);
-				if(!deleted.equals(korisnik)) {
-					return korisnik;
-				}
-			}
-			
-			if( getMenadzeriIds() != null) {
-				korisnik =  getMenadzeriIds().get(key);
-				if(!deleted.equals(korisnik)) {
-					return korisnik;
-				}
-			}
-			
-			if(getRecepcioneriIds() != null) {
-				korisnik = getRecepcioneriIds().get(key);
-				if(!deleted.equals(korisnik)) {
-					return korisnik;
-				}
-			}
-			
-			return deleted;
-		}
-		
-
-		@Override
-		public void put(String key, Korisnik value) {
-			if(value instanceof Klijent && getKlijentiIds() != null) {
-				getKlijentiIds().put(key, (Klijent) value);
-			}
-			
-			if(value instanceof Kozmeticar && getKozmeticariIds() != null) {
-				getKozmeticariIds().put(key, (Kozmeticar) value);
-			}
-			
-			if(value instanceof Recepcioner && getRecepcioneriIds() != null) {
-				getRecepcioneriIds().put(key, (Recepcioner) value);
-			}
-			
-			if(value instanceof Menadzer && getMenadzeriIds() != null) {
-				getMenadzeriIds().put(key, (Menadzer) value);
-			}
-			
-			throw new UnsupportedOperationException("Class not supported: " + value.getClass());
-		}
-		
-		
-		public DefaultDict<String, Kozmeticar> getKozmeticariIds() {
-			return kozmeticariIds;
-		}
-
-		public DefaultDict<String, Recepcioner> getRecepcioneriIds() {
-			return recepcioneriIds;
-		}
-
-		public DefaultDict<String, Menadzer> getMenadzeriIds() {
-			return menadzeriIds;
-		}
-		
-		public DefaultDict<String, Klijent> getKlijentiIds() {
-			return klijentiIds;
-		}
-		
-		public Query<Korisnik> getDeletedQuery() {
-			return deletedQuery;
-		}
-
-		public void setDeletedQuery(Query<Korisnik> deletedQuery) {
-			this.deletedQuery = deletedQuery;
-		}
+	private boolean klijentExists(Korisnik klijent) {
+		return 	klijent instanceof Klijent && getKlijentMenadzer().exists((Klijent) klijent) ||
+				klijent instanceof Kozmeticar && getKozmeticarMenadzer().exists((Kozmeticar) klijent) ||
+				klijent instanceof Menadzer && getMenadzerMenadzer() != null && getMenadzerMenadzer().exists((Menadzer) klijent) ||
+				klijent instanceof Recepcioner && getRecepcionerMenadzer() != null && getRecepcionerMenadzer().exists((Recepcioner) klijent);
 	}
 
 

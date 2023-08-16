@@ -48,6 +48,28 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 		}
 	};
 	
+	public static final Korisnik DELETED_KORISNIK = new Korisnik() {
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj == null) {
+				return false;
+			}
+			
+			if(this == obj) {
+				return true;
+			}
+			
+			if( !(obj instanceof Korisnik) ) {
+				return false;
+			}
+			
+			Korisnik korisnik = (Korisnik) obj;
+			return (korisnik == KlijentProvider.DELETED || korisnik == KozmeticarProvider.DELETED || korisnik == RecepcionerProvider.DELETED || korisnik == MenadzerProvider.DELETED);	
+		}
+		
+	};
+	
 	
 	public static final Converter<ZakazanTretman, String[]> TO_CSV = zakazanTretman -> {
 		String[] zt = new String[7];

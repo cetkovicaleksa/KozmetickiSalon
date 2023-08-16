@@ -9,7 +9,6 @@ import helpers.Query;
 public class RecepcionerMenadzer extends KorisnikMenadzer<Recepcioner> {
 			
 	public RecepcionerMenadzer(RecepcionerProvider recepcionerProvider) {
-		super();
 		super.setMainProvider(recepcionerProvider);
 	}
 	
@@ -25,9 +24,13 @@ public class RecepcionerMenadzer extends KorisnikMenadzer<Recepcioner> {
 		}
 		
 		List<Recepcioner> recepcioneri = super.getMainProvider().get(selector);
-		super.getMainProvider().delete(selector);
+		if(recepcioneri.isEmpty()) {
+			return false;
+		}
 		
-		return new KlijentFromZTRemover<>(ztm, recepcioneri, super.getMainProvider().getDeletedInstance()).run() != 0;
+		super.getMainProvider().delete(selector);
+		super.removeKlijentiFromZakazaniTretmani(recepcioneri);
+		return true;
 	}
 
 }

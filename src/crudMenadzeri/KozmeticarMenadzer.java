@@ -2,17 +2,20 @@ package crudMenadzeri;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
+import dataProvajderi.DataProvider;
 import dataProvajderi.IdNotUniqueException;
 import dataProvajderi.KozmeticarProvider;
-import dataProvajderi.KozmetickiTretmanProvider;
-import dataProvajderi.ZakazanTretmanProvider;
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
+import entiteti.ZakazanTretman;
 import helpers.Query;
+import helpers.Updater;
 
 public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 	
@@ -24,7 +27,7 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 	}
 	
 	
-	protected KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer() {
+	protected KozmetickiTretmanMenadzer getKozmetickiTretmanMenadzer() {
 		return kozmetickiTretmanMenadzer;
 	}
 	
@@ -33,59 +36,180 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 	}
 	
 	
-	private KozmeticarProvider getKozmeticarProvider() {
-		return (KozmeticarProvider) super.getMainProvider();
-	}
+	//private KozmeticarProvider getKozmeticarProvider() {
+		//return (KozmeticarProvider) super.getMainProvider();
+	//}
 
 	
 	
 	@Override
-	public void create(Kozmeticar entitet) throws IdNotUniqueException {
-		KozmeticarProvider kozmeticarProvider = getKozmeticarProvider();
+	/**Adds a new kozmeticar to the provider and checks whether all tretmani that the kozmeticar has exist.
+	 * If not new tretmani are added to the tretmani provider.*/  //TODO: so a kozmeticki tretman may exist witout it tipovi tretmana
+	public void create(Kozmeticar entitet) throws IdNotUniqueException, IllegalArgumentException {
+		DataProvider<Kozmeticar, ?> mainProvider = super.getMainProvider();
 		
-		if(entitet == null || kozmeticarProvider.getDeletedInstance().equals(entitet)) {
-			
+		if(entitet == null || mainProvider.getDeletedInstance().equals(entitet)) {
+			throw new IllegalArgumentException("Can't add a Kozmeticar that is either null or deleted kozmeticar.");
 		}
 		super.create(entitet);
 		
+		addKozmetickiTretmani(entitet);		
+	}
+	
+	/**Adds all treatments that kozmeticar has and are not in the KozmetickiTretmanMenadzer.*/
+	private void addKozmetickiTretmani(Kozmeticar kozmeticar) {
+		List<KozmetickiTretman> tretmaniKozmeticara = kozmeticar.getTretmani();
+		
+		if(tretmaniKozmeticara == null || tretmaniKozmeticara.isEmpty()) {
+			return;
+		}
+		
 		//provjeravamo da li postoje tretmani za koje je kozmeticar obucen, a da ne postoje u KozmetickiTretmanProvider
 		//ako ne postoje dodajemo ih
+		KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer = getKozmetickiTretmanMenadzer();
+		Iterator<KozmetickiTretman> kozmetickiTretmaniIter;
+		boolean foundCurrentTretman = false;
 		
-		KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer = kozmetickiTretmanMenadzer();		
-		entitet.getTretmani().forEach(tretman -> {
-			Iterator<Kozmeticar> iter = kozmeticarProvider.get();
-			boolean foundTretman = false;
+		for(KozmetickiTretman tretman : tretmaniKozmeticara) {
+			kozmetickiTretmaniIter = kozmetickiTretmanMenadzer.readAll();
+			foundCurrentTretman &= false;
 			
-			while(iter.hasNext()) {
-				if (iter.next().getTretmani().contains(tretman)) {
-					foundTretman = true;
+			while(kozmetickiTretmaniIter.hasNext()) {
+				if(kozmetickiTretmaniIter.next().equals(tretman)) {
+					foundCurrentTretman = true;
 					break;
 				}
 			}
 			
-			if(!foundTretman) {
-				kozmetickiTretmanMenadzer.create(tretman); //may throw exception
-			}		
-		});
+			if(!foundCurrentTretman) {
+				kozmetickiTretmanMenadzer.createKozmetickiTretman(tretman); //because we know that there is a kozmeticar that can preform this tretment
+			}
+		}
 	}
 
 	
+	
 	@Override
+	/**Deletes all kozmeticari that satisfy the query and searches for kozmeticki tretmani that will be kozmeticarless after deletion.
+	 *The found kozmeticki tretmani will also be removed from their menadzer. Also removes the kozmeticar from any zakazan tretman where he is a client or the kozmeticar.*/
 	public boolean delete(Query<Kozmeticar> selector) {
-		List<Kozmeticar> kozmeticari = getKozmeticarProvider().get(selector);
-		if(kozmeticari.isEmpty()) {
+		DataProvider<Kozmeticar, ?> kozmeticarProvider = super.getMainProvider();
+		List<Kozmeticar> kozmeticariZaBrisanje = kozmeticarProvider.get(selector);
+		
+		if(kozmeticariZaBrisanje.isEmpty()) {
 			return false;
 		}
 		
-		//TODO: finish
+		kozmeticarProvider.delete(selector);
 		
+		ArrayList<KozmetickiTretman> tretmani = new ArrayList<>();		
+		//add all the treatments to tretmani that may need to be deleted (union of the treatments from all deleted kozmeticari)
+		for(Kozmeticar izbrisaniKozmeticar : kozmeticariZaBrisanje) {
+			for(KozmetickiTretman tretmanKozmeticara : izbrisaniKozmeticar.getTretmani()) {
+				if(!tretmani.contains(tretmanKozmeticara)) {
+					tretmani.add(tretmanKozmeticara);
+				}
+			}
+		}
+		
+		this.deleteKozmetickiTretmaniThatHaveNoKozmeticar(tretmani);
+		this.removeKozmeticariFromZakazaniTretmani(kozmeticariZaBrisanje);		
 		return true;
 	}
+	
+	
+	private void deleteKozmetickiTretmaniThatHaveNoKozmeticar(List<KozmetickiTretman> potentiallyDeletedTreatments) {
+		DataProvider<Kozmeticar, ?> kozmeticarProvider = super.getMainProvider();
+		KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer = getKozmetickiTretmanMenadzer();
+		
+		//we are only deleting KozmetickiTretman the KozmetickiTretmanMenadzer will make sure that its all TipTretmana are deleted
+		for(KozmetickiTretman tretman : potentiallyDeletedTreatments) {
+			Iterator<Kozmeticar> kozmeticariIter = kozmeticarProvider.get();
+			boolean foundKozmeticarThatHasTreatment = false;
+			
+			while(kozmeticariIter.hasNext()) {
+				if(kozmeticariIter.next().getTretmani().contains(tretman)) {
+					foundKozmeticarThatHasTreatment  = true;
+					break;
+				}
+			}
+			
+			if(!foundKozmeticarThatHasTreatment) {
+				kozmetickiTretmanMenadzer.delete(new Query<>(kt -> kt.equals(tretman)));
+			}
+		}
+	}
+	
 
+	//removes kozmeticar as a kozmeticar and as a client form the zakazani tretman
+	private void removeKozmeticariFromZakazaniTretmani(List<Kozmeticar> kozmeticariZaBrisanje) {
+		ZakazanTretmanMenadzer ztm = super.getZakazanTretmanMenadzer();
+		Kozmeticar deletedKozmeticar = super.getMainProvider().getDeletedInstance();
+		
+		Function<Kozmeticar, Query<ZakazanTretman>> getQuery = k -> {
+			return new Query<>(zt -> k.equals(zt.getKlijent()) || k.equals(zt.getKozmeticar()));
+		};
+		
+		BiFunction<Kozmeticar, Kozmeticar, Updater<ZakazanTretman>> getUpdater = (kozmeticar, deleted) -> {
+			return new Updater<>(zt -> {
+				if(kozmeticar.equals(zt.getKlijent())) {
+					zt.setKlijent(deleted);
+				}
+				
+				if(kozmeticar.equals(zt.getKozmeticar())) {
+					zt.setKozmeticar(deleted);
+				}
+			});		
+		};
+		
+		
+		for(Kozmeticar kozmeticar : kozmeticariZaBrisanje) {
+			ztm.update(getQuery.apply(kozmeticar), getUpdater.apply(kozmeticar, deletedKozmeticar));
+		}
+	}
+	
+	
 	
 	@Override
 	public void load() throws IOException {
-		getKozmeticarProvider().loadData(kozmetickiTretmanMenadzer().getIds());;
+		((KozmeticarProvider) super.getMainProvider()).loadData(getKozmetickiTretmanMenadzer().getIds());;
+	}
+	
+	
+	
+	List<Kozmeticar> allKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman){
+		
+		return getMainProvider().get(
+					new Query<>(kozmeticar -> {
+						return ( kozmeticar.getTretmani() != null && kozmeticar.getTretmani().contains(tretman) );
+					})
+				);
+	}
+	
+	
+	boolean kozmeticarThatCenPreformTreatmentExists(KozmetickiTretman tretman) {
+		return !(this.allKozmeticariThatCanPreformTreatment(tretman).isEmpty());
+	}
+	
+	
+	void removeTretmaniFromAllKozmeticari(KozmetickiTretman... tretmani) {
+		Query<Kozmeticar> query = new Query<>();
+		for(KozmetickiTretman tretman : tretmani) {
+			query.ili(
+					kozmeticar -> ( kozmeticar.getTretmani() != null && kozmeticar.getTretmani().contains(tretman) )
+			);
+		}
+		
+		List<Kozmeticar> kozmeticari = super.getMainProvider().get(query);
+		
+		if(kozmeticari.isEmpty()) {
+			return;
+		}
+		
+		List<KozmetickiTretman> tretmaniLista = Arrays.asList(tretmani);
+		kozmeticari.forEach(kozmeticar -> {
+			kozmeticar.getTretmani().removeAll(tretmaniLista);
+		});
 	}
 
 }

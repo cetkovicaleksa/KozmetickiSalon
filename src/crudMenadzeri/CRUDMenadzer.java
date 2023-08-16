@@ -22,4 +22,6 @@ public interface CRUDMenadzer<T extends Entitet> {
 	public boolean delete(Query<T> selector);
 	
 	public void load() throws IOException;
+	
+	public void save() throws IOException;
 }

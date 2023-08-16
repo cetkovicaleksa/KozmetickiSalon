@@ -1,5 +1,6 @@
 package crudMenadzeri;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -16,10 +17,12 @@ public abstract class KorisnikMenadzer<T extends Korisnik> extends Menadzer<T> {
 	private ZakazanTretmanMenadzer zakazanTretmanMenadzer;
 	
 	
-	public KorisnikMenadzer() {}
-	
-	public KorisnikMenadzer(DataProvider<T, ?> mainProvider, ZakazanTretmanMenadzer zakazanTretmanProvider) {
+	public KorisnikMenadzer() {
 		super();
+	}
+		
+	public KorisnikMenadzer(DataProvider<T, ?> mainProvider, ZakazanTretmanMenadzer zakazanTretmanProvider) {
+		this();
 		setMainProvider(mainProvider);
 		setZakazanTretmanMenadzer(zakazanTretmanProvider);
 	}
@@ -45,6 +48,17 @@ public abstract class KorisnikMenadzer<T extends Korisnik> extends Menadzer<T> {
 	
 	
 	
+	protected void removeKlijentiFromZakazaniTretmani(Collection<T> clients) {
+		T deletedKlijent = getMainProvider().getDeletedInstance();
+		
+		getZakazanTretmanMenadzer().update(
+				new Query<>(zt -> clients.contains(zt.getKlijent())),
+				new Updater<>(zt -> zt.setKlijent(deletedKlijent))
+		);
+	}
+	
+	
+	
 
 	
 	
@@ -59,7 +73,7 @@ public abstract class KorisnikMenadzer<T extends Korisnik> extends Menadzer<T> {
 		private int numRemoved = 0;
 		
 		private final Query<ZakazanTretman> Q = new Query<>(zt -> {
-			return zt.getKlijent() == trenutniKlijent;
+			return zt.getKlijent().equals(trenutniKlijent);  //TODO
 		});
 		
 		private final Updater<ZakazanTretman> U = new Updater<>(zt -> {
@@ -122,6 +136,7 @@ public abstract class KorisnikMenadzer<T extends Korisnik> extends Menadzer<T> {
 			ZakazanTretmanMenadzer ztm = getZakazanTretmanMenadzer();
 			
 			while(iter.hasNext()) {
+				setTrenutniKlijent(iter.next());
 				ztm.update(Q, U);
 			}
 			

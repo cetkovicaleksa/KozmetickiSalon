@@ -9,7 +9,7 @@ import helpers.Converter;
 
 public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 	
-	private static final Recepcioner DELETED = new Recepcioner() {
+	public static final Recepcioner DELETED = new Recepcioner() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override

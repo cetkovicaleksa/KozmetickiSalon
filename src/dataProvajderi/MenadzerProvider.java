@@ -9,7 +9,7 @@ import helpers.Converter;
 
 public class MenadzerProvider extends DataProvider<Menadzer, String> {
 	
-	private static final Menadzer DELETED = new Menadzer() {
+	public static final Menadzer DELETED = new Menadzer() {
 		@Override
 		public void setGodineStaza(int godineStaza) {}
 		@Override
