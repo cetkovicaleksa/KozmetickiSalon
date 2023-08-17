@@ -39,6 +39,7 @@ public class Query<T> implements Predicate<T>{
 		return (Predicate<X>) NULL_FILTER;
 	}
 	
+	
 	public Query<T> clearQuery() {
 		setFilter(getNullFilter());
 		return this;

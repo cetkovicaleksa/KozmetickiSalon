@@ -79,7 +79,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 	 * @throws IdNotUniqueException if the ids are not unique with the new function*/
 	public void setNewIdFunction(Function<T, String> newIdFunction) throws IdNotUniqueException {
 		if( !DELETED_ID.equals(newIdFunction.apply(getDeletedInstance())) ) {
-			//hmmmmmmm TODO
+			//TODO: throw new IllegalArgumentException("");
 		}
 		
 		Iterator<T> iterator = get();

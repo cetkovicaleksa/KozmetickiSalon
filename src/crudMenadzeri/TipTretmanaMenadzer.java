@@ -133,4 +133,9 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 	}
 	
 
+	List<KozmetickiTretman.TipTretmana> tipoviTretmana(KozmetickiTretman kozmetickiTretman) {
+		return getMainProvider().get(new Query<>(
+				tt -> tt.getTretman().equals(kozmetickiTretman)
+				));
+	}
 }

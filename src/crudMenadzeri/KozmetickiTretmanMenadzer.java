@@ -54,7 +54,7 @@ public class KozmetickiTretmanMenadzer extends Menadzer<KozmetickiTretman> {
 	
 	@Override
 	/**Adds the new kozmeticki tretman if there is a kozmeticar that has it in its list of treatments.*/
-	public void create(KozmetickiTretman entitet) throws IdNotUniqueException {
+	public void create(KozmetickiTretman entitet) throws IdNotUniqueException, IllegalArgumentException {
 		if(entitet == null || getMainProvider().getDeletedInstance().equals(entitet)) {
 			throw new IllegalArgumentException("KozmetickiTretman can't be null or deleted kozmeticki tretman.");
 		}
@@ -63,7 +63,11 @@ public class KozmetickiTretmanMenadzer extends Menadzer<KozmetickiTretman> {
 			throw new IllegalArgumentException("Can't add a KozmetickiTretman that doesn't have a Kozmeticar that can preform it.");
 		}
 			
-		getMainProvider().post(entitet);
+		try {
+			getMainProvider().post(entitet);
+		}catch(IdNotUniqueException e) {
+			throw e; //maby add custom messages so that they can be displayed in popup or something
+		}
 	}
 	
 	void createKozmetickiTretman(KozmetickiTretman entitet) throws IdNotUniqueException{
@@ -88,11 +92,6 @@ public class KozmetickiTretmanMenadzer extends Menadzer<KozmetickiTretman> {
 		//izbacujemo tretmani iz tretmana za koje su kozmeticari obuceni
 		getKozmeticarMenadzer().removeTretmaniFromAllKozmeticari( tretmaniZaBrisanje.toArray(new KozmetickiTretman[0]) );
 		return true;
-	}
-	
-	
-	List<KozmetickiTretman.TipTretmana> tipoviTretmana(KozmetickiTretman kozmetickiTretman) {
-		return null;
 	}
 
 	

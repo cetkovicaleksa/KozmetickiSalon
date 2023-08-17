@@ -11,6 +11,7 @@ import entiteti.Korisnik;
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
 import entiteti.KozmetickiTretman.TipTretmana;
+import entiteti.Pol;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
 import helpers.Converter;
@@ -49,7 +50,20 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 	};
 	
 	public static final Korisnik DELETED_KORISNIK = new Korisnik() {
-
+		@Override
+		public void setIme(String ime) {}
+		@Override
+		public void setPrezime(String prezime) {}
+		@Override
+		public void setBrojTelefona(String brojTelefona) {}
+		@Override
+		public void setAdresa(String adresa) {}
+		@Override
+		public void setKorisnickoIme(String korisnickoIme) {}
+		@Override
+		public void setLozinka(String lozinka) {}
+		@Override
+		public void setPol(Pol pol) {}
 		@Override
 		public boolean equals(Object obj) {
 			if(obj == null) {
@@ -65,7 +79,10 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 			}
 			
 			Korisnik korisnik = (Korisnik) obj;
-			return (korisnik == KlijentProvider.DELETED || korisnik == KozmeticarProvider.DELETED || korisnik == RecepcionerProvider.DELETED || korisnik == MenadzerProvider.DELETED);	
+			return (korisnik == KlijentProvider.DELETED || 
+					korisnik == KozmeticarProvider.DELETED || 
+					korisnik == RecepcionerProvider.DELETED || 
+					korisnik == MenadzerProvider.DELETED);	
 		}
 		
 	};

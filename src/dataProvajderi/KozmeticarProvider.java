@@ -103,7 +103,7 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 	        ArrayList<KozmetickiTretman> tretmani = new ArrayList<>();
 	        kozmeticar.setTretmani(tretmani);
 	        
-	        if(k[11].isEmpty()) {
+	        if(k.length < 12 || k[11].isEmpty()) { //don't like this
 	        	return;
 	        }
 	        

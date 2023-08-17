@@ -62,7 +62,7 @@ public abstract class KorisnikMenadzer<T extends Korisnik> extends Menadzer<T> {
 
 	
 	
-	
+	// old code
 	
 	/**A class that helps with removing clients from their zakazaniTretman-i when deleting them.
 	 * Should be made without parameter just using Korisnik but constructors won't work for some reason??*/

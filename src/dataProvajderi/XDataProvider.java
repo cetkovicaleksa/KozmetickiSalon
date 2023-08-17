@@ -1,12 +1,19 @@
 package dataProvajderi;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import entiteti.Entitet;
 
 public abstract class XDataProvider<T extends Entitet, I> extends DataProvider<T, I>{
 	
+	public XDataProvider() {
+		super();
+	}
+	
+	public XDataProvider(Function<T, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
 
 	@Override
 	public void loadData() throws UnsupportedOperationException {

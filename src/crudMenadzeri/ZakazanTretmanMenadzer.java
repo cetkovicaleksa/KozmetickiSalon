@@ -14,7 +14,6 @@ import entiteti.Recepcioner;
 import entiteti.Menadzer;
 import entiteti.ZakazanTretman;
 import helpers.DefaultDict;
-import helpers.Query;
 
 public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretman> {
 	
@@ -23,6 +22,8 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 	//need the rest for loading and saving data
 	private KlijentMenadzer klijentMenadzer;
 	private KozmeticarMenadzer kozmeticarMenadzer;
+	
+	//these two are only required if you let any Korisnik schedule a treatment
 	private RecepcionerMenadzer recepcionerMenadzer;
 	private MenadzerMenadzer menadzerMenadzer;
 	
@@ -35,60 +36,34 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 			
 			return 	(k instanceof Klijent) ? getKlijentMenadzer().getId((Klijent) k) :
 				    (k instanceof Kozmeticar) ? getKozmeticarMenadzer().getId((Kozmeticar) k) :
-				    (k instanceof Recepcioner) ? getRecepcionerMenadzer().getId((Recepcioner) k) :
-				    (k instanceof Menadzer) ? getMenadzerMenadzer().getId((Menadzer) k) : DataProvider.DELETED_ID;
+				    (k instanceof Recepcioner && getRecepcionerMenadzer() != null) ? getRecepcionerMenadzer().getId((Recepcioner) k) :
+				    (k instanceof Menadzer && getMenadzerMenadzer() != null) ? getMenadzerMenadzer().getId((Menadzer) k) : DataProvider.DELETED_ID;
 		};
 		
+		Korisnik deletedKorisnik = ZakazanTretmanProvider.DELETED_KORISNIK;
 		
-		Query<Korisnik> isKorisnikDeletedQuery = new Query<>(korisnik -> {
-			return getKlijentMenadzer().getDeletedInstance().equals(korisnik) ||
-				   getKozmeticarMenadzer().getDeletedInstance().equals(korisnik) ||
-				   getRecepcionerMenadzer() != null && getRecepcionerMenadzer().getDeletedInstance().equals(korisnik) ||
-				   getMenadzerMenadzer() != null && getMenadzerMenadzer().getDeletedInstance().equals(korisnik);
-		});
-		
-		Korisnik deletedKorisnik = new Korisnik(){
-			@Override
-			public boolean equals(Object obj) {
-				if(obj == null) {
-					return false;
-				}
-				
-				if(this == obj) {
-					return true;
-				}
-				
-				if( !(obj instanceof Korisnik) ) {
-					return false;
-				}
-				
-				Korisnik korisnik = (Korisnik) obj;
-				return isKorisnikDeletedQuery.test(korisnik);	
-			}	
-		};
-		
-		Supplier<DefaultDict<String, Korisnik>> getIdFromKorisnik = () -> {
+		Supplier<DefaultDict<String, Korisnik>> getKorisniciIdsDict = () -> {
 			class D extends DefaultDict<String, Korisnik>{
 				
 				@Override
 				public Korisnik get(String key) {
 					Korisnik korisnik = getKlijentMenadzer().getById(key);
-					if( !isKorisnikDeletedQuery.test(korisnik)) {
+					if( !deletedKorisnik.equals(korisnik) ) {
 						return korisnik;
 					}
 					
 					korisnik = getKozmeticarMenadzer().getById(key);
-					if( !isKorisnikDeletedQuery.test(korisnik)) {
+					if( !deletedKorisnik.equals(korisnik) ) {
 						return korisnik;
 					}
 					
 					korisnik = (getRecepcionerMenadzer() == null) ? deletedKorisnik : getRecepcionerMenadzer().getById(key);
-					if( !isKorisnikDeletedQuery.test(korisnik)) {
+					if( !deletedKorisnik.equals(korisnik) ) {
 						return korisnik;
 					}
 					
 					korisnik = (getMenadzerMenadzer() == null) ? deletedKorisnik : getMenadzerMenadzer().getById(key); 
-					if( !isKorisnikDeletedQuery.test(korisnik) ) {
+					if( !deletedKorisnik.equals(korisnik) ) {
 						return korisnik;
 					}
 					
@@ -96,7 +71,7 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 				}
 				
 				@Override
-				public void put(String key, Korisnik value) {
+				public void put(String key, Korisnik value) throws UnsupportedOperationException {
 					throw new UnsupportedOperationException("This ids dictionary is read only.");
 				}
 				
@@ -110,7 +85,7 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 		};
 		
 		
-		KORISNIK_IDS_DICT = getIdFromKorisnik.get();
+		KORISNIK_IDS_DICT = getKorisniciIdsDict.get();
 	}
 
 	
@@ -119,7 +94,11 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 	public ZakazanTretmanMenadzer(
 			ZakazanTretmanProvider zakazanTretmanProvider, TipTretmanaMenadzer tipTretmanaMenadzer,
 			KlijentMenadzer klijentMenadzer, KozmeticarMenadzer kozmeticarMenadzer) {
-		
+		super();
+		setMainProvider(zakazanTretmanProvider);
+		setTipTretmanaMenadzer(tipTretmanaMenadzer);
+		setKlijentMenadzer(klijentMenadzer);
+		setKozmeticarMenadzer(kozmeticarMenadzer);		
 	}
 	
 	public ZakazanTretmanMenadzer(
@@ -196,7 +175,7 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 	@Override
 	public void create(ZakazanTretman entitet) throws IdNotUniqueException, IllegalArgumentException {
 		
-		if( !getTipTretmanaMenadzer().exists(entitet.getTipTretmana())) {
+		if( !getTipTretmanaMenadzer().exists(entitet.getTipTretmana()) ) {
 			throw new IllegalArgumentException("Can't create a ZakazanTretman ["+ getMainProvider().getId(entitet) + "] that has a non existent TipTretmana as its treatment.");
 		}
 		
@@ -214,8 +193,12 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 		if( !klijentExists(klijent) ) {
 			throw new IllegalArgumentException("Can't create a ZakazanTretman that has a non existent Korisnik as its klijent.");
 		}
-			
-		getMainProvider().post(entitet);
+		
+		try{
+			getMainProvider().post(entitet);
+		}catch (IdNotUniqueException e) {
+			throw e;
+		}
 	}
 
 

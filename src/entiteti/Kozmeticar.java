@@ -28,6 +28,14 @@ public class Kozmeticar extends Zaposleni{
 		this.tretmani = tretmani;
 	}
 	
+	public void addTretman(KozmetickiTretman tretman) {
+		getTretmani().add(tretman);
+	}
+	
+	public void removeTretman(KozmetickiTretman tretman) {
+		getTretmani().remove(tretman);
+	}
+	
 	
 
 	

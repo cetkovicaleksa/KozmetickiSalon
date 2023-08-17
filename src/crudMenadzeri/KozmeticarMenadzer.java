@@ -112,13 +112,13 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 			}
 		}
 		
-		this.deleteKozmetickiTretmaniThatHaveNoKozmeticar(tretmani);
-		this.removeKozmeticariFromZakazaniTretmani(kozmeticariZaBrisanje);		
+		this.deleteKozmetickiTretmaniThatHaveNoKozmeticar(tretmani.toArray(new KozmetickiTretman[0]));
+		this.removeKozmeticariFromZakazaniTretmani(kozmeticariZaBrisanje.toArray(new Kozmeticar[0]));		
 		return true;
 	}
 	
 	
-	private void deleteKozmetickiTretmaniThatHaveNoKozmeticar(List<KozmetickiTretman> potentiallyDeletedTreatments) {
+	private void deleteKozmetickiTretmaniThatHaveNoKozmeticar(KozmetickiTretman... potentiallyDeletedTreatments) {
 		DataProvider<Kozmeticar, ?> kozmeticarProvider = super.getMainProvider();
 		KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer = getKozmetickiTretmanMenadzer();
 		
@@ -142,10 +142,10 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 	
 
 	//removes kozmeticar as a kozmeticar and as a client form the zakazani tretman
-	private void removeKozmeticariFromZakazaniTretmani(List<Kozmeticar> kozmeticariZaBrisanje) {
+	private void removeKozmeticariFromZakazaniTretmani(Kozmeticar... kozmeticariZaBrisanje) {
 		ZakazanTretmanMenadzer ztm = super.getZakazanTretmanMenadzer();
 		Kozmeticar deletedKozmeticar = super.getMainProvider().getDeletedInstance();
-		
+
 		Function<Kozmeticar, Query<ZakazanTretman>> getQuery = k -> {
 			return new Query<>(zt -> k.equals(zt.getKlijent()) || k.equals(zt.getKozmeticar()));
 		};
@@ -175,10 +175,14 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 		((KozmeticarProvider) super.getMainProvider()).loadData(getKozmetickiTretmanMenadzer().getIds());;
 	}
 	
+	@Override
+	public void save() throws IOException {
+		((KozmeticarProvider) super.getMainProvider()).saveData(getKozmetickiTretmanMenadzer()::getId);
+	}
+	
 	
 	
 	List<Kozmeticar> allKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman){
-		
 		return getMainProvider().get(
 					new Query<>(kozmeticar -> {
 						return ( kozmeticar.getTretmani() != null && kozmeticar.getTretmani().contains(tretman) );
