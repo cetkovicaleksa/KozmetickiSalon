@@ -1,6 +1,7 @@
 package dataProvajderi;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import entiteti.KozmetickiTretman;
 import helpers.Converter;
@@ -57,6 +58,16 @@ public class KozmetickiTretmanProvider extends DataProvider<KozmetickiTretman, S
 		kozmetickiTretman.setOpis(kt[1]);
 	    return kozmetickiTretman;
 	};
+	
+	
+	
+	public KozmetickiTretmanProvider() {
+		super();
+	}
+	
+	public KozmetickiTretmanProvider(Function<KozmetickiTretman, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
 	
 
 	

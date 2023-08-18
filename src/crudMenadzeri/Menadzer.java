@@ -13,7 +13,7 @@ import helpers.Updater;
 
 public abstract class Menadzer<T extends Entitet> implements CRUDMenadzer<T> {
 	
-	public Menadzer() {}
+	protected Menadzer() {}
 	
 	protected abstract DataProvider<T, ?> getMainProvider();
 	

@@ -18,9 +18,12 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 	//private ZakazanTretmanMenadzer zakazanTretmanMenadzer;
 
 
-
-	public TipTretmanaMenadzer(TipTretmanaProvider mainProvider, KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer) {
+	public TipTretmanaMenadzer() {
 		super();
+	}
+	
+	public TipTretmanaMenadzer(TipTretmanaProvider mainProvider, KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer) {
+		this();
 		setMainProvider(mainProvider);
 		setKozmetickiTretmanMenadzer(kozmetickiTretmanMenadzer);
 	}
@@ -48,7 +51,8 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 	
 	
 	@Override
-	public void create(TipTretmana entitet) throws IdNotUniqueException, IllegalArgumentException {
+	/**Adds a new TipTretmana only if it belongs to an existent KozmetickiTretman.*/
+	public void create(TipTretmana entitet) throws IdNotUniqueException, IllegalArgumentException, IllegalArgumentException {
 		TipTretmana deletedTipTretmana = getMainProvider().getDeletedInstance();
 		KozmetickiTretman deletedKozmetickiTretman = deletedTipTretmana.getTretman();
 		
@@ -75,6 +79,7 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 	
 
 	@Override
+	/**Deletes tipovi tretmana and KozmetickiTretman that are left without any TipTretmana.*/ //TODO: check whether you should delete KozmetickiTretman because it conflicts with KozmeticarMenadzer
 	public boolean delete(Query<TipTretmana> selector) {
 		TipTretmanaProvider mainProvider = getMainProvider();
 		List<TipTretmana> tipoviTretmanaZaBrisanje = mainProvider.get(selector);

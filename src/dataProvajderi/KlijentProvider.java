@@ -1,6 +1,7 @@
 package dataProvajderi;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import entiteti.Klijent;
 import entiteti.Pol;
@@ -11,8 +12,8 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 	public static final Klijent DELETED = new Klijent() {
 		@Override
 		public void setHasLoyaltyCard(boolean hasLoyaltyCard) {}
-		@Override
-		public void setUkupnoPotrosio(double ukupnoPotrosio) {}
+		//@Override
+		//public void setUkupnoPotrosio(double ukupnoPotrosio) {}
 		@Override
 		public void setIme(String ime) {}
 		@Override
@@ -44,8 +45,8 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 	    k[4] = klijent.getKorisnickoIme();
 	    k[5] = klijent.getLozinka();
 	    k[6] = klijent.getPol().name();
-	    k[7] = Double.toString(klijent.getUkupnoPotrosio());
-	    k[8] = Boolean.toString(klijent.getHasLoyaltyCard());
+	    //k[7] = Double.toString(klijent.getUkupnoPotrosio());
+	    k[7] = Boolean.toString(klijent.getHasLoyaltyCard());
 	    return k;
 	};
 	
@@ -59,10 +60,20 @@ public class KlijentProvider extends DataProvider<Klijent, String> {
 	    klijent.setKorisnickoIme(k[4]);
 	    klijent.setLozinka(k[5]);
 	    klijent.setPol(Pol.valueOf(k[6]));
-	    klijent.setUkupnoPotrosio(Double.parseDouble(k[7]));
-	    klijent.setHasLoyaltyCard(Boolean.parseBoolean(k[8]));
+	    //klijent.setUkupnoPotrosio(Double.parseDouble(k[7]));
+	    klijent.setHasLoyaltyCard(Boolean.parseBoolean(k[7]));
 	    return klijent;
 	};
+	
+	
+	
+	public KlijentProvider() {
+		super();
+	}
+	
+	public KlijentProvider(Function<Klijent, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
 	
 	
 	

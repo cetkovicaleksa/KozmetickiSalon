@@ -1,6 +1,7 @@
 package dataProvajderi;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import entiteti.NivoStrucneSpreme;
 import entiteti.Pol;
@@ -77,6 +78,18 @@ public class RecepcionerProvider extends DataProvider<Recepcioner, String> {
 	    return recepcioner;
 	};
 
+	
+	
+	public RecepcionerProvider() {
+		super();
+	}
+	
+	public RecepcionerProvider(Function<Recepcioner, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
+	
+	
+	
 	@Override
 	public Recepcioner getDeletedInstance() { return DELETED; }
 

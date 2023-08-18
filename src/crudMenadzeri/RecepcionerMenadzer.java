@@ -7,9 +7,13 @@ import entiteti.Recepcioner;
 import helpers.Query;
 
 public class RecepcionerMenadzer extends KorisnikMenadzer<Recepcioner> {
+	
+	public RecepcionerMenadzer() {
+		super();
+	}
 			
 	public RecepcionerMenadzer(RecepcionerProvider recepcionerProvider) {
-		super.setMainProvider(recepcionerProvider);
+		super(recepcionerProvider);
 	}
 	
 	public RecepcionerMenadzer(RecepcionerProvider recepcionerProvider, ZakazanTretmanMenadzer zakazanTretmanMenadzer) {
@@ -17,9 +21,8 @@ public class RecepcionerMenadzer extends KorisnikMenadzer<Recepcioner> {
 	}
 
 	@Override
-	public boolean delete(Query<Recepcioner> selector) {
-		ZakazanTretmanMenadzer ztm = super.getZakazanTretmanMenadzer();		
-		if(ztm == null) {
+	public boolean delete(Query<Recepcioner> selector) {		
+		if( super.getZakazanTretmanMenadzer() == null ) {
 			return super.delete(selector);			
 		}
 		

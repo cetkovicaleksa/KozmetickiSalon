@@ -1,6 +1,7 @@
 package dataProvajderi;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import entiteti.Menadzer;
 import entiteti.NivoStrucneSpreme;
@@ -77,6 +78,16 @@ public class MenadzerProvider extends DataProvider<Menadzer, String> {
 	    return menadzer;
 	};
 
+	
+	
+	public MenadzerProvider() {
+		super();
+	}
+	
+	public MenadzerProvider(Function<Menadzer, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
+	
 
 	@Override
 	public Menadzer getDeletedInstance() { return DELETED; }

@@ -13,9 +13,13 @@ public class KozmetickiTretmanMenadzer extends Menadzer<KozmetickiTretman> {
 	private TipTretmanaMenadzer tipTretmanaMenadzer;
 	private KozmeticarMenadzer kozmeticarMenadzer;
 
+	
+	public KozmetickiTretmanMenadzer() {
+		super();
+	}
 
 	public KozmetickiTretmanMenadzer(KozmetickiTretmanProvider kozmetickiTretmanProvider, TipTretmanaMenadzer ipTretmanaMenadzer, KozmeticarMenadzer kozmeticarMenadzer) {
-		super();
+		this();
 		setMainProvider(kozmetickiTretmanProvider);
 		setTipTretmanaMenadzer(ipTretmanaMenadzer);
 		setKozmeticarMenadzer(kozmeticarMenadzer);

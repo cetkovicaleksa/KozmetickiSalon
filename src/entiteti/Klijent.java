@@ -3,11 +3,13 @@ package entiteti;
 
 public class Klijent extends Korisnik {
 	
-	private double ukupnoPotrosio;
+	//private double ukupnoPotrosio;
 	private boolean hasLoyaltyCard;
 
 
-	public Klijent() {}
+	public Klijent() {
+		super();
+	}
 	
 	public Klijent(String ime, String prezime, String brojTelefona, String adresa, String korisnickoIme, String lozinka, Pol pol, boolean hasLoyaltyCard) {
 		super(ime, prezime, brojTelefona, adresa, korisnickoIme, lozinka, pol);
@@ -22,12 +24,12 @@ public class Klijent extends Korisnik {
 		this.hasLoyaltyCard = hasLoyaltyCard;
 	}
 	
-	public double getUkupnoPotrosio() {
-		return ukupnoPotrosio;
-	}
+	//public double getUkupnoPotrosio() {
+		//return ukupnoPotrosio;
+	//}
 
-	public void setUkupnoPotrosio(double ukupnoPotrosio) {
-		this.ukupnoPotrosio = ukupnoPotrosio;
-	}
+	//public void setUkupnoPotrosio(double ukupnoPotrosio) {
+		//this.ukupnoPotrosio = ukupnoPotrosio;
+	//}
 
 }

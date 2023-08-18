@@ -110,6 +110,16 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 	
 	
 
+	public ZakazanTretmanProvider() {
+		super();
+	}
+	
+	public ZakazanTretmanProvider(Function<ZakazanTretman, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
+	
+	
+	
 	@Override
 	public ZakazanTretman getDeletedInstance() { return DELETED; }
 	

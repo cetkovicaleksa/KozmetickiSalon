@@ -8,6 +8,7 @@ public abstract class Zaposleni extends Korisnik implements Entitet {
 	private NivoStrucneSpreme nivoStrucneSpreme;
 	
 	public Zaposleni() {
+		super();
 		setNivoStrucneSpreme(NivoStrucneSpreme.SKOLE_BEZ);
 	}
 	

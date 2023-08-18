@@ -86,6 +86,16 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 	};
 
 	
+
+	public KozmeticarProvider() {
+		super();
+	}
+	
+	public KozmeticarProvider(Function<Kozmeticar, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
+	
+	
 	
 	@Override
 	public Kozmeticar getDeletedInstance() { return DELETED; }

@@ -9,6 +9,10 @@ import helpers.Query;
 
 
 public class KlijentMenadzer extends KorisnikMenadzer<Klijent> {
+	
+	public KlijentMenadzer() {
+		super();
+	}
 
 	public KlijentMenadzer(KlijentProvider klijentProvider, ZakazanTretmanMenadzer zakazanTretmanMenadzer) {
 		super(klijentProvider, zakazanTretmanMenadzer);

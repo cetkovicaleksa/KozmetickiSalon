@@ -3,6 +3,7 @@ package crudMenadzeri;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -20,6 +21,10 @@ import helpers.Updater;
 public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 	
 	private KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer;
+	
+	public KozmeticarMenadzer() {
+		super();
+	}
 	
 	public KozmeticarMenadzer(KozmeticarProvider kozmeticarProvider, KozmetickiTretmanMenadzer kozmetickTretmanMenadzer, ZakazanTretmanMenadzer zakazanTretmanMenadzer) {
 		super(kozmeticarProvider, zakazanTretmanMenadzer);
@@ -53,13 +58,11 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 		}
 		super.create(entitet);
 		
-		addKozmetickiTretmani(entitet);		
+		addNewKozmetickiTretmani(entitet.getTretmani());		
 	}
 	
 	/**Adds all treatments that kozmeticar has and are not in the KozmetickiTretmanMenadzer.*/
-	private void addKozmetickiTretmani(Kozmeticar kozmeticar) {
-		List<KozmetickiTretman> tretmaniKozmeticara = kozmeticar.getTretmani();
-		
+	private void addNewKozmetickiTretmani(Collection<KozmetickiTretman> tretmaniKozmeticara) {		
 		if(tretmaniKozmeticara == null || tretmaniKozmeticara.isEmpty()) {
 			return;
 		}
@@ -82,7 +85,7 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 			}
 			
 			if(!foundCurrentTretman) {
-				kozmetickiTretmanMenadzer.createKozmetickiTretman(tretman); //because we know that there is a kozmeticar that can preform this tretment
+				kozmetickiTretmanMenadzer.create(tretman); //TODO: because we know that there is a kozmeticar that can preform this tretment
 			}
 		}
 	}

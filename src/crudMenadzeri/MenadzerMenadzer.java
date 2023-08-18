@@ -8,8 +8,12 @@ import helpers.Query;
 
 public class MenadzerMenadzer extends KorisnikMenadzer<Menadzer> {
 	
+	public MenadzerMenadzer() {
+		super();
+	}
+	
 	public MenadzerMenadzer(MenadzerProvider menadzerProvider) {
-		super.setMainProvider(menadzerProvider);
+		super(menadzerProvider);
 	}
 	
 	public MenadzerMenadzer(MenadzerProvider menadzerProvider, ZakazanTretmanMenadzer zakazanTretmanMenadzer) {
@@ -17,9 +21,8 @@ public class MenadzerMenadzer extends KorisnikMenadzer<Menadzer> {
 	}
 
 	@Override
-	public boolean delete(Query<Menadzer> selector) {
-		ZakazanTretmanMenadzer ztm = super.getZakazanTretmanMenadzer();		
-		if(ztm == null) {
+	public boolean delete(Query<Menadzer> selector) {	
+		if( super.getZakazanTretmanMenadzer() == null ) {
 			return super.delete(selector);			
 		}
 		

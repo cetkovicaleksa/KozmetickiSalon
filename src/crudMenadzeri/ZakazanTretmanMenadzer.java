@@ -90,11 +90,14 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 
 	
 	
+	public ZakazanTretmanMenadzer() {
+		super();
+	}
 	
 	public ZakazanTretmanMenadzer(
 			ZakazanTretmanProvider zakazanTretmanProvider, TipTretmanaMenadzer tipTretmanaMenadzer,
 			KlijentMenadzer klijentMenadzer, KozmeticarMenadzer kozmeticarMenadzer) {
-		super();
+		this();
 		setMainProvider(zakazanTretmanProvider);
 		setTipTretmanaMenadzer(tipTretmanaMenadzer);
 		setKlijentMenadzer(klijentMenadzer);
@@ -105,7 +108,7 @@ public class ZakazanTretmanMenadzer extends crudMenadzeri.Menadzer<ZakazanTretma
 			ZakazanTretmanProvider zakazanTretmanProvider, TipTretmanaMenadzer tipTretmanaMenadzer,
 			KlijentMenadzer klijentMenadzer, KozmeticarMenadzer kozmeticarMenadzer,
 			RecepcionerMenadzer recepcionerMenadzer, MenadzerMenadzer menadzerMenadzer) {
-		super();
+		this();
 		setMainProvider(zakazanTretmanProvider);
 		setTipTretmanaMenadzer(tipTretmanaMenadzer);
 		setKlijentMenadzer(klijentMenadzer);

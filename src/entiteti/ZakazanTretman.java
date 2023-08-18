@@ -16,7 +16,9 @@ public class ZakazanTretman implements Entitet {
     
     private StatusTretmana status;
     
-    public ZakazanTretman() {}
+    public ZakazanTretman() {
+    	setStatus(StatusTretmana.ZAKAZAN);
+    }
     
     public ZakazanTretman(
 			KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent,

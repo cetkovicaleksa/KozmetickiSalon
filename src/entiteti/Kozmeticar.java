@@ -7,6 +7,7 @@ public class Kozmeticar extends Zaposleni{
 	ArrayList<KozmetickiTretman> tretmani;
 	
 	public Kozmeticar() {
+		super();
 		setTretmani(new ArrayList<>());
 	}
 	

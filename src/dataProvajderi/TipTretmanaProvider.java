@@ -32,6 +32,16 @@ public class TipTretmanaProvider extends XDataProvider<KozmetickiTretman.TipTret
 	
 	
 	
+	public TipTretmanaProvider() {
+		super();
+	}
+	
+	public TipTretmanaProvider(Function<KozmetickiTretman.TipTretmana, String> idFunction, String filePath) {
+		super(idFunction, filePath);
+	}
+	
+	
+	
 	@Override
 	public KozmetickiTretman.TipTretmana getDeletedInstance() { return DELETED; }
 	
