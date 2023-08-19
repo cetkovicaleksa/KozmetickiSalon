@@ -41,8 +41,8 @@ public class KozmetickiTretmanMenadzer extends Menadzer<KozmetickiTretman> {
 		return tipTretmanaMenadzer;
 	}
 
-	public void setTipTretmanaMenadzer(TipTretmanaMenadzer ipTretmanaMenadzer) {
-		this.tipTretmanaMenadzer = ipTretmanaMenadzer;
+	public void setTipTretmanaMenadzer(TipTretmanaMenadzer tipTretmanaMenadzer) {
+		this.tipTretmanaMenadzer = tipTretmanaMenadzer;
 	}
 	
 	

@@ -39,8 +39,8 @@ public abstract class KorisnikMenadzer<T extends Korisnik> extends Menadzer<T> {
 	}
 	
 	
-	protected void setZakazanTretmanMenadzer(ZakazanTretmanMenadzer zakazanTretmanProvider) {
-		this.zakazanTretmanMenadzer = zakazanTretmanProvider;
+	protected void setZakazanTretmanMenadzer(ZakazanTretmanMenadzer zakazanTretmanMenadzer) {
+		this.zakazanTretmanMenadzer = zakazanTretmanMenadzer;
 	}
 	
 	protected ZakazanTretmanMenadzer getZakazanTretmanMenadzer() {

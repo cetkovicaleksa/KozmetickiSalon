@@ -2,14 +2,18 @@ package crudMenadzeri;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import dataProvajderi.IdNotUniqueException;
 import dataProvajderi.TipTretmanaProvider;
 import entiteti.KozmetickiTretman;
 import entiteti.KozmetickiTretman.TipTretmana;
 import helpers.Query;
+import helpers.Updater;
 
 public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>{
 
@@ -79,7 +83,7 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 	
 
 	@Override
-	/**Deletes tipovi tretmana and KozmetickiTretman that are left without any TipTretmana.*/ //TODO: check whether you should delete KozmetickiTretman because it conflicts with KozmeticarMenadzer
+	/**Deletes tipovi tretmana.*/ //TODO: check whether you should delete KozmetickiTretman because it conflicts with KozmeticarMenadzer
 	public boolean delete(Query<TipTretmana> selector) {
 		TipTretmanaProvider mainProvider = getMainProvider();
 		List<TipTretmana> tipoviTretmanaZaBrisanje = mainProvider.get(selector);
@@ -88,41 +92,27 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 			return false;
 		}
 		
-		//izbrisali smo tipove tretmana, sada provjeravamo da li su neki kozmeticki tretmani ostali bez tipova tretmana i
-		//brisemo one koji jesu
-		List<KozmetickiTretman> kozmetickiTretmaniZaBrisanje = new ArrayList<>();
-		KozmetickiTretmanMenadzer kozmetickiTretmanMenadzer = getKozmetickiTretmanMenadzer();
-		KozmetickiTretman deletedKozmetickiTretman = kozmetickiTretmanMenadzer.getDeletedInstance();
-		
-		for(TipTretmana tipTretmana : tipoviTretmanaZaBrisanje) {
-			KozmetickiTretman tretman = tipTretmana.getTretman();
-			
-			if(tretman == null || deletedKozmetickiTretman.equals(tretman)) { //should never happen
-				continue;
-			}
-			
-			Iterator<TipTretmana> sviTipoviTretmanaIter = mainProvider.get();
-			boolean foundTipTretmanaForTretman = false;
-			
-			while(sviTipoviTretmanaIter.hasNext()) {
-				if(tretman.equals(sviTipoviTretmanaIter.next().getTretman())) {
-					foundTipTretmanaForTretman = true;
-					break;
-				}
-			}
-			
-			if( !foundTipTretmanaForTretman ) {
-				kozmetickiTretmaniZaBrisanje.add(tretman);
-			}
-		}
-		
-		if( !kozmetickiTretmaniZaBrisanje.isEmpty() ) {
-			kozmetickiTretmanMenadzer.delete(
-					new Query<>(kozmetickiTretman -> kozmetickiTretmaniZaBrisanje.contains(kozmetickiTretman))
-			);
-		}
-		
 		return true;		
+	}
+	
+	public void deleteKozmetickiTretmaniThatHaveNoTipTretmana() { //hmm
+		HashMap<KozmetickiTretman, Integer> map = new HashMap<>(); // explain
+		KozmetickiTretmanMenadzer ktm = getKozmetickiTretmanMenadzer();
+		
+		getMainProvider().put(
+				new Query<>(),
+				new Updater<>(tipTretmana -> {
+					Integer num = map.get(tipTretmana.getTretman());
+					
+					if(num == null || num++ == 0) {
+						map.put(tipTretmana.getTretman(), 1);
+					}		
+				})
+		);
+		
+		ktm.delete(
+				new Query<>(kt -> !map.containsKey(kt))
+		);
 	}
 	
 

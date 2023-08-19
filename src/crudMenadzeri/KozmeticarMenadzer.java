@@ -56,13 +56,23 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 		if(entitet == null || mainProvider.getDeletedInstance().equals(entitet)) {
 			throw new IllegalArgumentException("Can't add a Kozmeticar that is either null or deleted kozmeticar.");
 		}
-		super.create(entitet);
 		
-		addNewKozmetickiTretmani(entitet.getTretmani());		
+		try{
+			mainProvider.post(entitet); 
+		}catch(IdNotUniqueException e) {
+			throw e;
+		}
+		
+		try {
+			addNewKozmetickiTretmani(entitet.getTretmani());		
+		}catch(IdNotUniqueException e) {
+			throw e; //maby don't add the kozmeticar or just say that not all treatments have unique ids
+		}
 	}
 	
+	
 	/**Adds all treatments that kozmeticar has and are not in the KozmetickiTretmanMenadzer.*/
-	private void addNewKozmetickiTretmani(Collection<KozmetickiTretman> tretmaniKozmeticara) {		
+	private void addNewKozmetickiTretmani(Collection<KozmetickiTretman> tretmaniKozmeticara) throws IdNotUniqueException{		
 		if(tretmaniKozmeticara == null || tretmaniKozmeticara.isEmpty()) {
 			return;
 		}
