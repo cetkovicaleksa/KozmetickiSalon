@@ -1,4 +1,4 @@
-package gui;
+package gui.interfaces;
 
 import entiteti.Korisnik;
 import entiteti.StatusTretmana;

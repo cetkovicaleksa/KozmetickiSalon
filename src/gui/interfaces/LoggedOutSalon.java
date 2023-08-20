@@ -1,4 +1,4 @@
-package gui;
+package gui.interfaces;
 
 import entiteti.Klijent;
 import entiteti.Korisnik;
@@ -12,10 +12,10 @@ public interface LoggedOutSalon extends KozmetickiSalon{
 	
 	public Korisnik authenticateKorisnik(String username, String password) throws UsernameNotFoundException, PasswordMissmatchException;
 	
+	public boolean usernameTaken(String username);
 	
 	public Klijent registerKorisnik(
-			String name, String surname, Pol sex, String phoneNumber, String adress, String username, String password);
-	
-	public Klijent registerKorisnik(String username, String password);
+			String name, String surname, Pol gender, String phoneNumber, String address, String username, String password
+			);
 	
 }
