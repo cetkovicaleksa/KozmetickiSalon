@@ -2,15 +2,20 @@ package gui.interfaces;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 
-import entiteti.KozmetickiTretman;
+import entiteti.Kozmeticar;
+import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
 
 public interface KozmeticarSalon extends LoggedInSalon{
 	
-	public Collection<KozmetickiTretman> tretmaniKozmeticara();
+	@Override
+	public Kozmeticar getLoggedInKorisnik();
+	
+	public Map<StatusTretmana, List<ZakazanTretman>> zakazaniTretmaniKozmeticara();
 	
 	public void izvrsiTretman(ZakazanTretman tretman);
 	

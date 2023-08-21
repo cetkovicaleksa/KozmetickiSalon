@@ -2,6 +2,13 @@ package gui.login;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.function.Function;
 
 import javax.swing.JButton;
@@ -14,10 +21,16 @@ import javax.swing.JTextField;
 
 import entiteti.Klijent;
 import entiteti.Korisnik;
+import entiteti.Kozmeticar;
+import entiteti.KozmetickiTretman;
 import entiteti.Pol;
+import entiteti.StatusTretmana;
+import entiteti.ZakazanTretman;
 import exceptions.PasswordMissmatchException;
 import exceptions.UsernameNotFoundException;
+import gui.interfaces.KozmeticarSalon;
 import gui.interfaces.LoggedOutSalon;
+import gui.kozmeticar.KozmeticarGUI;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
@@ -103,6 +116,7 @@ public class LoginGUI extends JFrame {
 				JOptionPane.showMessageDialog(LoginGUI.this, "Pogresna lozinka", ":(", JOptionPane.ERROR_MESSAGE);
 			}
 			//TODO: maby add some more catch statements?
+			dispose();
 		});
     }
     
@@ -144,14 +158,55 @@ public class LoginGUI extends JFrame {
 
 			@Override
 			public void logIn(Korisnik korisnik) {
-				// TODO Auto-generated method stub
+				new KozmeticarGUI(new KozmeticarSalon() {
+
+					@Override
+					public void logOut() {
+						// TODO Auto-generated method stub
+						
+					}
+
+					
+					@Override
+					public void exit() {
+						// TODO Auto-generated method stub
+						
+					}
+
+					
+
+					@Override
+					public void izvrsiTretman(ZakazanTretman tretman) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara() {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Kozmeticar getLoggedInKorisnik() {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Map<StatusTretmana, List<ZakazanTretman>> zakazaniTretmaniKozmeticara() {
+						// TODO Auto-generated method stub
+						return null;
+					}
+					
+				}).setVisible(true);
 				
 			}
 
 			@Override
 			public Korisnik authenticateKorisnik(String username, String password)
 					throws UsernameNotFoundException, PasswordMissmatchException {
-				throw new PasswordMissmatchException();
+				return new Kozmeticar();
 				//return null;
 			}
 
