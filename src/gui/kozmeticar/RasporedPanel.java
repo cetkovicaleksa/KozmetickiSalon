@@ -1,5 +1,7 @@
 package gui.kozmeticar;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -13,11 +15,14 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
@@ -29,7 +34,7 @@ import gui.interfaces.KozmeticarSalon;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
-public class RasporedPanel extends JPanel{
+public class RasporedPanel extends JPanel{  //TODO: need to add updating data when appointment is completed!!!
 
 	private Supplier<SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>>> rasporedKozmeticaraSupplier;
 	private Consumer<ZakazanTretman> izvrsiTretmanConsumer;
@@ -38,8 +43,7 @@ public class RasporedPanel extends JPanel{
 	private JTable table;
 	
 	public RasporedPanel(KozmeticarSalon kozmeticarSalon) {
-		this.rasporedKozmeticaraSupplier = kozmeticarSalon::rasporedKozmeticara;
-		this.izvrsiTretmanConsumer = kozmeticarSalon::izvrsiTretman;
+		this(kozmeticarSalon::rasporedKozmeticara, kozmeticarSalon::izvrsiTretman);
 	}
 	
 	public RasporedPanel(Supplier<SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>>> rasporedKozmeticaraSupplier, Consumer<ZakazanTretman> izvrsiTretmanConsumer) {
@@ -57,7 +61,20 @@ public class RasporedPanel extends JPanel{
 	}
 	
 	private void setupLayout() {
-		
+		setLayout(new BorderLayout());
+
+	    JPanel contentPanel = new JPanel();
+	    contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS)); // Vertical BoxLayout
+
+	    JLabel label = new JLabel("Klikni na naziv tretmana za izvrsavanje.");
+	    label.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the label horizontally
+	    contentPanel.add(Box.createVerticalStrut(20)); // Add space on top
+	    contentPanel.add(label);
+	    contentPanel.add(Box.createVerticalStrut(20)); // Add space on bottom
+
+	    contentPanel.add(new JScrollPane(table));
+
+	    add(contentPanel, BorderLayout.CENTER);
 	}
 	
 	private void addListeners() {
@@ -68,7 +85,7 @@ public class RasporedPanel extends JPanel{
 	            int column = table.columnAtPoint(e.getPoint());
 
 	            // Check if the cursor is over a ZakazanTretman cell
-	            if (column == 2 && table.getValueAt(row, column) instanceof ZakazanTretman) {
+	            if (column == 2 && ((RasporedTableModel)table.getModel()).getZakazanTretman(row) != null) {
 	                table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	            } else {
 	                table.setCursor(Cursor.getDefaultCursor());
@@ -83,7 +100,7 @@ public class RasporedPanel extends JPanel{
 	            int column = table.columnAtPoint(e.getPoint());
 
 	            // Check if the clicked cell contains a ZakazanTretman
-	            if (column == 2 && table.getValueAt(row, column) instanceof ZakazanTretman) {
+	            if (column == 2) {
 	                ZakazanTretman selectedTretman = ((RasporedTableModel)table.getModel()).getZakazanTretman(row);
 	                if (selectedTretman != null) {
 	                	showZakazanTretmanPopup(selectedTretman);
@@ -92,6 +109,7 @@ public class RasporedPanel extends JPanel{
 	        }
 	    });
 	}
+	
 	
 	private void showZakazanTretmanPopup(ZakazanTretman zakazanTretman) {
 		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Prikaz zakazanog tretmana.", Dialog.ModalityType.APPLICATION_MODAL);
@@ -116,17 +134,28 @@ public class RasporedPanel extends JPanel{
         JButton button = new JButton("Izvrsi tretman.");
         button.addActionListener(x -> {
         	String[] options = {"Da", "Ne", "Nazad"};
-            int confirm = JOptionPane.showOptionDialog(this, "Da li ste sigurni da zelite da izvrsite tretman.", "Potvrda", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            int confirm = JOptionPane.showOptionDialog(
+                dialog,
+                "Da li ste sigurni da zelite da izvrsite tretman.",
+                "Potvrda",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[1]
+            );
 
             if (confirm == JOptionPane.NO_OPTION) {
-            	return;
+                return;
             }
-            
+
             if (confirm == JOptionPane.YES_OPTION) {
                 this.izvrsiTretmanConsumer.accept(zakazanTretman);
+                //TODO: see what to do
+                //((RasporedTableModel) table.getModel())
             }
-            
-            dialog.dispose();          
+
+            dialog.dispose();       
         });
 
         
@@ -172,6 +201,7 @@ public class RasporedPanel extends JPanel{
 		Consumer<ZakazanTretman> izvrsiTretmanConsumer = z -> System.out.println(z.getTipTretmana().getNaziv());
 		
 		RasporedPanel raspPanel = new RasporedPanel(rasporedKozmeticaraSupplier, izvrsiTretmanConsumer);
+		
 		
 		raspPanel.showZakazanTretmanPopup(zt);
 	}

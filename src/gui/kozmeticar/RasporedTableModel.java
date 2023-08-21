@@ -82,7 +82,7 @@ public class RasporedTableModel extends AbstractTableModel{
 	
 	public ZakazanTretman getZakazanTretman(int rowIndex) {
 	    if (rowIndex >= 0 && rowIndex < getRowCount()) {
-	        Object tretmanObject = getValueAt(rowIndex, 2);
+	        Object tretmanObject = data[rowIndex][2];
 	        if (tretmanObject instanceof ZakazanTretman) {
 	            return (ZakazanTretman) tretmanObject;
 	        }

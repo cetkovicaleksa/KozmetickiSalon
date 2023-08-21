@@ -97,6 +97,23 @@ public class KozmeticarGUI extends KorisnikGUI{
         return zakazaniList;
     }
     
+    
+    
+    public static SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> convertToSortedMap(List<ZakazanTretman> zakazanTretmanList) {
+        SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> resultMap = new TreeMap<>();
+
+        for (ZakazanTretman tretman : zakazanTretmanList) {
+            LocalDate date = tretman.getDatum();
+            LocalTime time = tretman.getVrijeme();
+
+            // Initialize inner SortedMap if not present
+            resultMap.computeIfAbsent(date, k -> new TreeMap<>())
+                    .put(time, tretman);
+        }
+
+        return resultMap;
+    }
+    
 	public static void main(String[] args) {
 		KozmeticarSalon ks = new KozmeticarSalon() {
 
@@ -122,7 +139,7 @@ public class KozmeticarGUI extends KorisnikGUI{
 
 			@Override
 			public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara() {
-				return new TreeMap<>();
+				return convertToSortedMap(createZakazaniList(30));
 			}
 
 			@Override
