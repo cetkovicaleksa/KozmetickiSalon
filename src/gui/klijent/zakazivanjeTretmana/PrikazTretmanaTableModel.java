@@ -117,7 +117,13 @@ public class PrikazTretmanaTableModel extends AbstractTableModel{
 				(KozmetickiTretman.TipTretmana) tretmaniSaTipovimaTretmana[row] : null);
 	}
 	
+	public CustomListSelectionModel getSelectionModel() {
+		return this.new CustomListSelectionModel();
+	}
 	
+	public CustomCellRenderer getCellRenderer() {
+		return this.new CustomCellRenderer();
+	}
 	
 	public class CustomListSelectionModel extends DefaultListSelectionModel {
 		
