@@ -26,15 +26,17 @@ public interface KlijentSalon extends LoggedInSalon{
 	/**@return A collection of collections of TipTretmana. A nested collection is a group of TipTretmana that have the same KozmetickiTretman.*/
 	public List<List<KozmetickiTretman.TipTretmana>> getTretmaniSelection();  //TODO: returns kozmetickiTretmani and tipTretmana for displaying
 	
-	
 	public double getPrice(KozmetickiTretman.TipTretmana tipTretmana);
 	
+	public List<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman);
+	
+	public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum, KozmetickiTretman.TipTretmana... tipoviTretmana);
 	
 	public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, LocalDate datum, LocalTime vrijeme);
 	
 	
 	
-	public List<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman);
+	
 	
 	
 	
