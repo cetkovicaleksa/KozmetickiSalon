@@ -1,5 +1,6 @@
 package gui.klijent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,29 +21,36 @@ public class InfoPanel extends JPanel{
 	}
 	
 	private void setupLayout() {
-        setLayout(new MigLayout("fillx, wrap 2", "[][grow, fill]"));
-        
-        add(new JLabel("Ime: "));
-        add(new JLabel(klijent.getIme()), "wrap");
-        
-        add(new JLabel("Prezime: "));
-        add(new JLabel(klijent.getPrezime()), "wrap");
-        
-        add(new JLabel("Korisnicko ime: "));
-        add(new JLabel(klijent.getKorisnickoIme()), "wrap");
-        
-        add(new JLabel("Adresa: "));
-        add(new JLabel(klijent.getAdresa()), "wrap");
-        
-        add(new JLabel("Telefon: "));
-        add(new JLabel(klijent.getBrojTelefona()), "wrap");
-        
-        add(new JLabel("Pol: "));
-        add(new JLabel((Pol.MUSKI.equals(klijent.getPol())) ? "Muski" : "Zenski"), "wrap"); //can use ==
-        
-        add(new JLabel("Klijent ima karticu lojalnosti: "));
-        add(new JLabel((klijent.getHasLoyaltyCard()) ? "Da" : "Ne"), "wrap");
-    }
+		setLayout(new MigLayout("fill, center"));
+
+	    JPanel cardPanel = new JPanel(new MigLayout("wrap 2", "[][grow, fill]"));
+	    cardPanel.setBorder(BorderFactory.createEtchedBorder());  // Adding a border for the card effect
+	    cardPanel.setOpaque(true);  // Make sure the background of the card is visible
+
+	    cardPanel.add(new JLabel("Ime: "));
+	    cardPanel.add(new JLabel(klijent.getIme()), "wrap");
+
+	    cardPanel.add(new JLabel("Prezime: "));
+	    cardPanel.add(new JLabel(klijent.getPrezime()), "wrap");
+
+	    cardPanel.add(new JLabel("Korisnicko ime: "));
+	    cardPanel.add(new JLabel(klijent.getKorisnickoIme()), "wrap");
+
+	    cardPanel.add(new JLabel("Adresa: "));
+	    cardPanel.add(new JLabel(klijent.getAdresa()), "wrap");
+
+	    cardPanel.add(new JLabel("Telefon: "));
+	    cardPanel.add(new JLabel(klijent.getBrojTelefona()), "wrap");
+
+	    cardPanel.add(new JLabel("Pol: "));
+	    cardPanel.add(new JLabel((Pol.MUSKI.equals(klijent.getPol())) ? "Muski" : "Zenski"	), "wrap");
+
+	    cardPanel.add(new JLabel("Klijent ima karticu lojalnosti: "));
+	    cardPanel.add(new JLabel((klijent.getHasLoyaltyCard()) ? "Da" : "Ne"), "wrap");
+
+	    add(cardPanel, "center, center");  // Center the cardPanel both horizontally and vertically
+	}
+
 	
 	
 	public static void main(String[] args) {

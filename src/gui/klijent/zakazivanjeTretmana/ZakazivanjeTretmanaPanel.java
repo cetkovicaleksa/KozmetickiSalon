@@ -85,8 +85,8 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 	private static final Supplier<String> backButtonText = () -> "Nazad";
 	
 	private final Supplier<String> forwardButtonText = () -> {
-		if(currentStep == 1 && selectedKozmeticar == null) {
-			return "Preskoci odabir kozmeticara";
+		if(currentStep == 1) {
+			return (selectedKozmeticar == null ? "Preskoci odabir kozmeticara" : "Odaberi kozmeticara: " + selectedKozmeticar.getKorisnickoIme());
 		}
 		
 		return (currentStep == 2 ? "Zakazi" : "Nastavi");
@@ -145,9 +145,10 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		
 		//step 0
 		JPanel izborTipaTretmanaPanel = new JPanel(new MigLayout("fill"));
+		izborTipaTretmanaPanel.add(new JLabel("Izbor tipa tretmana: "), "grow, wrap");
         izborTipaTretmanaPanel.add(new JScrollPane(table), "grow, wrap");
 
-        izborTipaTretmanaPanel.add(new JLabel("Izbor tipa tretmana: "), "grow, wrap");
+        
         
         //step 1
         JPanel izborKozmeticaraPanel = new JPanel(new MigLayout("fill, wrap 2", "", "[grow][]"));
@@ -155,12 +156,18 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
         izborKozmeticaraPanel.add(kozmeticariList, "grow, span 2, wrap");
         
         //stap 2
-        JPanel izborTajmingaPanel = new JPanel(new MigLayout("fill", "", "[grow][]"));
-        izborTajmingaPanel.add(new JLabel("Izaberite datum i vrijeme:"));
-        izborTajmingaPanel.add(new JLabel("Izaberite datum:"));
-        izborTajmingaPanel.add(datePicker, "width 200px, wrap");
-        izborTajmingaPanel.add(new JLabel("Izaberite vrijeme:"));
-        izborTajmingaPanel.add(timePicker, "width 200px, wrap");
+        JPanel izborTajmingaPanel = new JPanel(new MigLayout("center center", "", "[grow][]"));
+        JPanel innerPanel = new JPanel(new MigLayout("fill", "", "[grow][]"));
+
+        innerPanel.add(new JLabel("Izaberite datum:"), "aligny center, wrap");
+        innerPanel.add(datePicker, "aligny center, width 150, wrap");
+
+        innerPanel.add(new JLabel("Izaberite vrijeme:"), "aligny center, wrap");
+        innerPanel.add(timePicker, "aligny center, width 200, wrap");
+        
+        izborTajmingaPanel.add(innerPanel, "center");
+
+
         
         currentPanel.add(izborTipaTretmanaPanel);
         currentPanel.add(izborKozmeticaraPanel);
@@ -256,7 +263,6 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		}
 		
 		LocalDate datum = datePicker.getDate();
-		forwardButton.setEnabled(true);
 		timePicker.removeAllItems();
 		if(datum == null) {
 			return;
@@ -303,8 +309,6 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		selectedKozmeticar = kozmeticar;
 		cardLayout.next(currentPanel);
 		++currentStep;
-		forwardButton.setEnabled(false);
-		forwardButton.setText("Zakazi");
 	}
 	
 	private void finishedChoosingTiming() {
@@ -321,7 +325,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		}
 		
 		klijentSalon.zakaziTretman(selectedTipTretmana, selectedKozmeticar, datum, vrijeme);
-		JOptionPane.showMessageDialog(null, "Tretman je uspjesno zakazan.", "Uspjeh", JOptionPane.INFORMATION_MESSAGE);	
+		JOptionPane.showMessageDialog(null, "Tretman" + " '"+ selectedTipTretmana.getNaziv() + "' " + "je uspjesno zakazan kod kozmeticara" + " '"+ selectedKozmeticar.getIme() + "' " + datum + " u " + vrijeme + "h.", "Uspjeh", JOptionPane.INFORMATION_MESSAGE);	
 		reset(true);
 	}
 	
@@ -372,7 +376,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		System.out.println("Updating tables...");
 	}
 	
-	private static KlijentSalon getKlijentSalon() {
+	public static KlijentSalon getKlijentSalon() {
 		KozmetickiTretman.TipTretmana tt = new KozmetickiTretman("kt1", "opiskt1").newTipTretmana("tt", 3, 15);
 		return new KlijentSalon() {
 
@@ -390,8 +394,11 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 
 			@Override
 			public Klijent getLoggedInKorisnik() {
-				// TODO Auto-generated method stub
-				return null;
+				return new Klijent() {
+					{
+						super.setKorisnickoIme("klijentKorisnickoIme");
+					}
+				};
 			}
 
 			@Override
@@ -408,8 +415,11 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 
 			@Override
 			public List<List<TipTretmana>> getTretmaniSelection() {
-				// TODO Auto-generated method stub
-				return Collections.singletonList(Collections.singletonList(tt));
+				List<List<TipTretmana>> l = new ArrayList<>();
+				for(int i = 1; i<8; i++) {
+					l.add(Collections.singletonList(new KozmetickiTretman("kozmetickiTretman" + i, "opis kt" + i).newTipTretmana("tipTretmana" + i, i * 200, i * 15)));
+				}
+				return l;
 			}
 
 			@Override
@@ -419,20 +429,24 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 
 			@Override
 			public List<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
-				// TODO Auto-generated method stub
-				Kozmeticar kozmeticar = new Kozmeticar() {
+				Supplier<Kozmeticar> kozmeticarSupplier = () -> new Kozmeticar() {
 					{
-						setKorisnickoIme("aleksa");
-						addTretman(tt.getTretman());
+						String imeIKIme = "kozmeticar" + new Random().nextInt();
+						setKorisnickoIme(imeIKIme);
+						setIme(imeIKIme);
+						//addTretman(tt.getTretman());
 					}
 					@Override
 					public String toString() {
 						return this.getKorisnickoIme();
 					}
 				};
+				
+				
+				
 				ArrayList<Kozmeticar> l = new ArrayList<>();
 				for(int i = 0; i<10 ; i++) {
-					l.add(kozmeticar);
+					l.add(kozmeticarSupplier.get());
 				}
 				return l;
 			}
@@ -441,7 +455,12 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 			public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
 					TipTretmana... tipoviTretmana) {
 				// TODO Auto-generated method stub
-				return new ArrayList<>();
+				List<Integer> l = new ArrayList<>();
+				for(int i = 2; i<10; i++) {
+					l.add(i);
+				}
+				
+				return l;
 			}
 
 			@Override
