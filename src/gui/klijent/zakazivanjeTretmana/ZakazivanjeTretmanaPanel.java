@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -40,6 +41,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import entiteti.Klijent;
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
+import entiteti.Pol;
 import entiteti.KozmetickiTretman.TipTretmana;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
@@ -378,6 +380,11 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 	
 	public static KlijentSalon getKlijentSalon() {
 		KozmetickiTretman.TipTretmana tt = new KozmetickiTretman("kt1", "opiskt1").newTipTretmana("tt", 3, 15);
+		Klijent aki = new Klijent(
+				"aleksa", "cetkovic", "1234567890", "adresa", "cetkovicaleksa", "lokomotiva",
+				Pol.MUSKI, true
+		);
+		
 		return new KlijentSalon() {
 
 			@Override
@@ -394,37 +401,35 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 
 			@Override
 			public Klijent getLoggedInKorisnik() {
-				return new Klijent() {
-					{
-						super.setKorisnickoIme("klijentKorisnickoIme");
-					}
-				};
+				return aki;
 			}
 
 			@Override
-			public Map<StatusTretmana, ZakazanTretman> zakazaniTretmaniKlijenta() {
-				// TODO Auto-generated method stub
-				return null;
+			public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKlijenta() {
+				Map<StatusTretmana, List<ZakazanTretman>> zt = new HashMap<>();
+				zt.put(StatusTretmana.ZAKAZAN, Collections.singletonList(new ZakazanTretman()));
+				zt.put(StatusTretmana.OTKAZAO_KLIJENT, Collections.singletonList(new ZakazanTretman()));
+				zt.put(StatusTretmana.OTKAZAO_SALON, new ArrayList<>());
+				zt.put(StatusTretmana.NIJE_SE_POJAVIO, Collections.singletonList(new ZakazanTretman()));
+				zt.put(StatusTretmana.IZVRSEN, Collections.singletonList(new ZakazanTretman()));
+				return zt;
 			}
 
-			@Override
-			public boolean stanjeNaKarticiLojalnosti() {
-				// TODO Auto-generated method stub
-				return false;
-			}
 
 			@Override
 			public List<List<TipTretmana>> getTretmaniSelection() {
 				List<List<TipTretmana>> l = new ArrayList<>();
 				for(int i = 1; i<8; i++) {
-					l.add(Collections.singletonList(new KozmetickiTretman("kozmetickiTretman" + i, "opis kt" + i).newTipTretmana("tipTretmana" + i, i * 200, i * 15)));
+					KozmetickiTretman kt = new KozmetickiTretman("kozmetickiTretman" + i, "opis kt" + i);
+					
+					l.add(Collections.singletonList(kt.newTipTretmana("tipTretmana" + i, i * 200, i * 15)));
 				}
 				return l;
 			}
 
 			@Override
 			public double getPrice(TipTretmana tipTretmana) {
-				return (stanjeNaKarticiLojalnosti() ? tipTretmana.getCijena() * 10 / 100 : tipTretmana.getCijena());
+				return (getLoggedInKorisnik().getHasLoyaltyCard() ? tipTretmana.getCijena() * 10 / 100 : tipTretmana.getCijena());
 			}
 
 			@Override
@@ -453,7 +458,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 
 			@Override
 			public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
-					TipTretmana... tipoviTretmana) {
+					TipTretmana tipoviTretmana) {
 				// TODO Auto-generated method stub
 				List<Integer> l = new ArrayList<>();
 				for(int i = 2; i<10; i++) {
@@ -466,14 +471,12 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 			@Override
 			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, LocalDate datum,
 					LocalTime vrijeme) {
-				// TODO Auto-generated method stub
-				
+				System.out.println("Zakazan tretman");
 			}
 
 			@Override
 			public void otkaziTretman(ZakazanTretman zakazanTretman) {
-				// TODO Auto-generated method stub
-				
+				System.out.println("Otkazan tretman");
 			}
 			
 		};

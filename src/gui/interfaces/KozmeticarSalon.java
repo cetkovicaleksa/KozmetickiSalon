@@ -15,9 +15,16 @@ public interface KozmeticarSalon extends LoggedInSalon{
 	@Override
 	public Kozmeticar getLoggedInKorisnik();
 	
+	
+	/**Get all the treatments that the logged in kozmeticar is set to be a kozmeticar grouped by status.
+	 * @return Map from StatusTretmana to a list of ZakazanTretman that have that status*/	
 	public Map<StatusTretmana, List<ZakazanTretman>> zakazaniTretmaniKozmeticara();
+	
+	
 	
 	public void izvrsiTretman(ZakazanTretman tretman);
 	
+	
+	/***/
 	public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara();
 }

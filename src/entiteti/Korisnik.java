@@ -49,6 +49,10 @@ public abstract class Korisnik implements Entitet {
 
 	public Pol getPol() { return pol; }
 	public void setPol(Pol pol) { this.pol = pol; }
-		
 
+	
+	@Override
+	public String toString() {
+		return String.format("%s %s [ %s ]", getIme(), getPrezime(), getKorisnickoIme());
+	}
 }
