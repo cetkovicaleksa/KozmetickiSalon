@@ -22,8 +22,7 @@ public abstract class KorisnikGUI extends JFrame{
 
 			@Override
 			public void windowClosing(WindowEvent e) {
-				getLoggedInSalon().exit();
-				dispose();
+				exit();
 			}
 			
 		});
@@ -32,11 +31,15 @@ public abstract class KorisnikGUI extends JFrame{
 	
 	protected abstract LoggedInSalon getLoggedInSalon();
 	
-	private void logOut() {
+	protected void logOut() {
 		getLoggedInSalon().logOut();
 		dispose();
 	}
 	
+	protected void exit() {
+		getLoggedInSalon().exit();
+		dispose();
+	}
 	
 	private void addMenuBar() {
 		JMenuBar menuBar = new JMenuBar();

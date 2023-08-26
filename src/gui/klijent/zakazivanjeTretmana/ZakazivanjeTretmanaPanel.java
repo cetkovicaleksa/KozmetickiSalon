@@ -52,7 +52,6 @@ import net.miginfocom.swing.MigLayout;
 @SuppressWarnings("serial")
 public class ZakazivanjeTretmanaPanel extends JPanel{
 	
-	private HasTablesToUpdate updateTables;
 	private KlijentSalon klijentSalon;
 	
 	
@@ -99,12 +98,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 	
 	
 	public ZakazivanjeTretmanaPanel(KlijentSalon klijentSalon) {
-		this(klijentSalon, null);
-	}
-	
-	public ZakazivanjeTretmanaPanel(KlijentSalon klijentSalon, HasTablesToUpdate updateTables) {
 		this.klijentSalon = klijentSalon;
-		this.updateTables = updateTables;
 		
 		initialize();
 		setupLayout();
@@ -136,7 +130,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		
 		datePicker = new DatePicker();
         timePicker = new JComboBox<>();
-        reset(false);
+        reset();
 	}
 	
 	
@@ -328,11 +322,11 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		
 		klijentSalon.zakaziTretman(selectedTipTretmana, selectedKozmeticar, datum, vrijeme);
 		JOptionPane.showMessageDialog(null, "Tretman" + " '"+ selectedTipTretmana.getNaziv() + "' " + "je uspjesno zakazan kod kozmeticara" + " '"+ selectedKozmeticar.getIme() + "' " + datum + " u " + vrijeme + "h.", "Uspjeh", JOptionPane.INFORMATION_MESSAGE);	
-		reset(true);
+		reset();
 	}
 	
 	
-	private void reset(boolean update) {
+	private void reset() {
 		while(currentStep > 0) {
 			currentStep--;
 			cardLayout.previous(currentPanel);
@@ -348,12 +342,12 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		
 		kozmeticariList.clearSelection();
 		table.clearSelection();
-		
-		if(update && updateTables != null) {
-			updateTables.onUpdate();
-		}
 	}
 	
+	
+	public void updateData() {
+		((PrikazTretmanaTableModel) table.getModel()).setData(klijentSalon.getTretmaniSelection());
+	}
 	
 	
 	
@@ -364,7 +358,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		
 		SwingUtilities.invokeLater(() -> {
 			JFrame frame = new JFrame();
-			JPanel panel = new ZakazivanjeTretmanaPanel(getKlijentSalon(), ZakazivanjeTretmanaPanel::update);
+			JPanel panel = new ZakazivanjeTretmanaPanel(getKlijentSalon());
 			
 			frame.add(panel);
 			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -374,7 +368,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 		});
 	}
 	
-	private static void update() {
+	public static void update() {
 		System.out.println("Updating tables...");
 	}
 	

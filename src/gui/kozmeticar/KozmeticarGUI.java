@@ -54,7 +54,13 @@ public class KozmeticarGUI extends KorisnikGUI{
 		jTabbedPane = new JTabbedPane();
 		kozmetickiTretmanPanel = new KozmetickiTretmanPanel(kozmeticarSalon.getLoggedInKorisnik()::getTretmani);
 		zakazanTretmanPanel = new ZakazanTretmanPanel(kozmeticarSalon::zakazaniTretmaniKozmeticara);
-		rasporedPanel = new RasporedPanel(kozmeticarSalon);
+		rasporedPanel = new RasporedPanel(
+				kozmeticarSalon::rasporedKozmeticara,
+				(ZakazanTretman zt) -> {
+					kozmeticarSalon.izvrsiTretman(zt);
+					KozmeticarGUI.this.updateData();
+				}
+		);
 	}
 	
 	private void setupLayout() {
@@ -62,6 +68,11 @@ public class KozmeticarGUI extends KorisnikGUI{
 		jTabbedPane.addTab("Prikaz zakazanih tretmana.", zakazanTretmanPanel);
 		jTabbedPane.addTab("Raspored.", rasporedPanel);
 		super.add(jTabbedPane, BorderLayout.CENTER);
+	}
+	
+	
+	private void updateData() {
+		this.rasporedPanel.updateData();
 	}
 	
 	
@@ -133,7 +144,7 @@ public class KozmeticarGUI extends KorisnikGUI{
 
 			@Override
 			public void izvrsiTretman(ZakazanTretman tretman) {
-				// TODO Auto-generated method stub
+				System.out.println("izvsen tretman");
 				
 			}
 

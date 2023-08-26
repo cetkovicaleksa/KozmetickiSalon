@@ -12,39 +12,12 @@ import entiteti.ZakazanTretman;
 @SuppressWarnings("serial")
 public class RasporedTableModel extends AbstractTableModel{
 	
-	private SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara;
 	private final String[] columnNames = {"Datum", "Vrijeme", "Naziv tretmana / tip tretmana"};
 	private Object[][] data;
 	
-	public RasporedTableModel(SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara) {
-		this.rasporedKozmeticara = rasporedKozmeticara;
-		
-		generateData();
+	public RasporedTableModel(SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara) {		
+		setData(rasporedKozmeticara);
 	}
-	
-	
-	private void generateData() {
-        int totalRows = rasporedKozmeticara.size();
-        for (SortedMap<LocalTime, ZakazanTretman> timeTretmanMap : rasporedKozmeticara.values()) {
-            totalRows += timeTretmanMap.size();
-        }
-
-        data = new Object[totalRows][columnNames.length];
-        int row = 0;
-
-        for (LocalDate date : rasporedKozmeticara.keySet()) {
-            data[row][0] = date;
-            data[row][1] = ""; // Empty time cell
-            data[row++][2] = ""; // Empty tretman cell
-
-            SortedMap<LocalTime, ZakazanTretman> timeTretmanMap = rasporedKozmeticara.get(date);
-            for (LocalTime time : timeTretmanMap.keySet()) {
-                data[row][0] = ""; // Empty date cell
-                data[row][1] = time;
-                data[row++][2] = timeTretmanMap.get(time);
-            }
-        }
-    }
 	
 
 	@Override
@@ -90,9 +63,27 @@ public class RasporedTableModel extends AbstractTableModel{
 	    return null;
 	}
 	
-	public void setRasporedKozmeticara(SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara) {
-		this.rasporedKozmeticara = rasporedKozmeticara;
-		super.fireTableDataChanged();
-	}
+	
+	public void setData(SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara) {
+        int totalRows = rasporedKozmeticara.size();
+        for (SortedMap<LocalTime, ZakazanTretman> timeTretmanMap : rasporedKozmeticara.values()) {
+            totalRows += timeTretmanMap.size();
+        }
 
+        data = new Object[totalRows][columnNames.length];
+        int row = 0;
+
+        for (LocalDate date : rasporedKozmeticara.keySet()) {
+            data[row][0] = date;
+            data[row][1] = ""; // Empty time cell
+            data[row++][2] = ""; // Empty tretman cell
+
+            SortedMap<LocalTime, ZakazanTretman> timeTretmanMap = rasporedKozmeticara.get(date);
+            for (LocalTime time : timeTretmanMap.keySet()) {
+                data[row][0] = ""; // Empty date cell
+                data[row][1] = time;
+                data[row++][2] = timeTretmanMap.get(time);
+            }
+        }
+    }
 }

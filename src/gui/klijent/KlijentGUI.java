@@ -1,10 +1,18 @@
 package gui.klijent;
 
 import java.awt.BorderLayout;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import entiteti.Klijent;
+import entiteti.Kozmeticar;
+import entiteti.KozmetickiTretman;
+import entiteti.KozmetickiTretman.TipTretmana;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
 import gui.KorisnikGUI;
@@ -29,7 +37,7 @@ public class KlijentGUI extends KorisnikGUI{
 	public KlijentGUI(KlijentSalon klijentSalon) {
 		this.klijentSalon = klijentSalon;
 		
-		setTitle("Klijent: " + klijentSalon.getLoggedInKorisnik().getKorisnickoIme());
+		setTitle("Klijent: " + klijentSalon.getLoggedInKorisnik());
 		setSize(900, 600);
 		setLocationRelativeTo(null);
 		initialize();
@@ -47,7 +55,63 @@ public class KlijentGUI extends KorisnikGUI{
 	
 	private void initialize() {
 		tabbedPane = new JTabbedPane();
-		zakazivanjeTretmanaPanel = new ZakazivanjeTretmanaPanel(klijentSalon, this::updateData);
+		zakazivanjeTretmanaPanel = new ZakazivanjeTretmanaPanel(new KlijentSalon() {
+
+			@Override
+			public void logOut() {
+				KlijentGUI.super.logOut();				
+			}
+
+			@Override
+			public void exit() {
+				KlijentGUI.super.exit();
+				
+			}
+
+			@Override
+			public Klijent getLoggedInKorisnik() {
+				return klijentSalon.getLoggedInKorisnik();
+			}
+
+			@Override
+			public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKlijenta() {
+				return klijentSalon.getZakazaniTretmaniKlijenta();
+			}
+
+			@Override
+			public List<List<TipTretmana>> getTretmaniSelection() {
+				return klijentSalon.getTretmaniSelection();
+			}
+
+			@Override
+			public double getPrice(TipTretmana tipTretmana) {
+				return klijentSalon.getPrice(tipTretmana);
+			}
+
+			@Override
+			public List<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
+				return klijentSalon.getKozmeticariThatCanPreformTreatment(tretman);
+			}
+
+			@Override
+			public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
+					TipTretmana tipoviTretmana) {
+				return klijentSalon.getKozmeticarFreeHours(kozmeticar, datum, tipoviTretmana);
+			}
+
+			@Override
+			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, LocalDate datum,
+					LocalTime vrijeme) {
+				klijentSalon.zakaziTretman(tipTretmana, kozmeticar, datum, vrijeme);
+				KlijentGUI.this.updateData();
+			}
+
+			@Override
+			public void otkaziTretman(ZakazanTretman zakazanTretman) {
+				klijentSalon.otkaziTretman(zakazanTretman);
+			}
+		});
+		
 		infoPanel = new InfoPanel(klijentSalon.getLoggedInKorisnik());
 		zakazaniTretmaniPanel = new ZakazaniTretmaniPanel(
 

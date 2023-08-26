@@ -34,7 +34,7 @@ import gui.interfaces.KozmeticarSalon;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
-public class RasporedPanel extends JPanel{  //TODO: need to add updating data when appointment is completed!!!
+public class RasporedPanel extends JPanel{
 
 	private Supplier<SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>>> rasporedKozmeticaraSupplier;
 	private Consumer<ZakazanTretman> izvrsiTretmanConsumer;
@@ -184,6 +184,10 @@ public class RasporedPanel extends JPanel{  //TODO: need to add updating data wh
         dialog.setVisible(true);
     }
 	
+	
+	public void updateData() {
+		((RasporedTableModel) table.getModel()).setData(rasporedKozmeticaraSupplier.get());
+	}
 	
 	public static void main(String[] args) {
 		KozmetickiTretman kt = new KozmetickiTretman();
