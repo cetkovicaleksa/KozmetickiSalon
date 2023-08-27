@@ -1,6 +1,18 @@
 package crudMenadzeri;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 
 import dataProvajderi.KlijentProvider;
 import dataProvajderi.KozmeticarProvider;
@@ -9,7 +21,14 @@ import dataProvajderi.MenadzerProvider;
 import dataProvajderi.RecepcionerProvider;
 import dataProvajderi.TipTretmanaProvider;
 import dataProvajderi.ZakazanTretmanProvider;
+import entiteti.Korisnik;
+import entiteti.Kozmeticar;
+import entiteti.KozmetickiTretman;
+import entiteti.StatusTretmana;
+import entiteti.ZakazanTretman;
+import helpers.Query;
 import helpers.Settings;
+import helpers.Updater;
 
 public class RegistarMenadzera {
 	
@@ -27,7 +46,7 @@ public class RegistarMenadzera {
 	private SalonMenadzer salonMenadzer;
 	
 
-	
+
 	public RegistarMenadzera() {}
 	
 	public RegistarMenadzera(Settings settings) {
@@ -35,6 +54,61 @@ public class RegistarMenadzera {
 		initializeMenadzers();
 	}
 	
+	
+	
+	public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKorisnika(Korisnik korisnik, boolean asKlijent, boolean asKozmeticar){
+		Map<StatusTretmana, List<ZakazanTretman>> result = new TreeMap<>();
+		Query<ZakazanTretman> query = new Query<>();
+		
+		if(asKlijent) {
+			query.i(zt -> korisnik.equals(zt.getKlijent()));
+		}
+		
+		if(asKozmeticar) {
+			query.i(zt -> korisnik.equals(zt.getKozmeticar()));
+		}
+
+		
+		Updater<ZakazanTretman> fakeUpdater = new Updater<>(
+				zt -> {
+					StatusTretmana status = zt.getStatus();
+	                
+	                result.putIfAbsent(status, new ArrayList<>());
+	                result.get(status).add(zt);
+				}
+		);		
+		
+		getZakazanTretmanMenadzer().update(query, fakeUpdater);
+		return result;
+	}
+	
+	
+	public Collection<Collection<KozmetickiTretman.TipTretmana>> getTretmaniSelection(){
+		Iterator<KozmetickiTretman.TipTretmana> iter = getTipTretmanaMenadzer().readAll();
+		Map<KozmetickiTretman, Collection<KozmetickiTretman.TipTretmana>> map = new HashMap<>();
+		
+		while(iter.hasNext()) {
+			KozmetickiTretman.TipTretmana tipTretmana = iter.next();
+			KozmetickiTretman kozmetickiTretman = tipTretmana.getTretman();
+			
+			map.putIfAbsent(kozmetickiTretman, new ArrayList<>());
+			map.get(kozmetickiTretman).add(tipTretmana);
+		}
+		
+		return map.values();
+	}
+	
+	
+	public Collection<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
+		return getKozmeticarMenadzer().read(
+				new Query<>(kozmeticar -> kozmeticar.getTretmani().contains(tretman)) //TODO: see if the tretmani is always initialized!!
+		);
+	}
+	
+	public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum){
+		//TODO: finish
+		return null;
+	}
 	
 
 	public void save() throws IOException{
@@ -171,5 +245,13 @@ public class RegistarMenadzera {
 		getKozmeticarMenadzer().setZakazanTretmanMenadzer(zakazanTretmanMenadzer);
 		getRecepcionerMenadzer().setZakazanTretmanMenadzer(zakazanTretmanMenadzer);
 		getMenadzerMenadzer().setZakazanTretmanMenadzer(zakazanTretmanMenadzer);
+	}
+	
+	public SalonMenadzer getSalonMenadzer() {
+		return salonMenadzer;
+	}
+
+	public void setSalonMenadzer(SalonMenadzer salonMenadzer) {
+		this.salonMenadzer = salonMenadzer;
 	}
 }

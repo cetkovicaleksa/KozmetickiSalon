@@ -171,7 +171,7 @@ public class KozmeticarGUI extends KorisnikGUI{
 			}
 
 			@Override
-			public Map<StatusTretmana, List<ZakazanTretman>> zakazaniTretmaniKozmeticara() {
+			public Map<StatusTretmana, Collection<ZakazanTretman>> zakazaniTretmaniKozmeticara() {
 				ArrayList<ZakazanTretman> zakazaniList1 = createZakazaniList(20);
 		        ArrayList<ZakazanTretman> zakazaniList2 = createZakazaniList(30);
 		        ArrayList<ZakazanTretman> zakazaniList3 = createZakazaniList(32);
@@ -185,7 +185,7 @@ public class KozmeticarGUI extends KorisnikGUI{
 		        zakazaniList4.forEach(zt -> zt.setStatus(StatusTretmana.OTKAZAO_SALON));
 		        zakazaniList5.forEach(zt -> zt.setStatus(StatusTretmana.NIJE_SE_POJAVIO));
 		        
-		        Map<StatusTretmana, List<ZakazanTretman>> map = new HashMap<>();
+		        Map<StatusTretmana, Collection<ZakazanTretman>> map = new HashMap<>();
 		        map.put(StatusTretmana.ZAKAZAN, zakazaniList1);
 		        map.put(StatusTretmana.IZVRSEN, zakazaniList2);
 		        map.put(StatusTretmana.OTKAZAO_KLIJENT, zakazaniList3);

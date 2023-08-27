@@ -2,8 +2,9 @@ package gui.interfaces;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
+import java.util.SortedSet;
 
 import entiteti.Klijent;
 import entiteti.Kozmeticar;
@@ -21,12 +22,12 @@ public interface KlijentSalon extends LoggedInSalon{
 	/**All zakazani tretmani that logged in klijent has in the saloon by their status.
 	 * @return A map from status tretmana to a list of zakazan tretman that have that status
 	 * @see StatusTretmana, ZakazanTretman*/
-	public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKlijenta();
+	public Map<StatusTretmana, Collection<ZakazanTretman>> getZakazaniTretmaniKlijenta();
 	
 	
 	/**List of lists of tip tretmana where an inner list represents a group of tip tretmana that have the same kozmeticki tretman.
 	 * @see KozmetickiTretman*/
-	public List<List<KozmetickiTretman.TipTretmana>> getTretmaniSelection();
+	public Collection<Collection<KozmetickiTretman.TipTretmana>> getTretmaniSelection();
 	
 	
 	/**Get the price for the given tip tretmana taking in mind the loyalty card status of klijent.
@@ -38,7 +39,7 @@ public interface KlijentSalon extends LoggedInSalon{
 	/**Get all kozmeticar that can preform the given treatment in the saloon.
 	 * @param tretman A KozmetickiTretman that exists in the saloon
 	 * @return A list of Kozmeticar*/
-	public List<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman);
+	public Collection<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman);
 	
 	
 	/**Get a list of integer values that represent the hours of day on a given date that the provided kozmeticar can preform the given
@@ -47,7 +48,7 @@ public interface KlijentSalon extends LoggedInSalon{
 	 * @param kozmeticar A kozmeticar that must exist in the saloon
 	 * @param datum The date of interest
 	 * @param tipTretmana The tip tretmana of interest*/
-	public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum, KozmetickiTretman.TipTretmana tipTretmana);
+	public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum, KozmetickiTretman.TipTretmana tipTretmana);
 	
 	
 	/***/

@@ -2,6 +2,9 @@ package gui.kozmeticar;
 
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +23,7 @@ import net.miginfocom.swing.MigLayout;
 @SuppressWarnings("serial")
 public class ZakazanTretmanPanel extends JPanel{
 
-	private Supplier<Map<StatusTretmana, List<ZakazanTretman>>> zakazaniTretmaniKozmeticaraSupplier;
+	private Supplier<Map<StatusTretmana, Collection<ZakazanTretman>>> zakazaniTretmaniKozmeticaraSupplier;
 	
 	private JTable table;
 	
@@ -31,7 +34,7 @@ public class ZakazanTretmanPanel extends JPanel{
 	private JCheckBox nijeSePojavioCheckBox;
 	
 	
-	public ZakazanTretmanPanel(Supplier<Map<StatusTretmana, List<ZakazanTretman>>> zakazaniTretmaniKozmeticaraSupplier) {
+	public ZakazanTretmanPanel(Supplier<Map<StatusTretmana, Collection<ZakazanTretman>>> zakazaniTretmaniKozmeticaraSupplier) {
 		this.zakazaniTretmaniKozmeticaraSupplier = zakazaniTretmaniKozmeticaraSupplier;
 		
 		initialize();
@@ -88,6 +91,16 @@ public class ZakazanTretmanPanel extends JPanel{
 	
 	private void filterZakazaniTretmani() {
 		List<ZakazanTretman> sviTretmaniKozmeticara = new ArrayList<>();
+		Comparator<ZakazanTretman> comparator = (zt1, zt2) -> {
+			int dateComparison = zt1.getDatum().compareTo(zt2.getDatum());
+			
+			if(dateComparison !=0 ) {
+				return dateComparison;
+			}
+			
+			return zt1.getVrijeme().compareTo(zt2.getVrijeme());
+		};
+		
 		Map<StatusTretmana, Boolean> filter = new HashMap<>();
 		
 		filter.put(StatusTretmana.ZAKAZAN, zakazanCheckBox.isSelected());
@@ -97,9 +110,11 @@ public class ZakazanTretmanPanel extends JPanel{
 		filter.put(StatusTretmana.NIJE_SE_POJAVIO, nijeSePojavioCheckBox.isSelected());
 		
 		
-		for(Map.Entry<StatusTretmana, List<ZakazanTretman>> entry : zakazaniTretmaniKozmeticaraSupplier.get().entrySet()) {
+		for(Map.Entry<StatusTretmana, Collection<ZakazanTretman>> entry : zakazaniTretmaniKozmeticaraSupplier.get().entrySet()) {
 			if(filter.get(entry.getKey())) {
-				sviTretmaniKozmeticara.addAll( entry.getValue() );
+				List<ZakazanTretman> tretmaniStatusa = new ArrayList<>(entry.getValue());
+				Collections.sort(tretmaniStatusa , comparator);
+				sviTretmaniKozmeticara.addAll(tretmaniStatusa);
 			}
 		}
 		

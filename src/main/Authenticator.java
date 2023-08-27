@@ -1,11 +1,15 @@
 package main;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -16,10 +20,16 @@ import dataProvajderi.IdNotUniqueException;
 import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Kozmeticar;
+import entiteti.KozmetickiTretman;
+import entiteti.KozmetickiTretman.TipTretmana;
 import entiteti.Menadzer;
 import entiteti.Pol;
 import entiteti.Recepcioner;
+import entiteti.Salon;
+import entiteti.StatusTretmana;
+import entiteti.ZakazanTretman;
 import gui.KorisnikGUI;
+import gui.interfaces.KlijentSalon;
 import gui.interfaces.LoggedOutSalon;
 import gui.klijent.KlijentGUI;
 import gui.kozmeticar.KozmeticarGUI;
@@ -151,7 +161,71 @@ public class Authenticator implements LoggedOutSalon{
 	
 	
 	private KlijentGUI getGUI(Klijent klijent) {
-		return null;
+		
+		return new KlijentGUI(new KlijentSalon() {
+
+			@Override
+			public void logOut() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void exit() {
+				System.out.println("EXIT KLIJENT");
+				//Authenticator.this.exit();				
+			}
+
+			@Override
+			public Klijent getLoggedInKorisnik() {
+				return klijent;
+			}
+
+			@Override
+			public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKlijenta() {	
+				return registarSupplier.get().getZakazaniTretmaniKorisnika(klijent, true, false);
+			}
+
+			@Override
+			public Collection<Collection<TipTretmana>> getTretmaniSelection() {
+				return registarSupplier.get().getTretmaniSelection();
+			}
+
+			@Override
+			public double getPrice(TipTretmana tipTretmana) {
+				double price = tipTretmana.getCijena();
+				
+				if(klijent.getHasLoyaltyCard()) {
+					price *= registarSupplier.get().getSalonMenadzer().read().getLoyaltyCardDiscount();
+				}
+				
+				return price;
+			}
+
+			@Override
+			public Collection<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
+				return registarSupplier.get().getKozmeticariThatCanPreformTreatment(tretman);
+			}
+
+			@Override
+			public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
+					TipTretmana tipTretmana) {
+				return registarSupplier.get().getKozmeticarFreeHours(kozmeticar, datum);
+			}
+
+			@Override
+			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, LocalDate datum,
+					LocalTime vrijeme) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void otkaziTretman(ZakazanTretman zakazanTretman) {
+				zakazanTretman.setStatus(StatusTretmana.OTKAZAO_KLIJENT);
+			}
+			
+		});
 	}
 	
 	private KozmeticarGUI getGUI(Kozmeticar kozmeticar) {

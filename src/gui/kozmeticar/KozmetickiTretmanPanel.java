@@ -1,5 +1,7 @@
 package gui.kozmeticar;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -13,11 +15,11 @@ import net.miginfocom.swing.MigLayout;
 @SuppressWarnings("serial")
 public class KozmetickiTretmanPanel extends JPanel{
 	
-	private Supplier<List<KozmetickiTretman>> tretmaniKozmeticaraSupplier;
+	private Supplier<Collection<KozmetickiTretman>> tretmaniKozmeticaraSupplier;
 	
 	private JTable table;
 	
-	public KozmetickiTretmanPanel(Supplier<List<KozmetickiTretman>> tretmaniKozmeticaraSupplier) {
+	public KozmetickiTretmanPanel(Supplier<Collection<KozmetickiTretman>> tretmaniKozmeticaraSupplier) {
 		this.tretmaniKozmeticaraSupplier = tretmaniKozmeticaraSupplier;
 		
 		initialize();
@@ -25,7 +27,7 @@ public class KozmetickiTretmanPanel extends JPanel{
 	}
 	
 	private void initialize() {
-		table = new JTable(new KozmetickiTretmanTableModel(tretmaniKozmeticaraSupplier.get()));
+		table = new JTable( new KozmetickiTretmanTableModel(new ArrayList<>(tretmaniKozmeticaraSupplier.get())) );
 		table.getTableHeader().setReorderingAllowed(false);
 	}
 	

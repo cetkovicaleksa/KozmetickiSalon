@@ -2,7 +2,7 @@ package gui.interfaces;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -18,7 +18,7 @@ public interface KozmeticarSalon extends LoggedInSalon{
 	
 	/**Get all the treatments that the logged in kozmeticar is set to be a kozmeticar grouped by status.
 	 * @return Map from StatusTretmana to a list of ZakazanTretman that have that status*/	
-	public Map<StatusTretmana, List<ZakazanTretman>> zakazaniTretmaniKozmeticara();
+	public Map<StatusTretmana, Collection<ZakazanTretman>> zakazaniTretmaniKozmeticara();
 	
 	
 	

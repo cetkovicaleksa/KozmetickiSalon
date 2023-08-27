@@ -194,7 +194,7 @@ public class LoginGUI extends JFrame {
 					}
 
 					@Override
-					public Map<StatusTretmana, List<ZakazanTretman>> zakazaniTretmaniKozmeticara() {
+					public Map<StatusTretmana, Collection<ZakazanTretman>> zakazaniTretmaniKozmeticara() {
 						// TODO Auto-generated method stub
 						return null;
 					}
