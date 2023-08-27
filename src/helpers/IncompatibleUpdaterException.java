@@ -1,4 +1,4 @@
-package exceptions;
+package helpers;
 
 @SuppressWarnings("serial")
 public class IncompatibleUpdaterException extends RuntimeException {

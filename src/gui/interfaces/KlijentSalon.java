@@ -47,7 +47,7 @@ public interface KlijentSalon extends LoggedInSalon{
 	 * @param kozmeticar A kozmeticar that must exist in the saloon
 	 * @param datum The date of interest
 	 * @param tipTretmana The tip tretmana of interest*/
-	public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum, KozmetickiTretman.TipTretmana tipoviTretmana);
+	public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum, KozmetickiTretman.TipTretmana tipTretmana);
 	
 	
 	/***/

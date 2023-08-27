@@ -24,7 +24,7 @@ public class RegistarMenadzera {
 	private TipTretmanaMenadzer tipTretmanaMenadzer;
 	private ZakazanTretmanMenadzer zakazanTretmanMenadzer;
 	
-	private CjenovnikMenadzer cjenovnikMenadzer;
+	private SalonMenadzer salonMenadzer;
 	
 
 	

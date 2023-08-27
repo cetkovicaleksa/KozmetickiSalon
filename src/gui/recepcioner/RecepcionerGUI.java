@@ -35,18 +35,18 @@ public class RecepcionerGUI extends KorisnikGUI{
 	private ZakazanTretman selectedZakazanTretman;
 	
 	private JTable table; //table of zakazani tretmani
-    private TableRowSorter<AbstractTableModel> tableSorter = new TableRowSorter<AbstractTableModel>();
-	
-    private JTextField minPriceFilterTextField;
-    private JTextField maxPriceFilterTextField;
-    
+    private TableRowSorter<AbstractTableModel> tableSorter = new TableRowSorter<AbstractTableModel>();    
     
     
     private JComboBox<KozmetickiTretman> kozmetickiTretmanComboBox;
     private JComboBox<KozmetickiTretman.TipTretmana> tipTretmanaComboBox;
     
+    private JTextField minPriceFilterTextField;
+    private JTextField maxPriceFilterTextField;
+    
     private JComboBox<Korisnik> klijentComboBox;    
     private JComboBox<Kozmeticar> kozmeticarComboBox;
+    
     private DatePicker datePicker;
     private JComboBox<LocalTime> timeComboBox;
     private JComboBox<StatusTretmana> statusComboBox;
@@ -68,6 +68,7 @@ public class RecepcionerGUI extends KorisnikGUI{
 		setSize(1000, 660);
 		setLocationRelativeTo(null);
 		
+		initialize();
 		addListeners();
 	}
 	

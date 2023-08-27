@@ -3,8 +3,8 @@ package gui.interfaces;
 import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Pol;
-import exceptions.PasswordMissmatchException;
-import exceptions.UsernameNotFoundException;
+import helpers.PasswordMissmatchException;
+import helpers.UsernameNotFoundException;
 
 public interface LoggedOutSalon extends KozmetickiSalon{
 	

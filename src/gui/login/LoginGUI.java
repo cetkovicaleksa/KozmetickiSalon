@@ -26,11 +26,11 @@ import entiteti.KozmetickiTretman;
 import entiteti.Pol;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
-import exceptions.PasswordMissmatchException;
-import exceptions.UsernameNotFoundException;
 import gui.interfaces.KozmeticarSalon;
 import gui.interfaces.LoggedOutSalon;
 import gui.kozmeticar.KozmeticarGUI;
+import helpers.PasswordMissmatchException;
+import helpers.UsernameNotFoundException;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")

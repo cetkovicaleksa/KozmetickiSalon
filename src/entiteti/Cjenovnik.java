@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class Cjenovnik {
+public class Cjenovnik {  //TODO: haven't finished this, not used in the project
 	
 	private ArrayList<Entry> entries;	
 	

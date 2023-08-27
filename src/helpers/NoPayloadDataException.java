@@ -1,4 +1,4 @@
-package exceptions;
+package helpers;
 
 @SuppressWarnings("serial")
 public class NoPayloadDataException extends RuntimeException {
