@@ -8,6 +8,8 @@ import helpers.UsernameNotFoundException;
 
 public interface LoggedOutSalon extends KozmetickiSalon{
 	
+	public void login();
+	
 	public void logIn(Korisnik korisnik);
 	
 	public Korisnik authenticateKorisnik(String username, String password) throws UsernameNotFoundException, PasswordMissmatchException;

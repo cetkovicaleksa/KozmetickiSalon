@@ -3,13 +3,12 @@ package main;
 import java.io.IOException;
 
 import crudMenadzeri.RegistarMenadzera;
-import gui.login.LoginGUI;
 import helpers.Settings;
 
-public class App {
+public class App implements Runnable{
 	
 	private RegistarMenadzera registar;
-	private final Authenticator authenticator = new Authenticator(this::getRegistar);
+	private final Authenticator authenticator = new Authenticator(this::getRegistar, this::save);
 
 	
 	public App() {
@@ -32,10 +31,12 @@ public class App {
 	
 	
 	
-	
-	public void login() {
-		new LoginGUI(authenticator).setVisible(true);
+	@Override
+	public void run() {
+		load();
+		authenticator.login();
 	}
+	
 	
 	public void load() {
 		try {
@@ -46,17 +47,20 @@ public class App {
 		}
 	}
 	
-	public void run() {
-		load();
-		login();
+	
+	public void save() {
+		try {
+			registar.save();
+		}catch (IOException e) {
+			// TODO
+			e.printStackTrace();;
+		}
 	}
-
+	
 	
 
 	
 	public static void main(String[] args) {
-		App app = new App();
-		//app.load();
-		app.login();
+		new App().run();
 	}
 }

@@ -56,7 +56,7 @@ public class RegistarMenadzera {
 	
 	
 	
-	public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKorisnika(Korisnik korisnik, boolean asKlijent, boolean asKozmeticar){
+	public Map<StatusTretmana, Collection<ZakazanTretman>> getZakazaniTretmaniKorisnika(Korisnik korisnik, boolean asKlijent, boolean asKozmeticar){
 		Map<StatusTretmana, List<ZakazanTretman>> result = new TreeMap<>();
 		Query<ZakazanTretman> query = new Query<>();
 		

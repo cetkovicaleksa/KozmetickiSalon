@@ -1,16 +1,13 @@
 package main;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -24,8 +21,6 @@ import entiteti.KozmetickiTretman;
 import entiteti.KozmetickiTretman.TipTretmana;
 import entiteti.Menadzer;
 import entiteti.Pol;
-import entiteti.Recepcioner;
-import entiteti.Salon;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
 import gui.KorisnikGUI;
@@ -33,6 +28,7 @@ import gui.interfaces.KlijentSalon;
 import gui.interfaces.LoggedOutSalon;
 import gui.klijent.KlijentGUI;
 import gui.kozmeticar.KozmeticarGUI;
+import gui.login.LoginGUI;
 import gui.recepcioner.RecepcionerGUI;
 import helpers.PasswordMissmatchException;
 import helpers.Query;
@@ -41,46 +37,38 @@ import helpers.UsernameNotFoundException;
 public class Authenticator implements LoggedOutSalon{
 	
 	private Supplier<RegistarMenadzera> registarSupplier;
-	
-	private final Map<Class<?>, Function<Korisnik, KorisnikGUI>> guiMap;
-	
-	{
-		guiMap = new HashMap<>();
-		
-		guiMap.put(Klijent.class, klijent -> getGUI((Klijent) klijent));
-		guiMap.put(Kozmeticar.class, kozmeticar -> getGUI((Kozmeticar) kozmeticar));
-		guiMap.put(Recepcioner.class, recepcioner -> getGUI((Recepcioner) recepcioner));
-		guiMap.put(Menadzer.class, menadzer -> getGUI((Menadzer) menadzer));
-	}
+	private Runnable save;
+	private GUIFactory guiFactory;
 	
 	
 	
-	public Authenticator(Supplier<RegistarMenadzera> registarSupplier) {
+	public Authenticator(Supplier<RegistarMenadzera> registarSupplier, Runnable save) {
 		this.registarSupplier = registarSupplier;
+		this.save = save;
+		this.guiFactory = GUIFactory.getInstance();
 	}
 	
 	
+	private RegistarMenadzera getRegistar() {
+		return registarSupplier.get();
+	}
+	
+	public void login() {
+		new LoginGUI(this).setVisible(true);
+	}
 
 	@Override
 	public void exit() {
-		try {
-			registarSupplier.get().save();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+		save.run();
 	}
 
 	@Override
 	public void logIn(Korisnik korisnik) {
-		
-		Function<Korisnik, KorisnikGUI> getGUI = guiMap.get(korisnik.getClass());
-		
-		if(getGUI == null) {
-			throw new IllegalArgumentException("Unsupported korisnik type!");
+		try {
+			guiFactory.getKorisnikGUI(korisnik, this, getRegistar()).setVisible(true);
+		}catch(IllegalArgumentException e) {
+			throw e;
 		}
-		
-		getGUI.apply(korisnik).setVisible(true);						
 	}
 
 	
@@ -149,7 +137,7 @@ public class Authenticator implements LoggedOutSalon{
 		);
 		
 		try {
-			registarSupplier.get().getKlijentMenadzer().create(klijent);
+			getRegistar().getKlijentMenadzer().create(klijent);
 		}catch (IdNotUniqueException e) {
 			//shouldn't happen TODO: see what to do!
 			throw e;
@@ -182,7 +170,7 @@ public class Authenticator implements LoggedOutSalon{
 			}
 
 			@Override
-			public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKlijenta() {	
+			public Map<StatusTretmana, Collection<ZakazanTretman>> getZakazaniTretmaniKlijenta() {	
 				return registarSupplier.get().getZakazaniTretmaniKorisnika(klijent, true, false);
 			}
 
@@ -228,23 +216,11 @@ public class Authenticator implements LoggedOutSalon{
 		});
 	}
 	
-	private KozmeticarGUI getGUI(Kozmeticar kozmeticar) {
-		return null;
-	}
-	
-	private RecepcionerGUI getGUI(Recepcioner recepcioner) {
-		return null;
-	}
-	
-	private KorisnikGUI getGUI(Menadzer menadzer) {
-		return null;		
-	}
-	
 	
 	
 	
 	private Iterator<KorisnikMenadzer<? extends Korisnik>> getKorisnikMenadzeriIterator(){
-		RegistarMenadzera registar = registarSupplier.get();
+		RegistarMenadzera registar = getRegistar();
 	    
 	    List<KorisnikMenadzer<? extends Korisnik>> korisnikMenadzerList = new ArrayList<>();
 	    
