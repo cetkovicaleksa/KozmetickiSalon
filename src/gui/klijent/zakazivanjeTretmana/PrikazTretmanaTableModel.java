@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -28,24 +29,25 @@ public class PrikazTretmanaTableModel extends AbstractTableModel{
 	
 	
 	
-	public PrikazTretmanaTableModel(List<List<KozmetickiTretman.TipTretmana>> grupisaniTipoviTretmana, Function<KozmetickiTretman.TipTretmana, Double> getPriceFunction) {
+	public PrikazTretmanaTableModel(Collection<Collection<KozmetickiTretman.TipTretmana>> grupisaniTipoviTretmana, Function<KozmetickiTretman.TipTretmana, Double> getPriceFunction) {
 		this.getPriceFunction = getPriceFunction;
 		setData(grupisaniTipoviTretmana);
 	}
 	
 
-	public void setData(List<List<KozmetickiTretman.TipTretmana>> grupisaniTipoviTretmana) {
+	public void setData(Collection<Collection<KozmetickiTretman.TipTretmana>> grupisaniTipoviTretmana) {
 		int numberOfTreatments = grupisaniTipoviTretmana.size();
 		
 		int numberOfTypes = 0;
-		for(List<KozmetickiTretman.TipTretmana> listOfTypes : grupisaniTipoviTretmana) {
-			numberOfTypes += listOfTypes.size();
+		for(Collection<KozmetickiTretman.TipTretmana> collectionOfTypes : grupisaniTipoviTretmana) {
+			numberOfTypes += collectionOfTypes.size();
 		}
 		
 		this.tretmaniSaTipovimaTretmana = new Entitet[numberOfTypes + numberOfTreatments];
 		
 		int row = 0;
-		for(List<KozmetickiTretman.TipTretmana> listOfTypes : grupisaniTipoviTretmana) {
+		for(Collection<KozmetickiTretman.TipTretmana> collectionOfTypes : grupisaniTipoviTretmana) {
+			List<KozmetickiTretman.TipTretmana> listOfTypes = new ArrayList<>(collectionOfTypes);
 			tretmaniSaTipovimaTretmana[row++] = listOfTypes.get(0).getTretman();
 			
 			for(KozmetickiTretman.TipTretmana tipTretmana : listOfTypes) {
@@ -224,29 +226,29 @@ public class PrikazTretmanaTableModel extends AbstractTableModel{
 	    List<List<KozmetickiTretman.TipTretmana>> tretmani = Arrays.asList(num1, num2, num3, num4, num5, num6);
 
 	    // Create an instance of your PrikazTretmanaTableModel
-	    PrikazTretmanaTableModel model = new PrikazTretmanaTableModel(tretmani, f);
+	    //PrikazTretmanaTableModel model = new PrikazTretmanaTableModel(tretmani, f);
 
 	    // Set the data for the model
-	    model.setData(tretmani);
+	    //model.setData(tretmani);
 
 	    // Create a JTable with your model
-	    JTable table = new JTable(model);
+	    //JTable table = new JTable(model);
 
 	    // Set the custom selection model
-	    CustomListSelectionModel selectionModel = model.new CustomListSelectionModel();
-	    table.setSelectionModel(selectionModel);
+	    //CustomListSelectionModel selectionModel = model.new CustomListSelectionModel();
+	    //table.setSelectionModel(selectionModel);
 
 	    // Set the custom cell renderer
-	    CustomCellRenderer cellRenderer = model.new CustomCellRenderer();
-	    table.setDefaultRenderer(Object.class, cellRenderer);
+	    //CustomCellRenderer cellRenderer = model.new CustomCellRenderer();
+	    //table.setDefaultRenderer(Object.class, cellRenderer);
 
 	    // Create a JScrollPane to hold the table
-	    JScrollPane scrollPane = new JScrollPane(table);
+	    //JScrollPane scrollPane = new JScrollPane(table);
 
 	    // Create a JFrame to display the table
 	    JFrame frame = new JFrame("Prikaz Tretmana Table");
 	    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	    frame.add(scrollPane);
+	    //frame.add(scrollPane);
 	    frame.pack();
 	    frame.setLocationRelativeTo(null);
 	    frame.setVisible(true);

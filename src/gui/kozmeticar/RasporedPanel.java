@@ -69,11 +69,11 @@ public class RasporedPanel extends JPanel{
 	    JLabel label = new JLabel("Klikni na naziv tretmana za izvrsavanje.");
 	    label.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the label horizontally
 	    contentPanel.add(Box.createVerticalStrut(20)); // Add space on top
-	    contentPanel.add(label);
+	    contentPanel.add(label);	    
 	    contentPanel.add(Box.createVerticalStrut(20)); // Add space on bottom
 
 	    contentPanel.add(new JScrollPane(table));
-
+	    
 	    add(contentPanel, BorderLayout.CENTER);
 	}
 	

@@ -2,11 +2,18 @@ package main;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.function.BiFunction;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import crudMenadzeri.RegistarMenadzera;
 import entiteti.Klijent;
@@ -20,7 +27,9 @@ import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
 import gui.KorisnikGUI;
 import gui.interfaces.KlijentSalon;
+import gui.interfaces.KozmeticarSalon;
 import gui.interfaces.LoggedOutSalon;
+import gui.interfaces.RecepcionerSalon;
 import gui.klijent.KlijentGUI;
 import gui.kozmeticar.KozmeticarGUI;
 import gui.recepcioner.RecepcionerGUI;
@@ -35,9 +44,10 @@ public class GUIFactory {
 		
 		guiMap.put(Klijent.class, (klijent, salon, registar) -> getKlijentGUI((Klijent) klijent, salon, registar));
 		guiMap.put(Kozmeticar.class, (kozmeticar, salon, registar) -> getKozmeticarGUI((Kozmeticar) kozmeticar, salon, registar));
-		//guiMap.put(Recepcioner.class, (recepcioner, authenticator) -> getRecepcionerGUI((Recepcioner) recepcioner, null));
-		//guiMap.put(Menadzer.class, (menadzer, authenticator) -> getMenadzerGUI((Menadzer) menadzer, null));
+		guiMap.put(Recepcioner.class, (recepcioner, salon, registar) -> getRecepcionerGUI((Recepcioner) recepcioner, salon, registar));
+		guiMap.put(Menadzer.class, (menadzer, salon, registar) -> getMenadzerGUI((Menadzer) menadzer, salon, registar));
 	}
+	
 	
 	private static GUIFactory instance;
 	
@@ -53,7 +63,7 @@ public class GUIFactory {
 	}
 	
 	
-	public KorisnikGUI getKorisnikGUI(Korisnik korisnik, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) throws IllegalArgumentException {
+	public KorisnikGUI getKorisnikGUI(Korisnik korisnik, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) throws IllegalArgumentException {		
 		ThreeArgumentFunction<Korisnik, LoggedOutSalon, RegistarMenadzera, KorisnikGUI> getGUI = guiMap.get(korisnik.getClass());
 		
 		if(getGUI == null) {
@@ -95,8 +105,13 @@ public class GUIFactory {
 
 			@Override
 			public double getPrice(TipTretmana tipTretmana) {
-				return (klijent.getHasLoyaltyCard() ? 
-						tipTretmana.getCijena() * registar.getSalonMenadzer().read().getLoyaltyCardDiscount() : tipTretmana.getCijena());
+				double price = tipTretmana.getCijena();
+				
+				if(klijent.getHasLoyaltyCard()) {
+					price *= registar.getSalonMenadzer().read().getLoyaltyCardDiscount();
+				}
+				
+				return price;
 			}
 
 			@Override
@@ -108,14 +123,20 @@ public class GUIFactory {
 			public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
 					TipTretmana tipTretmana) {
 				// TODO Auto-generated method stub
-				return null;
+				SortedSet<Integer> set = new TreeSet<>();
+				for(int i = 3; i < 10; i++) {
+					set.add(i);
+				}
+				
+				return set;
 			}
 
 			@Override
 			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, LocalDate datum,
 					LocalTime vrijeme) {
-				// TODO Auto-generated method stub
-				
+				registar.getZakazanTretmanMenadzer().create(
+						new ZakazanTretman(tipTretmana, kozmeticar, getLoggedInKorisnik(), datum, vrijeme)
+				);				
 			}
 
 			@Override
@@ -125,15 +146,112 @@ public class GUIFactory {
 		});
 	}
 	
+	
 	public KozmeticarGUI getKozmeticarGUI(Kozmeticar kozmeticar, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) {
-		return null;
+		return new KozmeticarGUI(new KozmeticarSalon() {
+
+			@Override
+			public void logOut() {
+				loggedOutSalon.login();				
+			}
+
+			@Override
+			public void exit() {
+				loggedOutSalon.exit();				
+			}
+
+			@Override
+			public Kozmeticar getLoggedInKorisnik() {
+				return kozmeticar;
+			}
+
+			@Override
+			public Map<StatusTretmana, Collection<ZakazanTretman>> zakazaniTretmaniKozmeticara() {
+				return registar.getZakazaniTretmaniKorisnika(kozmeticar, false, true);
+			}
+
+			@Override
+			public void izvrsiTretman(ZakazanTretman tretman) {
+				tretman.setStatus(StatusTretmana.IZVRSEN);				
+			}
+
+			@Override
+			public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara() {
+				// TODO Auto-generated method stub
+				return new TreeMap<>();
+			}
+			
+		});
 	}
 	
-	public RecepcionerGUI getRecepcionerGUI(Recepcioner recepcioner, RegistarMenadzera registar) {
-		return null;
+	
+	public RecepcionerGUI getRecepcionerGUI(Recepcioner recepcioner, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) {
+		return new RecepcionerGUI(new RecepcionerSalon() {
+
+			@Override
+			public void logOut() {
+				loggedOutSalon.login();
+			}
+
+			@Override
+			public void exit() {
+				loggedOutSalon.exit();				
+			}
+
+			@Override
+			public Recepcioner getLoggedInKorisnik() {
+				return recepcioner;
+			}
+
+			@Override
+			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent, LocalDate datum,
+					LocalTime vrijeme) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public double getPrice(TipTretmana tipTretmana, Korisnik klijent) {
+				double price = tipTretmana.getCijena();
+				
+				if(klijent instanceof Klijent && ((Klijent) klijent).getHasLoyaltyCard()) {
+					price *= registar.getSalonMenadzer().read().getLoyaltyCardDiscount();
+				}
+				
+				return price;
+			}
+
+			@Override
+			public void otkaziTretman(ZakazanTretman zakazanTretman) {
+								
+			}
+
+			@Override
+			public void updateZakazanTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent,
+					LocalDate datum, LocalTime vrijeme, StatusTretmana status) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public Collection<Collection<TipTretmana>> getTretmaniSelection() {
+				return registar.getTretmaniSelection();
+			}
+
+			@Override
+			public Collection<ZakazanTretman> getZakazaniTretmani() { //TODO: see how this works
+				return StreamSupport.stream( 
+						Spliterators.spliteratorUnknownSize(
+					    		registar.getZakazanTretmanMenadzer().readAll(), Spliterator.ORDERED),
+					    false
+					   ).collect(Collectors.toList());
+			}
+			
+		});
 	}
 	
-	public KorisnikGUI getMenadzerGUI(Menadzer menadzer, RegistarMenadzera registar) {
+	
+	public KorisnikGUI getMenadzerGUI(Menadzer menadzer, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) {
 		return null;
 	}
 	

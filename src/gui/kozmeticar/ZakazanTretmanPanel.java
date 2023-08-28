@@ -33,6 +33,8 @@ public class ZakazanTretmanPanel extends JPanel{
 	private JCheckBox otkazaoSalonCheckBox;
 	private JCheckBox nijeSePojavioCheckBox;
 	
+	private JLabel placeholder;
+	
 	
 	public ZakazanTretmanPanel(Supplier<Map<StatusTretmana, Collection<ZakazanTretman>>> zakazaniTretmaniKozmeticaraSupplier) {
 		this.zakazaniTretmaniKozmeticaraSupplier = zakazaniTretmaniKozmeticaraSupplier;
@@ -62,6 +64,9 @@ public class ZakazanTretmanPanel extends JPanel{
 		nijeSePojavioCheckBox = new JCheckBox("Nije se pojavio klijent");
 		nijeSePojavioCheckBox.setSelected(true);
 		
+		placeholder = new JLabel("Nema zakazanih tretmana.");
+		placeholder.setVisible(false);
+		
 		filterZakazaniTretmani();			
 	}
 	
@@ -86,7 +91,9 @@ public class ZakazanTretmanPanel extends JPanel{
 	    add(otkazaoSalonCheckBox, "align left, wrap");
 	    add(nijeSePojavioCheckBox, "align left, wrap");
 	    
-	    add(new JScrollPane(table), "span 2, grow, push");
+	    
+	    add(new JScrollPane(table), "span 2, grow, push, wrap");
+	    add(placeholder, "align center");
 	}
 	
 	private void filterZakazaniTretmani() {
@@ -119,5 +126,6 @@ public class ZakazanTretmanPanel extends JPanel{
 		}
 		
 		((ZakazanTretmanTableModel) table.getModel()).setZakazaniTretmani(sviTretmaniKozmeticara);
+		placeholder.setVisible(sviTretmaniKozmeticara.isEmpty());
 	}
 }

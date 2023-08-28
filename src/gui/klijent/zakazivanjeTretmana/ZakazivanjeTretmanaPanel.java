@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -399,8 +401,8 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 			}
 
 			@Override
-			public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKlijenta() {
-				Map<StatusTretmana, List<ZakazanTretman>> zt = new HashMap<>();
+			public Map<StatusTretmana, Collection<ZakazanTretman>> getZakazaniTretmaniKlijenta() {
+				Map<StatusTretmana, Collection<ZakazanTretman>> zt = new HashMap<>();
 				zt.put(StatusTretmana.ZAKAZAN, Collections.singletonList(new ZakazanTretman()));
 				zt.put(StatusTretmana.OTKAZAO_KLIJENT, Collections.singletonList(new ZakazanTretman()));
 				zt.put(StatusTretmana.OTKAZAO_SALON, new ArrayList<>());
@@ -411,8 +413,8 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 
 
 			@Override
-			public List<List<TipTretmana>> getTretmaniSelection() {
-				List<List<TipTretmana>> l = new ArrayList<>();
+			public Collection<Collection<TipTretmana>> getTretmaniSelection() {
+				Collection<Collection<TipTretmana>> l = new ArrayList<>();
 				for(int i = 1; i<8; i++) {
 					KozmetickiTretman kt = new KozmetickiTretman("kozmetickiTretman" + i, "opis kt" + i);
 					
@@ -451,7 +453,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 			}
 
 			@Override
-			public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
+			public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
 					TipTretmana tipoviTretmana) {
 				// TODO Auto-generated method stub
 				List<Integer> l = new ArrayList<>();
@@ -459,7 +461,7 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 					l.add(i);
 				}
 				
-				return l;
+				return new TreeSet<>();
 			}
 
 			@Override

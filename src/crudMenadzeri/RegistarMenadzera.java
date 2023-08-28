@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -57,7 +58,7 @@ public class RegistarMenadzera {
 	
 	
 	public Map<StatusTretmana, Collection<ZakazanTretman>> getZakazaniTretmaniKorisnika(Korisnik korisnik, boolean asKlijent, boolean asKozmeticar){
-		Map<StatusTretmana, List<ZakazanTretman>> result = new TreeMap<>();
+		Map<StatusTretmana, Collection<ZakazanTretman>> result = new TreeMap<>();
 		Query<ZakazanTretman> query = new Query<>();
 		
 		if(asKlijent) {
@@ -107,7 +108,7 @@ public class RegistarMenadzera {
 	
 	public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum){
 		//TODO: finish
-		return null;
+		return new TreeSet<>();
 	}
 	
 
@@ -163,6 +164,15 @@ public class RegistarMenadzera {
 		ztm.setRecepcionerMenadzer(rm);
 		ztm.setTipTretmanaMenadzer(ttm);
 		ztm.setMainProvider(new ZakazanTretmanProvider(Settings.getZakazanTretmanId(), settings.getZakazanTretmanFilePath()));
+		
+		this.klijentMenadzer = km;
+		this.kozmeticarMenadzer = kzm;
+		this.recepcionerMenadzer = rm;
+		this.menadzerMenadzer = mm;
+		
+		this.zakazanTretmanMenadzer = ztm;
+		this.kozmetickiTretmanMenadzer = ktm;
+		this.tipTretmanaMenadzer = ttm;
 	}
 	
 	

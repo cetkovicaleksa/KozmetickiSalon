@@ -22,7 +22,10 @@ public class ZakazaniTretmaniTableModel extends AbstractTableModel{
 	}
 	
 	public void updateData(Collection<ZakazanTretman> zakazaniTretmani) {
-		this.zakazaniTretmani = new ZakazanTretman[zakazaniTretmani.size()];
+		this.zakazaniTretmani = new ZakazanTretman[(zakazaniTretmani == null ? 0 : zakazaniTretmani.size())];
+		if(this.zakazaniTretmani.length == 0) {
+			return;
+		}
 		
 		int row = 0;
 		for(ZakazanTretman zt : zakazaniTretmani) {

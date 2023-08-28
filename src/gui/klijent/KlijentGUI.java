@@ -3,8 +3,10 @@ package gui.klijent;
 import java.awt.BorderLayout;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -74,12 +76,12 @@ public class KlijentGUI extends KorisnikGUI{
 			}
 
 			@Override
-			public Map<StatusTretmana, List<ZakazanTretman>> getZakazaniTretmaniKlijenta() {
+			public Map<StatusTretmana, Collection<ZakazanTretman>> getZakazaniTretmaniKlijenta() {
 				return klijentSalon.getZakazaniTretmaniKlijenta();
 			}
 
 			@Override
-			public List<List<TipTretmana>> getTretmaniSelection() {
+			public Collection<Collection<TipTretmana>> getTretmaniSelection() {
 				return klijentSalon.getTretmaniSelection();
 			}
 
@@ -89,12 +91,12 @@ public class KlijentGUI extends KorisnikGUI{
 			}
 
 			@Override
-			public List<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
+			public Collection<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
 				return klijentSalon.getKozmeticariThatCanPreformTreatment(tretman);
 			}
 
 			@Override
-			public List<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
+			public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
 					TipTretmana tipoviTretmana) {
 				return klijentSalon.getKozmeticarFreeHours(kozmeticar, datum, tipoviTretmana);
 			}

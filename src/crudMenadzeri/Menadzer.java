@@ -56,7 +56,7 @@ public abstract class Menadzer<T extends Entitet> implements CRUDMenadzer<T> {
 	
 	
 	public void save() throws IOException, UnsupportedOperationException {
-		getMainProvider().loadData();
+		getMainProvider().saveData();
 	}
 	
 	

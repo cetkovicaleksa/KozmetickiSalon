@@ -3,6 +3,7 @@ package main;
 import java.io.IOException;
 
 import crudMenadzeri.RegistarMenadzera;
+import entiteti.Recepcioner;
 import helpers.Settings;
 
 public class App implements Runnable{

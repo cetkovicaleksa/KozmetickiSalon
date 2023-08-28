@@ -1,5 +1,6 @@
 package gui.login;
 
+import java.awt.event.KeyAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Function;
@@ -12,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import com.sun.glass.events.KeyEvent;
 
 import entiteti.Klijent;
 import entiteti.Pol;
@@ -129,6 +132,21 @@ public class RegisterGUI extends JFrame{
             loggedOutSalon.logIn(klijent);
             dispose();            
     	});
+    	
+    	KeyAdapter keyAdapter = new KeyAdapter() {
+
+			@Override
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (e.getSource() == addressField) {
+                        registerButton.doClick();
+                    }
+                }
+			}
+            
+        };
+        
+        addressField.addKeyListener(keyAdapter);
     }
     
     

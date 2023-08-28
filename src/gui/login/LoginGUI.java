@@ -1,5 +1,6 @@
 package gui.login;
 
+import java.awt.event.KeyAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.LocalDate;
@@ -18,6 +19,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import com.sun.glass.events.KeyEvent;
 
 import entiteti.Klijent;
 import entiteti.Korisnik;
@@ -110,14 +113,30 @@ public class LoginGUI extends JFrame {
 				
 			try {
 				loggedOutSalon.logIn( loggedOutSalon.authenticateKorisnik(username, password) );
+				dispose();
 			}catch(UsernameNotFoundException unfe) {
 				JOptionPane.showMessageDialog(LoginGUI.this, "Korisnicko ime nije pronadjeno.", ":(", JOptionPane.ERROR_MESSAGE);					
 			}catch(PasswordMissmatchException pme) {
 				JOptionPane.showMessageDialog(LoginGUI.this, "Pogresna lozinka", ":(", JOptionPane.ERROR_MESSAGE);
 			}
 			//TODO: maby add some more catch statements?
-			dispose();
 		});
+    	
+    	KeyAdapter keyAdapter = new KeyAdapter() {
+
+			@Override
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (e.getSource() == usernameField || e.getSource() == passwordField) {
+                        loginButton.doClick();
+                    }
+                }
+			}
+            
+        };
+        
+        usernameField.addKeyListener(keyAdapter);
+        passwordField.addKeyListener(keyAdapter);
     }
     
     
@@ -221,6 +240,12 @@ public class LoginGUI extends JFrame {
 			public boolean usernameTaken(String username) {
 				// TODO Auto-generated method stub
 				return false;
+			}
+
+			@Override
+			public void login() {
+				// TODO Auto-generated method stub
+				
 			}
     		
     	};
