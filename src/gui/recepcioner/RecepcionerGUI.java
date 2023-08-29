@@ -69,7 +69,7 @@ public class RecepcionerGUI extends KorisnikGUI{
 		setLocationRelativeTo(null);
 		
 		initialize();
-		addListeners();
+		//addListeners();
 	}
 	
 	

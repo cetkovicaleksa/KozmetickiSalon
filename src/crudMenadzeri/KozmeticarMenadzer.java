@@ -195,7 +195,7 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 	
 	
 	
-	List<Kozmeticar> allKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman){
+	public List<Kozmeticar> allKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman){
 		return getMainProvider().get(
 					new Query<>(kozmeticar -> {
 						return ( kozmeticar.getTretmani() != null && kozmeticar.getTretmani().contains(tretman) );

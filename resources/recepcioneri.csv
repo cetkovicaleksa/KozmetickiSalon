@@ -1,1 +1,24 @@
-null	null	null	null	recepcioner	123	NIJE_NAVEDEN	0	0.0	false	SKOLE_BEZ
+Filip	Simic	7890123456	456 Elm St	filipsimic	pass234	MUSKI	3	800.0	false	SKOLE_BEZ
+Ana	Todorovic	0123456789	456 Elm St	anatodorovic	pass123	ZENSKI	20	500.0	true	SKOLE_BEZ
+Ana	Kovacevic	7890123456	654 Maple Dr	anakovacevic	pass890	ZENSKI	20	622.0	true	DOKTORSKE_STUDIJE
+Mina	Ristic	2345678901	123 Cherry Dr	minaristic	pass890	ZENSKI	16	542.0	false	SREDNJA_SKOLA
+Sara	Stojanovic	2345678901	567 Willow Ave	sarastojanovic	pass123	ZENSKI	20	542.0	false	MASTER_STUDIJE
+Stefan	Milanovic	9012345678	987 Birch Ln	stefanmilanovic	pass567	MUSKI	1	600.0	true	SREDNJA_SKOLA
+Jovana	Milosevic	8901234567	456 Elm St	jovanamilosevic	pass321	ZENSKI	4	100.0	false	MASTER_STUDIJE
+Luka	Pavlovic	5678901234	890 Spruce St	lukapavlovic	pass789	MUSKI	3	800.0	true	DOKTORSKE_STUDIJE
+Jasmina	Jovanovic	9012345678	123 Cherry Dr	jasminajovanovic	pass654	ZENSKI	20	500.0	true	DOKTORSKE_STUDIJE
+Nemanja	Milinkovic	9012345678	456 Elm St	nemanjamilinkovic	pass987	MUSKI	2	800.0	false	MASTER_STUDIJE
+Milan	Milosevic	2345678901	234 Cedar Rd	milanmilosevic	pass987	MUSKI	4	100.0	true	SKOLE_BEZ
+Stefan	Markovic	5678901234	234 Cedar Rd	stefanmarkovic	pass567	MUSKI	20	542.0	true	DOKTORSKE_STUDIJE
+Ivana	Nikolic	6789012345	890 Spruce St	ivananikolic	pass567	ZENSKI	4	600.0	false	MASTER_STUDIJE
+Milan	Radic	4567890123	890 Spruce St	milanradic	pass123	MUSKI	1	100.0	false	SREDNJA_SKOLA
+Maja	Todorovic	3456789012	789 Oak Ave	majatodorovic	pass789	ZENSKI	8	542.0	true	DOKTORSKE_STUDIJE
+Nikola	Savic	1234567890	123 Cherry Dr	nikolasavic	pass567	MUSKI	16	600.0	false	MASTER_STUDIJE
+Ana	Savic	5678901234	123 Main St	anasavic	pass987	ZENSKI	16	500.0	false	OSNOVNE_STUDIJE
+Ivana	Petrovic	2345678901	987 Birch Ln	ivanapetrovic	pass321	ZENSKI	12	542.0	false	SREDNJA_SKOLA
+Vuk	Dimitrijevic	1234567890	234 Cedar Rd	vukdimitrijevic	pass987	MUSKI	20	600.0	true	MASTER_STUDIJE
+Nikola	Todorovic	8901234567	123 Main St	nikolatodorovic	pass321	MUSKI	6	542.0	true	MASTER_STUDIJE
+Milica	Pavlovic	2345678901	234 Cedar Rd	milicapavlovic	pass123	ZENSKI	12	600.0	false	OSNOVNE_STUDIJE
+Mina	Nikolic	8901234567	123 Main St	minanikolic	pass654	ZENSKI	7	600.0	false	OSNOVNE_STUDIJE
+Filip	Milinkovic	2345678901	123 Cherry Dr	filipmilinkovic	pass456	MUSKI	2	542.0	false	OSNOVNE_STUDIJE
+Filip	Milosevic	7890123456	234 Cedar Rd	filipmilosevic	pass123	MUSKI	7	622.0	false	SREDNJA_SKOLA

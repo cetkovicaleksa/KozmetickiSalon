@@ -1,8 +1,10 @@
 package crudMenadzeri;
 
 import java.io.IOException;
+import java.util.Set;
 
 import dataProvajderi.SalonProvider;
+import entiteti.BonusCriteria;
 import entiteti.Dan;
 import entiteti.Salon;
 import helpers.Updater;
@@ -68,6 +70,19 @@ public class SalonMenadzer {
 		salon.setIncome(salon.getIncome() + newIncome.doubleValue());
 	}
 	
+	public double getProfit() {
+		return salon.getIncome() - salon.getExpenses();
+	}
+	
+	public void recheckEmployeeBonus(Set<BonusCriteria.KozmeticarIzvjestaj> kozmeticariIzvjestaji) {
+		
+	}
+	
+	public void recheckLoyaltyCards() {
+		
+	}
+	
+	
 	
 	
 	
@@ -75,12 +90,12 @@ public class SalonMenadzer {
 	
 	//saving and loading data
 	
-	public void loadData() throws IOException {
+	public void load() throws IOException {
 		getSalonProvider().loadData();
 		salon = getSalonProvider().getSalon();
 	}
 	
-	public void saveData() throws IOException {
+	public void save() throws IOException {
 		getSalonProvider().saveData();
 	}
 

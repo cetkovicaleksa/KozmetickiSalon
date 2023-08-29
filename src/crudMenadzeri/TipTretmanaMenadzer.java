@@ -2,6 +2,7 @@ package crudMenadzeri;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,6 +53,21 @@ public class TipTretmanaMenadzer extends Menadzer<KozmetickiTretman.TipTretmana>
 		this.kozmetickiTretmanMenadzer = kozmetickiTretmanMenadzer;
 	}
 	
+	
+	public Collection<Collection<KozmetickiTretman.TipTretmana>> getTretmaniSelection(){
+		Iterator<KozmetickiTretman.TipTretmana> iter = readAll();
+		Map<KozmetickiTretman, Collection<KozmetickiTretman.TipTretmana>> map = new HashMap<>();
+		
+		while(iter.hasNext()) {
+			KozmetickiTretman.TipTretmana tipTretmana = iter.next();
+			KozmetickiTretman kozmetickiTretman = tipTretmana.getTretman();
+			
+			map.putIfAbsent(kozmetickiTretman, new ArrayList<>());
+			map.get(kozmetickiTretman).add(tipTretmana);
+		}
+		
+		return map.values();
+	}
 	
 	
 	@Override

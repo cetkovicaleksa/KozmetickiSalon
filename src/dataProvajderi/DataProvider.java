@@ -417,7 +417,7 @@ public abstract class DataProvider<T extends Entitet, I> implements IsProvider<T
 		DataProvider.writeToCsv(lista, path, delimiter);
 	}
 	
-	protected static void writeToCsv(List<String[]> entityStrings, String path, String delimiter) throws IOException {
+	public static void writeToCsv(List<String[]> entityStrings, String path, String delimiter) throws IOException {
 		File file = new File(path);
 		if(!file.exists()) {
 			try {

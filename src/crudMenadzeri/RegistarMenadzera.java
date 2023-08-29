@@ -2,6 +2,7 @@ package crudMenadzeri;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import dataProvajderi.KozmeticarProvider;
 import dataProvajderi.KozmetickiTretmanProvider;
 import dataProvajderi.MenadzerProvider;
 import dataProvajderi.RecepcionerProvider;
+import dataProvajderi.SalonProvider;
 import dataProvajderi.TipTretmanaProvider;
 import dataProvajderi.ZakazanTretmanProvider;
 import entiteti.Korisnik;
@@ -27,6 +29,7 @@ import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
+import entiteti.KozmetickiTretman.TipTretmana;
 import helpers.Query;
 import helpers.Settings;
 import helpers.Updater;
@@ -85,30 +88,27 @@ public class RegistarMenadzera {
 	
 	
 	public Collection<Collection<KozmetickiTretman.TipTretmana>> getTretmaniSelection(){
-		Iterator<KozmetickiTretman.TipTretmana> iter = getTipTretmanaMenadzer().readAll();
-		Map<KozmetickiTretman, Collection<KozmetickiTretman.TipTretmana>> map = new HashMap<>();
-		
-		while(iter.hasNext()) {
-			KozmetickiTretman.TipTretmana tipTretmana = iter.next();
-			KozmetickiTretman kozmetickiTretman = tipTretmana.getTretman();
-			
-			map.putIfAbsent(kozmetickiTretman, new ArrayList<>());
-			map.get(kozmetickiTretman).add(tipTretmana);
-		}
-		
-		return map.values();
+		return getTipTretmanaMenadzer().getTretmaniSelection();
 	}
 	
 	
 	public Collection<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
-		return getKozmeticarMenadzer().read(
-				new Query<>(kozmeticar -> kozmeticar.getTretmani().contains(tretman)) //TODO: see if the tretmani is always initialized!!
-		);
+		return getKozmeticarMenadzer().allKozmeticariThatCanPreformTreatment(tretman);
 	}
 	
 	public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum){
 		//TODO: finish
-		return new TreeSet<>();
+		SortedSet<Integer> freeHours = new TreeSet<>();
+		
+		
+		return freeHours;
+	}
+	
+	public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent, LocalDate datum,
+					LocalTime vrijeme) {
+		getZakazanTretmanMenadzer().create(
+				new ZakazanTretman(tipTretmana, kozmeticar, klijent, datum, vrijeme)
+		);				
 	}
 	
 
@@ -122,6 +122,8 @@ public class RegistarMenadzera {
 		getTipTretmanaMenadzer().save();
 		getZakazanTretmanMenadzer().save();
 		
+		getSalonMenadzer().save();
+		
 		//TODO: cjenovnik
 	}
 	
@@ -134,6 +136,8 @@ public class RegistarMenadzera {
 		getKozmetickiTretmanMenadzer().load();
 		getTipTretmanaMenadzer().load();
 		getZakazanTretmanMenadzer().load();
+		
+		getSalonMenadzer().load();
 	}
 	
 	private void initializeMenadzers() {
@@ -173,6 +177,8 @@ public class RegistarMenadzera {
 		this.zakazanTretmanMenadzer = ztm;
 		this.kozmetickiTretmanMenadzer = ktm;
 		this.tipTretmanaMenadzer = ttm;
+		
+		this.salonMenadzer = new SalonMenadzer(new SalonProvider(settings.getSalonFilePath()));
 	}
 	
 	

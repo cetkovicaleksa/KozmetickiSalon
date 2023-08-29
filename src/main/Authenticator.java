@@ -41,16 +41,17 @@ public class Authenticator implements LoggedOutSalon{
 	
 	
 	
-	@Override
-	public void login() {
-		new LoginGUI(this).setVisible(true);
-	}
 
 	@Override
 	public void exit() {
 		save.run();
 	}
-
+	
+	
+	@Override
+	public void login() {
+		new LoginGUI(this).setVisible(true);
+	}
 	
 	@Override
 	public void logIn(Korisnik korisnik) {

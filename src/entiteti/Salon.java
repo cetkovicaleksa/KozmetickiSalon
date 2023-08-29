@@ -2,7 +2,7 @@ package entiteti;
 
 import java.util.SortedSet;
 
-public class Salon implements Entitet{ //TODO: add employee bonuses
+public class Salon implements Entitet{
 
 	private String naziv;
 	
@@ -10,22 +10,18 @@ public class Salon implements Entitet{ //TODO: add employee bonuses
 	private int closingHour;
 	private SortedSet<Dan> workingDays;
 	
-	private double loyaltyCardThreshold;
-	private double loyaltyCardDiscount;
-	
 	private double income;
 	private double expenses;
 	
+	//loyalty card for clients
+	private double loyaltyCardThreshold;
+	private double loyaltyCardDiscount;
+	
+	//for employees
+	private BonusCriteria bonusCriteria;	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
+	// TODO Add constructors
 	
 	
 	
@@ -77,5 +73,10 @@ public class Salon implements Entitet{ //TODO: add employee bonuses
 	public void setExpenses(double expenses) {
 		this.expenses = expenses;
 	}	
-	
+	public BonusCriteria getBonusCriteria() {
+		return bonusCriteria;
+	}
+	public void setBonusCriteria(BonusCriteria bonusCriteria) {
+		this.bonusCriteria = bonusCriteria;
+	}
 }

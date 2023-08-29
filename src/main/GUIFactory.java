@@ -134,9 +134,7 @@ public class GUIFactory {
 			@Override
 			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, LocalDate datum,
 					LocalTime vrijeme) {
-				registar.getZakazanTretmanMenadzer().create(
-						new ZakazanTretman(tipTretmana, kozmeticar, getLoggedInKorisnik(), datum, vrijeme)
-				);				
+				registar.zakaziTretman(tipTretmana, kozmeticar, getLoggedInKorisnik(), datum, vrijeme);
 			}
 
 			@Override
@@ -206,8 +204,7 @@ public class GUIFactory {
 			@Override
 			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent, LocalDate datum,
 					LocalTime vrijeme) {
-				// TODO Auto-generated method stub
-				
+				registar.zakaziTretman(tipTretmana, kozmeticar, klijent, datum, vrijeme);				
 			}
 
 			@Override
@@ -223,14 +220,14 @@ public class GUIFactory {
 
 			@Override
 			public void otkaziTretman(ZakazanTretman zakazanTretman) {
-								
+				zakazanTretman.setStatus(StatusTretmana.OTKAZAO_SALON);
 			}
 
 			@Override
 			public void updateZakazanTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent,
 					LocalDate datum, LocalTime vrijeme, StatusTretmana status) {
 				// TODO Auto-generated method stub
-				
+				// TODO stupid needs recheck
 			}
 
 			@Override
@@ -252,7 +249,7 @@ public class GUIFactory {
 	
 	
 	public KorisnikGUI getMenadzerGUI(Menadzer menadzer, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) {
-		return null;
+		throw new IllegalArgumentException();
 	}
 	
 

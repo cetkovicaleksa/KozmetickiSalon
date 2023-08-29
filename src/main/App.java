@@ -3,7 +3,6 @@ package main;
 import java.io.IOException;
 
 import crudMenadzeri.RegistarMenadzera;
-import entiteti.Recepcioner;
 import helpers.Settings;
 
 public class App implements Runnable{
@@ -53,8 +52,8 @@ public class App implements Runnable{
 		try {
 			registar.save();
 		}catch (IOException e) {
-			// TODO
-			e.printStackTrace();;
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
