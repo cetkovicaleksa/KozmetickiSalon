@@ -25,7 +25,7 @@ public class Settings {
 	
 	private String klijentFilePath, kozmeticarFilePath, menadzerFilePath, 
 	recepcionerFilePath, kozmetickiTretmanFilePath, tipKozmetickogTretmanaFilePath,
-	zakazanTretmanFilePath, salonFilePath;
+	zakazanTretmanFilePath, salonFilePath, criteriaFilePath;
 	
 	private Function<Klijent, String> klijentIdFunction;
 	private Function<Kozmeticar, String> kozmeticarIdFunction;
@@ -49,6 +49,7 @@ public class Settings {
 	
 	private static final String CJENOVNIK = "resources/cjenovnik.csv";
 	private static final String SALON = "resources/salon.csv";
+	private static final String CRITERIA = "resources/salon_employee_bonus_criteria.csv";
 	
 	private static final Function<Klijent, String> KLIJENT_ID = klijent -> (KlijentProvider.DELETED.equals(klijent)) ? DataProvider.DELETED_ID : klijent.getKorisnickoIme() ;
 	public static final Function<Kozmeticar, String> KOZMETICAR_ID = kozmeticar -> (KozmeticarProvider.DELETED.equals(kozmeticar)) ? DataProvider.DELETED_ID : kozmeticar.getKorisnickoIme();
@@ -81,6 +82,7 @@ public class Settings {
 		settings.setTipKozmetickogTretmanaFilePath(TIPOVI_TRETMANA);
 		settings.setZakazanTretmanFilePath(ZAKAZANI_TRETMANI);
 		settings.setSalonFilePath(SALON);
+		settings.setCriteriaFilePath(CRITERIA);
 		
 		
 		return settings;
@@ -151,6 +153,14 @@ public class Settings {
 	
 	public void setSalonFilePath(String salonFilePath) {
 		this.salonFilePath = salonFilePath;
+	}
+	
+	public String getCriteriaFilePath() {
+		return criteriaFilePath;
+	}
+	
+	public void setCriteriaFilePath(String criteriaFilePath) {
+		this.criteriaFilePath = criteriaFilePath;
 	}
 
 	

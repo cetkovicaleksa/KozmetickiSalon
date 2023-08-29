@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -24,11 +26,15 @@ import dataProvajderi.RecepcionerProvider;
 import dataProvajderi.SalonProvider;
 import dataProvajderi.TipTretmanaProvider;
 import dataProvajderi.ZakazanTretmanProvider;
+import entiteti.BonusCriteria;
+import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
+import entiteti.NivoStrucneSpreme;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
+import entiteti.Zaposleni;
 import entiteti.KozmetickiTretman.TipTretmana;
 import helpers.Query;
 import helpers.Settings;
@@ -87,22 +93,50 @@ public class RegistarMenadzera {
 	}
 	
 	
-	public Collection<Collection<KozmetickiTretman.TipTretmana>> getTretmaniSelection(){
-		return getTipTretmanaMenadzer().getTretmaniSelection();
+	
+	public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> getRasporedKozmeticara(Kozmeticar kozmeticar) {
+		List<ZakazanTretman> zakazaniTretmaniKozmeticara = getZakazanTretmanMenadzer().read(new Query<>(zt -> kozmeticar.equals(zt.getKozmeticar())));
+		SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> raspored = new TreeMap<>();
+		
+		zakazaniTretmaniKozmeticara.forEach(tretman -> {
+			LocalDate datum = tretman.getDatum();			
+			
+			raspored.computeIfAbsent( datum, k -> {  // TODO seems stupid 
+													SortedMap<LocalTime, ZakazanTretman> map = new TreeMap<>();
+													raspored.put(datum, map);
+													return map;
+												   } 
+			).put(tretman.getVrijeme(), tretman);
+		});
+		
+		return raspored;
 	}
 	
 	
-	public Collection<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
-		return getKozmeticarMenadzer().allKozmeticariThatCanPreformTreatment(tretman);
-	}
+	
+	
+	
 	
 	public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum){
-		//TODO: finish
 		SortedSet<Integer> freeHours = new TreeSet<>();
+		for(int i = 0; i <= 23; i++) {
+			freeHours.add(i);
+		}
 		
+		List<ZakazanTretman> zakazaniTretmaniZaDatum = getZakazanTretmanMenadzer().read(
+															new Query<>(
+																 zt -> kozmeticar.equals(zt.getKozmeticar()) && datum.equals(zt.getDatum())
+															)
+														);		
+		
+		zakazaniTretmaniZaDatum.forEach(zt -> {
+			freeHours.remove(zt.getVrijeme().getHour());  // TODO check this
+		});
 		
 		return freeHours;
 	}
+	
+	
 	
 	public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent, LocalDate datum,
 					LocalTime vrijeme) {
@@ -110,6 +144,109 @@ public class RegistarMenadzera {
 				new ZakazanTretman(tipTretmana, kozmeticar, klijent, datum, vrijeme)
 		);				
 	}
+	
+	
+	
+	public void recheckLoyaltyCards() {
+		Iterator<ZakazanTretman> iter = getZakazanTretmanMenadzer().readAll();
+		Map<Klijent, Double> totalSpentMap = new HashMap<>();
+		
+		while(iter.hasNext()) {
+			ZakazanTretman tretman = iter.next();
+			Korisnik korisnik = tretman.getKlijent();
+			
+			if(korisnik instanceof Klijent) {
+				Klijent klijent = (Klijent) korisnik;
+				totalSpentMap.put(klijent, tretman.getCijena() + totalSpentMap.computeIfAbsent(klijent, k -> 0d));
+			}
+		}
+		
+		double loyaltyThreshold = getSalonMenadzer().read().getLoyaltyCardThreshold();
+		getKlijentMenadzer().update(
+				new Query<>(klijent -> loyaltyThreshold <= totalSpentMap.computeIfAbsent(klijent, k -> 0d)),
+				new Updater<>(klijent -> klijent.setHasLoyaltyCard(true))
+		);
+	}
+	
+	public void recheckLoyaltyCards(Number newLoyaltyCardThreshold) {
+		getSalonMenadzer().read().setLoyaltyCardThreshold(newLoyaltyCardThreshold.doubleValue());
+		recheckLoyaltyCards();
+	}
+	
+	
+	public void recheckEmployeeBonuses() {
+		Query<Zaposleni> bonusQuery = 
+				getSalonMenadzer().read().getBonusCriteria().getEmployeeCriteria(this::getIzvjestajForKozmeticar);
+				
+		
+		getKozmeticarMenadzer().update(
+				new Query<>(kozmeticar -> bonusQuery.test(kozmeticar)),
+				new Updater<>(kozmeticar -> kozmeticar.setBonus(true))
+			);
+		
+		getRecepcionerMenadzer().update(
+				new Query<>(recepcioner -> bonusQuery.test(recepcioner)),
+				new Updater<>(recepcioner -> recepcioner.setBonus(true))
+			);
+		
+		getMenadzerMenadzer().update(
+				new Query<>(menadzer -> bonusQuery.test(menadzer)),
+				new Updater<>(menadzer -> menadzer.setBonus(true))
+			);
+	}
+	
+	public void recheckEmployeeBonuses(Set<String> specialEmployeeUsernames, boolean ignoreIfHadBonusLastTime, int godineStazaThreshold, 
+			NivoStrucneSpreme nivoStrucneSpremeThreshold, double bazaPlateMin, double bazaPlateMax, int inTheLastNumberOfDays,
+			int numberOfCompletedTreatmentsThreshold, double moneyEarnedThreshold) {
+		
+		getSalonMenadzer().read().setBonusCriteria(
+				new BonusCriteria(
+						specialEmployeeUsernames, ignoreIfHadBonusLastTime, godineStazaThreshold, 
+						nivoStrucneSpremeThreshold, bazaPlateMin, bazaPlateMax, inTheLastNumberOfDays,
+						numberOfCompletedTreatmentsThreshold, moneyEarnedThreshold
+						)
+		);
+		
+		recheckEmployeeBonuses();
+	}
+	
+	
+	
+	public BonusCriteria.KozmeticarIzvjestaj getIzvjestajForKozmeticar(Kozmeticar kozmeticar, LocalDate beginingDate, LocalDate endDate){
+		Map<StatusTretmana, Integer> numberOfTreatmentsMap = new HashMap<>();
+		Map<StatusTretmana, Number> moneyEarnedMap = new HashMap<>();
+		
+		for(StatusTretmana status : new StatusTretmana[] {
+											StatusTretmana.ZAKAZAN, StatusTretmana.IZVRSEN, 
+											StatusTretmana.OTKAZAO_KLIJENT, StatusTretmana.OTKAZAO_SALON, 
+											StatusTretmana.NIJE_SE_POJAVIO}
+		   ) {
+			numberOfTreatmentsMap.put(status, 0);
+			moneyEarnedMap.put(status, 0d);
+		}
+		
+		List<ZakazanTretman> zakazaniTretmaniKozmeticaraZaDateDatume = 
+				getZakazanTretmanMenadzer().read(
+						new Query<>(tretman -> {
+							if(!kozmeticar.equals(tretman.getKozmeticar())) {
+								return false;
+							}
+							LocalDate datum = tretman.getDatum();
+							return (beginingDate.isBefore(datum) && endDate.isAfter(datum));
+						})
+				);
+		
+		for(ZakazanTretman tretman : zakazaniTretmaniKozmeticaraZaDateDatume) {
+			StatusTretmana status = tretman.getStatus();
+			numberOfTreatmentsMap.put(status, 1 + numberOfTreatmentsMap.get(status));
+			moneyEarnedMap.put(status, tretman.getCijena() + moneyEarnedMap.get(status).doubleValue());
+		}
+		
+		return new BonusCriteria.KozmeticarIzvjestaj(beginingDate, endDate, kozmeticar, numberOfTreatmentsMap, moneyEarnedMap);		
+	}
+	
+	
+	
 	
 
 	public void save() throws IOException{
@@ -129,15 +266,15 @@ public class RegistarMenadzera {
 	
 	public void load() throws IOException{
 		getKlijentMenadzer().load();
-		getKozmeticarMenadzer().load();
 		getRecepcionerMenadzer().load();
 		getMenadzerMenadzer().load();
 		
 		getKozmetickiTretmanMenadzer().load();
+		getKozmeticarMenadzer().load();
 		getTipTretmanaMenadzer().load();
 		getZakazanTretmanMenadzer().load();
 		
-		getSalonMenadzer().load();
+		//getSalonMenadzer().load();
 	}
 	
 	private void initializeMenadzers() {
@@ -178,7 +315,7 @@ public class RegistarMenadzera {
 		this.kozmetickiTretmanMenadzer = ktm;
 		this.tipTretmanaMenadzer = ttm;
 		
-		this.salonMenadzer = new SalonMenadzer(new SalonProvider(settings.getSalonFilePath()));
+		this.salonMenadzer = new SalonMenadzer(new SalonProvider(settings.getSalonFilePath(), settings.getCriteriaFilePath()));
 	}
 	
 	
@@ -269,5 +406,20 @@ public class RegistarMenadzera {
 
 	public void setSalonMenadzer(SalonMenadzer salonMenadzer) {
 		this.salonMenadzer = salonMenadzer;
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		ArrayList<String[]> strings = new ArrayList<>();
+		
+		
+		String[] k = KozmeticarProvider.TO_CSV.convert(
+				new Kozmeticar(
+						
+				)
+	       );
+		
+		strings.add(k);
 	}
 }

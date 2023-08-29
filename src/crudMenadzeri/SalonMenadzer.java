@@ -74,13 +74,7 @@ public class SalonMenadzer {
 		return salon.getIncome() - salon.getExpenses();
 	}
 	
-	public void recheckEmployeeBonus(Set<BonusCriteria.KozmeticarIzvjestaj> kozmeticariIzvjestaji) {
-		
-	}
 	
-	public void recheckLoyaltyCards() {
-		
-	}
 	
 	
 	

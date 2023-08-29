@@ -100,7 +100,7 @@ public class GUIFactory {
 
 			@Override
 			public Collection<Collection<TipTretmana>> getTretmaniSelection() {
-				return registar.getTretmaniSelection();
+				return registar.getTipTretmanaMenadzer().getTretmaniSelection();
 			}
 
 			@Override
@@ -116,19 +116,20 @@ public class GUIFactory {
 
 			@Override
 			public Collection<Kozmeticar> getKozmeticariThatCanPreformTreatment(KozmetickiTretman tretman) {
-				return registar.getKozmeticariThatCanPreformTreatment(tretman);
+				return registar.getKozmeticarMenadzer().allKozmeticariThatCanPreformTreatment(tretman);
 			}
 
 			@Override
 			public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
 					TipTretmana tipTretmana) {
-				// TODO Auto-generated method stub
-				SortedSet<Integer> set = new TreeSet<>();
-				for(int i = 3; i < 10; i++) {
-					set.add(i);
+				SortedSet<Integer> freeHours = registar.getKozmeticarFreeHours(kozmeticar, datum);
+				// TODO finish this
+				
+				for(Integer hour : freeHours) {
+					
 				}
 				
-				return set;
+				return freeHours;
 			}
 
 			@Override
@@ -175,8 +176,7 @@ public class GUIFactory {
 
 			@Override
 			public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> rasporedKozmeticara() {
-				// TODO Auto-generated method stub
-				return new TreeMap<>();
+				return registar.getRasporedKozmeticara(kozmeticar);
 			}
 			
 		});
@@ -232,7 +232,7 @@ public class GUIFactory {
 
 			@Override
 			public Collection<Collection<TipTretmana>> getTretmaniSelection() {
-				return registar.getTretmaniSelection();
+				return registar.getTipTretmanaMenadzer().getTretmaniSelection();
 			}
 
 			@Override

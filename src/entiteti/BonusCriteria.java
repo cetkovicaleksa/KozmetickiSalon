@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import helpers.Query;
+import helpers.ThreeArgumentFunction;
 
 public class BonusCriteria {
 	
@@ -35,7 +36,19 @@ public class BonusCriteria {
 		inTheLastNumberOfDays = Integer.MAX_VALUE; // all time
 	}
 	
-	
+	public BonusCriteria(Set<String> specialEmployeeUsernames, boolean ignoreIfHadBonusLastTime, int godineStazaThreshold, 
+			NivoStrucneSpreme nivoStrucneSpremeThreshold, double bazaPlateMin, double bazaPlateMax, int inTheLastNumberOfDays,
+			int numberOfCompletedTreatmentsThreshold, double moneyEarnedThreshold) {
+		this.specialEmployeeUsernames = specialEmployeeUsernames;
+		this.ignoreIfHadBonusLastTime = ignoreIfHadBonusLastTime;
+		this.godineStazaThreshold = godineStazaThreshold;
+		this.nivoStrucneSpremeThreshold = nivoStrucneSpremeThreshold;
+		this.bazaPlateMin = bazaPlateMin;
+		this.bazaPlateMax = bazaPlateMax;
+		this.inTheLastNumberOfDays = inTheLastNumberOfDays;
+		this.numberOfCompletedTreatmentsThreshold = numberOfCompletedTreatmentsThreshold;
+		this.moneyEarnedThreshold = moneyEarnedThreshold;
+	}
 	
 	public Query<Zaposleni> getEmployeeCriteria() {
 		Query<Zaposleni> primaryQuery = new Query<>(
@@ -76,21 +89,15 @@ public class BonusCriteria {
 	}
 	
 	
-	public Query<Zaposleni> getEmployeeCriteria(Function<Kozmeticar, KozmeticarIzvjestaj> izvjestajForKozmeticarFunction){
+	public Query<Zaposleni> getEmployeeCriteria(ThreeArgumentFunction<Kozmeticar, LocalDate, LocalDate, KozmeticarIzvjestaj> izvjestajForKozmeticarFunction){
 		Query<Zaposleni> employeeQuery = getEmployeeCriteria();
 		
 		Query<Kozmeticar> kozmeticarQuery = new Query<Kozmeticar>(kozmeticar -> {
 			
-			KozmeticarIzvjestaj izvjestaj = izvjestajForKozmeticarFunction.apply(kozmeticar);		
-			
-			if(
-			   !izvjestaj.getEndDate().equals(LocalDate.now()) ||
-			   !izvjestaj.getBeginingDate().equals(LocalDate.now().minusDays(inTheLastNumberOfDays)) ||
-			   !izvjestaj.getKozmeticar().equals(kozmeticar)
-			  ) {
-				return false; // TODO not good izvjestaj idk what to do
-			}
-						
+			KozmeticarIzvjestaj izvjestaj = izvjestajForKozmeticarFunction.apply(
+					kozmeticar, LocalDate.now().minusDays(inTheLastNumberOfDays), LocalDate.now()
+					);		
+					
 			return (numberOfCompletedTreatmentsThreshold <= izvjestaj.getTotalNumberOfTreatments() 
 					&& moneyEarnedThreshold <= izvjestaj.getTotalMoneyEarned());
 		});
@@ -106,6 +113,114 @@ public class BonusCriteria {
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	public Set<String> getSpecialEmployeeUsernames() {
+		return specialEmployeeUsernames;
+	}
+
+	public void setSpecialEmployeeUsernames(Set<String> specialEmployeeUsernames) {
+		this.specialEmployeeUsernames = specialEmployeeUsernames;
+	}
+
+	public boolean isIgnoreIfHadBonusLastTime() {
+		return ignoreIfHadBonusLastTime;
+	}
+
+	public void setIgnoreIfHadBonusLastTime(boolean ignoreIfHadBonusLastTime) {
+		this.ignoreIfHadBonusLastTime = ignoreIfHadBonusLastTime;
+	}
+
+	public int getGodineStazaThreshold() {
+		return godineStazaThreshold;
+	}
+
+	public void setGodineStazaThreshold(int godineStazaThreshold) {
+		this.godineStazaThreshold = godineStazaThreshold;
+	}
+
+	public NivoStrucneSpreme getNivoStrucneSpremeThreshold() {
+		return nivoStrucneSpremeThreshold;
+	}
+
+	public void setNivoStrucneSpremeThreshold(NivoStrucneSpreme nivoStrucneSpremeThreshold) {
+		this.nivoStrucneSpremeThreshold = nivoStrucneSpremeThreshold;
+	}
+
+	public double getBazaPlateMin() {
+		return bazaPlateMin;
+	}
+
+	public void setBazaPlateMin(double bazaPlateMin) {
+		this.bazaPlateMin = bazaPlateMin;
+	}
+
+	public double getBazaPlateMax() {
+		return bazaPlateMax;
+	}
+
+	public void setBazaPlateMax(double bazaPlateMax) {
+		this.bazaPlateMax = bazaPlateMax;
+	}
+
+	public int getInTheLastNumberOfDays() {
+		return inTheLastNumberOfDays;
+	}
+
+	public void setInTheLastNumberOfDays(int inTheLastNumberOfDays) {
+		this.inTheLastNumberOfDays = inTheLastNumberOfDays;
+	}
+
+	public int getNumberOfCompletedTreatmentsThreshold() {
+		return numberOfCompletedTreatmentsThreshold;
+	}
+
+	public void setNumberOfCompletedTreatmentsThreshold(int numberOfCompletedTreatmentsThreshold) {
+		this.numberOfCompletedTreatmentsThreshold = numberOfCompletedTreatmentsThreshold;
+	}
+
+	public double getMoneyEarnedThreshold() {
+		return moneyEarnedThreshold;
+	}
+
+	public void setMoneyEarnedThreshold(double moneyEarnedThreshold) {
+		this.moneyEarnedThreshold = moneyEarnedThreshold;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	public static class KozmeticarIzvjestaj{		
 		private LocalDate beginingDate;
 		private LocalDate endDate;

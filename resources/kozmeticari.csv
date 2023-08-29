@@ -1,0 +1,10 @@
+Nemanja	Savic	1234567890	123 Cherry Dr	nemanjasavic	pass890	MUSKI	8	622.0	false	MASTER_STUDIJE	Tretman tela,Masaža leđa,Masaža leđa
+Aleksandar	Radic	5678901234	234 Cedar Rd	aleksandarradic	pass321	MUSKI	12	100.0	true	MASTER_STUDIJE	Tretman stopala
+Maja	Milosevic	6789012345	567 Willow Ave	majamilosevic	pass567	ZENSKI	3	600.0	false	OSNOVNE_STUDIJE	Masaža leđa,Manikir,Tretman usana,Manikir,Tretman obrva
+Ivana	Dimitrijevic	6789012345	789 Oak Ave	ivanadimitrijevic	pass234	MUSKI	8	600.0	true	SKOLE_BEZ	Tretman stopala,Manikir,Manikir,Tretman tela
+Vuk	Radic	0123456789	567 Willow Ave	vukradic	pass234	MUSKI	2	100.0	true	MASTER_STUDIJE	Tretman tela,Tretman lica,Depilacija,Tretman tela,Tretman lica
+Kristina	Ristic	8901234567	654 Maple Dr	kristinaristic	pass123	MUSKI	16	100.0	true	MASTER_STUDIJE	Tretman kose,Tretman usana,Depilacija
+Sara	Stojanovic	7890123456	567 Willow Ave	sarastojanovic	pass654	MUSKI	2	622.0	true	SREDNJA_SKOLA	Tretman tela,Tretman obrva
+Aleksandar	Ristic	7890123456	567 Willow Ave	aleksandarristic	pass321	ZENSKI	20	600.0	false	MASTER_STUDIJE	Tretman obrva,Tretman kose
+Maja	Radic	7890123456	321 Pine Rd	majaradic1	pass234	ZENSKI	12	622.0	false	SREDNJA_SKOLA	Tretman tela,Tretman tela,Depilacija,Tretman obrva
+Jovana	Milanovic	3456789012	654 Maple Dr	jovanamilanovic	pass321	ZENSKI	16	800.0	true	SREDNJA_SKOLA	Tretman obrva,Manikir,Manikir

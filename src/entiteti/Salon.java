@@ -18,7 +18,7 @@ public class Salon implements Entitet{
 	private double loyaltyCardDiscount;
 	
 	//for employees
-	private BonusCriteria bonusCriteria;	
+	private BonusCriteria bonusCriteria = new BonusCriteria();	
 	
 	
 	// TODO Add constructors
