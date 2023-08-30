@@ -299,9 +299,9 @@ public class ZakazivanjeTretmanaPanel extends JPanel{
 				JOptionPane.showMessageDialog(null, "Za izabrani tip tretmana ne postoji kozmeticar.", "Velika greska", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			int index = Math.abs(new Random().nextInt() + 1);
+			int index = new Random().nextInt(model.getSize());
 			
-			kozmeticar = model.getElementAt(index % (model.getSize() - 1));
+			kozmeticar = model.getElementAt(index);
 		}
 		
 		selectedKozmeticar = kozmeticar;

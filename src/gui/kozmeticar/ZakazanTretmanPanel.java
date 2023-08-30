@@ -46,7 +46,7 @@ public class ZakazanTretmanPanel extends JPanel{
 	
 	
 	private void initialize() {		
-		table = new JTable(new ZakazanTretmanTableModel(null));
+		table = new JTable(new ZakazanTretmanTableModel(new ArrayList<>()));
 		table.getTableHeader().setReorderingAllowed(false);
 		
 		zakazanCheckBox = new JCheckBox("Zakazani");

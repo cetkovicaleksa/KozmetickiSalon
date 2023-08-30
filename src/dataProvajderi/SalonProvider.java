@@ -116,7 +116,7 @@ public class SalonProvider {
 	
 	public void saveData() throws IOException {
 		DataProvider.writeToCsv(Collections.singletonList(TO_CSV.convert(getSalon())), salonPath, DataProvider.CSV_DELIMITER);
-		DataProvider.writeToCsv(Collections.singletonList( CRITERIA_TO_CSV.convert(getSalon().getBonusCriteria()) ), getCriteriaPath(), DataProvider.CSV_DELIMITER);
+		//DataProvider.writeToCsv(Collections.singletonList( CRITERIA_TO_CSV.convert(getSalon().getBonusCriteria()) ), getCriteriaPath(), DataProvider.CSV_DELIMITER);
 	}
 	
 	

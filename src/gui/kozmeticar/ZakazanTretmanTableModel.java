@@ -1,7 +1,7 @@
 package gui.kozmeticar;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.Collection;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -10,7 +10,7 @@ import entiteti.ZakazanTretman;
 @SuppressWarnings("serial")
 public class ZakazanTretmanTableModel extends AbstractTableModel{
 	
-	private List<ZakazanTretman> zakazaniTretmani;
+	private ZakazanTretman[] zakazaniTretmani;
 	private final String[] columnNames = {
 											"Naziv", "Klijent", "Datum", "Vrijeme",
 											"Trajanje", "Cijena", "Status"
@@ -18,17 +18,26 @@ public class ZakazanTretmanTableModel extends AbstractTableModel{
 	public static final DateTimeFormatter FORMATER_DATUMA = java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 	
 	
-	public ZakazanTretmanTableModel(List<ZakazanTretman> zakazaniTretmani) {
+	public ZakazanTretmanTableModel(Collection<ZakazanTretman> zakazaniTretmani) {
 		setZakazaniTretmani(zakazaniTretmani);
 	}
 	
 	
-	
+	public void setZakazaniTretmani(Collection<ZakazanTretman> zakazaniTretmani) {
+		this.zakazaniTretmani = new ZakazanTretman[zakazaniTretmani.size()];
+		
+		int row = 0;
+		for(ZakazanTretman tretman : zakazaniTretmani) {
+			this.zakazaniTretmani[row++] = tretman;
+		}
+		
+		super.fireTableDataChanged();
+	}
 	
 
 	@Override
 	public int getRowCount() {
-		return zakazaniTretmani.size();
+		return zakazaniTretmani.length;
 	}
 
 	@Override
@@ -44,12 +53,15 @@ public class ZakazanTretmanTableModel extends AbstractTableModel{
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		ZakazanTretman tretman = getZakazanTretman(rowIndex);
+		if(tretman == null) {
+			return null;
+		}
 		
 		switch (columnIndex) {
 			case 0:
 				return tretman.getTipTretmana().getTretman().getNaziv() + " --- " + tretman.getTipTretmana().getNaziv();
 			case 1:
-				return tretman.getKlijent().getKorisnickoIme();
+				return tretman.getKlijent();
 			case 2:
 				return FORMATER_DATUMA.format(tretman.getDatum());
 			case 3:
@@ -66,12 +78,9 @@ public class ZakazanTretmanTableModel extends AbstractTableModel{
 	}
 
 	
-	public void setZakazaniTretmani(List<ZakazanTretman> zakazaniTretmani) {
-		this.zakazaniTretmani = zakazaniTretmani;
-		super.fireTableDataChanged();
-	}
+	
 	
 	public ZakazanTretman getZakazanTretman(int row) {
-		return this.zakazaniTretmani.get(row);
+		return ( row >= 0 && row < getRowCount() ? zakazaniTretmani[row] : null );
 	}
 }

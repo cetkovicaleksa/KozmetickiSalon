@@ -93,9 +93,7 @@ public class ZakazaniTretmaniPanel extends JPanel{
 	
 	
 	public void updateData() {
-		if(table != null) {
-			((ZakazaniTretmaniTableModel) table.getModel()).updateData(zakazaniTretmaniKlijentaSupplier.get());
-		}
+		((ZakazaniTretmaniTableModel) table.getModel()).updateData(zakazaniTretmaniKlijentaSupplier.get());
 		recheckPlaceholder();
 	}
 }

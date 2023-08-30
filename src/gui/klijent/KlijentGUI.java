@@ -111,6 +111,7 @@ public class KlijentGUI extends KorisnikGUI{
 			@Override
 			public void otkaziTretman(ZakazanTretman zakazanTretman) {
 				klijentSalon.otkaziTretman(zakazanTretman);
+				KlijentGUI.this.updateData();
 			}
 		});
 		

@@ -57,7 +57,7 @@ public class Settings {
 	private static final Function<Menadzer, String> MENADZER_ID = menadzer -> (MenadzerProvider.DELETED.equals(menadzer)) ? DataProvider.DELETED_ID : menadzer.getKorisnickoIme();
 	
 	public static final Function<KozmetickiTretman, String> KOZMETICKI_TRETMAN_ID = kozmetickiTretman -> (KozmetickiTretmanProvider.DELETED.equals(kozmetickiTretman)) ? DataProvider.DELETED_ID : kozmetickiTretman.getNaziv();
-	private static final Function<KozmetickiTretman.TipTretmana, String> TIP_TRETMANA_ID = tipTretmana -> (TipTretmanaProvider.DELETED.equals(tipTretmana)) ? DataProvider.DELETED_ID : tipTretmana.getNaziv();
+	private static final Function<KozmetickiTretman.TipTretmana, String> TIP_TRETMANA_ID = tipTretmana -> (TipTretmanaProvider.DELETED.equals(tipTretmana)) ? DataProvider.DELETED_ID : tipTretmana.getNaziv() + DataProvider.ID_DELIMITER + KOZMETICKI_TRETMAN_ID.apply(tipTretmana.getTretman());
 	private static final Function<ZakazanTretman, String> ZAKAZAN_TRETMAN_ID = zakazanTretman -> {
 		if(ZakazanTretmanProvider.DELETED.equals(zakazanTretman)) {
 			return DataProvider.DELETED_ID;
@@ -65,7 +65,7 @@ public class Settings {
 		
 		return Float.toString(zakazanTretman.getDatum().toEpochDay()) + 
 				DataProvider.ID_DELIMITER + 
-				zakazanTretman.getVrijeme().toSecondOfDay();
+				zakazanTretman.getVrijeme().toSecondOfDay() + DataProvider.ID_DELIMITER + KOZMETICAR_ID.apply(zakazanTretman.getKozmeticar());
 	};
 
 	

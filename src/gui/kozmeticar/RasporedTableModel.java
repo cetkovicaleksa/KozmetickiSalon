@@ -85,5 +85,7 @@ public class RasporedTableModel extends AbstractTableModel{
                 data[row++][2] = timeTretmanMap.get(time);
             }
         }
+        
+        fireTableDataChanged();
     }
 }

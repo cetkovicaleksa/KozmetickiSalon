@@ -140,7 +140,12 @@ public class GUIFactory {
 
 			@Override
 			public void otkaziTretman(ZakazanTretman zakazanTretman) {
-				zakazanTretman.setStatus(StatusTretmana.OTKAZAO_KLIJENT);				
+				zakazanTretman.setStatus(StatusTretmana.OTKAZAO_KLIJENT);
+				
+				// return 90% of money to client
+				zakazanTretman.setCijena(zakazanTretman.getCijena() * 0.1);
+				
+				// TODO: maby recheck if the client still satisfies the loyalty criteria
 			}
 		});
 	}
@@ -221,6 +226,9 @@ public class GUIFactory {
 			@Override
 			public void otkaziTretman(ZakazanTretman zakazanTretman) {
 				zakazanTretman.setStatus(StatusTretmana.OTKAZAO_SALON);
+				
+				// return 100% of the money to the client
+				zakazanTretman.setCijena(0);
 			}
 
 			@Override

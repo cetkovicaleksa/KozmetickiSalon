@@ -89,13 +89,14 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 	
 	
 	public static final Converter<ZakazanTretman, String[]> TO_CSV = zakazanTretman -> {
-		String[] zt = new String[7];
-		
-		zt[3] = Double.toString(zakazanTretman.getCijena());
-		zt[4] = Integer.toString(zakazanTretman.getTrajanje());
-		zt[5] = zakazanTretman.getDatum().format(FORMATER_DATUMA);
-		zt[6] = zakazanTretman.getStatus().name();
-	    return zt;
+		return new String[] {
+				null, null, null,
+				Double.toString(zakazanTretman.getCijena()),
+				Integer.toString(zakazanTretman.getTrajanje()),
+				zakazanTretman.getDatum().format(FORMATER_DATUMA),
+				zakazanTretman.getVrijeme().toString(),
+				zakazanTretman.getStatus().name()
+		};
 	};
 	
 	public static final Converter<String[], ZakazanTretman> FROM_CSV = zt -> {
@@ -104,7 +105,8 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 		zakazanTretman.setCijena(Float.parseFloat(zt[3]));
 		zakazanTretman.setTrajanje(Integer.parseInt(zt[4]));
 		zakazanTretman.setDatum(LocalDate.parse(zt[5], FORMATER_DATUMA));
-		zakazanTretman.setStatus(StatusTretmana.valueOf(zt[6]));
+		zakazanTretman.setVrijeme(LocalTime.parse(zt[6]));
+		zakazanTretman.setStatus(StatusTretmana.valueOf(zt[7]));
 	    return zakazanTretman;
 	};
 	
@@ -133,6 +135,9 @@ public class ZakazanTretmanProvider extends XDataProvider<ZakazanTretman, String
 		super.setData(new Data<>(initializedData));
 		
 		loadedData.forEach(zt -> {
+			if(zt.length != 8) {
+				return;
+			}
 			ZakazanTretman zakazanTretman = FROM_CSV.convert(zt);
 			initializedData.add(zakazanTretman);
 			

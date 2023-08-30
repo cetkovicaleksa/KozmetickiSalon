@@ -95,7 +95,10 @@ public class RegistarMenadzera {
 	
 	
 	public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> getRasporedKozmeticara(Kozmeticar kozmeticar) {
-		List<ZakazanTretman> zakazaniTretmaniKozmeticara = getZakazanTretmanMenadzer().read(new Query<>(zt -> kozmeticar.equals(zt.getKozmeticar())));
+		List<ZakazanTretman> zakazaniTretmaniKozmeticara = getZakazanTretmanMenadzer().read(
+				new Query<>(zt -> StatusTretmana.ZAKAZAN.equals(zt.getStatus()) && kozmeticar.equals(zt.getKozmeticar()))
+				);
+		
 		SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> raspored = new TreeMap<>();
 		
 		zakazaniTretmaniKozmeticara.forEach(tretman -> {
@@ -172,6 +175,7 @@ public class RegistarMenadzera {
 		getSalonMenadzer().read().setLoyaltyCardThreshold(newLoyaltyCardThreshold.doubleValue());
 		recheckLoyaltyCards();
 	}
+	
 	
 	
 	public void recheckEmployeeBonuses() {

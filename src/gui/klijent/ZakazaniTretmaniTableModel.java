@@ -78,6 +78,6 @@ public class ZakazaniTretmaniTableModel extends AbstractTableModel{
 	}
 	
 	public ZakazanTretman getZakazanTretman(int rowIndex) {
-		return (rowIndex > 0 && rowIndex < getRowCount() ? zakazaniTretmani[rowIndex] : null);
+		return (rowIndex >= 0 && rowIndex < getRowCount() ? zakazaniTretmani[rowIndex] : null);
 	}
 }

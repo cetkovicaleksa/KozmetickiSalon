@@ -73,6 +73,7 @@ public class KozmeticarGUI extends KorisnikGUI{
 	
 	private void updateData() {
 		this.rasporedPanel.updateData();
+		//this.zakazanTretmanPanel.updateData();
 	}
 	
 	
