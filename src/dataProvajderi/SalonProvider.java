@@ -1,10 +1,17 @@
 package dataProvajderi;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import entiteti.BonusCriteria;
+import entiteti.Dan;
 import entiteti.NivoStrucneSpreme;
 import entiteti.Salon;
 import helpers.Converter;
@@ -13,37 +20,34 @@ public class SalonProvider {
 	
 	private Salon salon;
 	private String salonPath;
-	private String criteriaPath;
+	
+	private static final String NO_DAYS = "NODAYS";
+	private static final String NO_USERNAMES = "NOSPECIALUSERS";
 	
 	public static final Converter<Salon, String[]> TO_CSV = salon -> {
 		return new String[] {
 				salon.getNaziv(), Integer.toString(salon.getOpeningHour()),
-				Integer.toString(salon.getClosingHour()), Double.toString(salon.getIncome()),
-				Double.toString(salon.getExpenses()), Double.toString(salon.getLoyaltyCardThreshold()),
-				Double.toString(salon.getLoyaltyCardDiscount())
-				
-				//(salon.getWorkingDays()).toString()
-				
+				Integer.toString(salon.getClosingHour()), workingDaysToCSV(salon.getWorkingDays()),
+				Double.toString(salon.getIncome()), Double.toString(salon.getExpenses()), 
+				Double.toString(salon.getLoyaltyCardThreshold()), Double.toString(salon.getLoyaltyCardDiscount())				
 		};
 	};
 	
 	public static final Converter<String[], Salon> FROM_CSV = s -> {
-		Salon salon = new Salon();
-		
-		salon.setNaziv(s[0]);
-		salon.setOpeningHour(Integer.parseInt(s[1]));
-		salon.setClosingHour(Integer.parseInt(s[2]));
-		salon.setIncome(Double.parseDouble(s[3]));
-		salon.setExpenses(Double.parseDouble(s[4]));
-		salon.setLoyaltyCardThreshold(Double.parseDouble(s[5]));
-		salon.setLoyaltyCardDiscount(Double.parseDouble(s[6]));
-		
-		//salon.setWorkingDays(new TreeSet<>());
-		
-		return salon;
+		return new Salon(
+				s[0], Integer.parseInt(s[1]),
+				Integer.parseInt(s[2]), workingDaysFromCSV(s[3]),
+				Double.parseDouble(s[4]), Double.parseDouble(s[5]),
+				Double.parseDouble(s[6]), Double.parseDouble(s[7]), null
+		);
 	};
 	
+	
+	
 	public static final Converter<BonusCriteria, String[]> CRITERIA_TO_CSV = criteria -> {
+		Set<String> usernames = criteria.getSpecialEmployeeUsernames();
+		String usernamesString = (usernames.isEmpty() ? NO_USERNAMES : String.join(DataProvider.CSV_INNER_DELIMITER, usernames));
+		
 		return new String[] {
 				Boolean.toString(criteria.isIgnoreIfHadBonusLastTime()),
 				Integer.toString(criteria.getGodineStazaThreshold()),
@@ -52,9 +56,9 @@ public class SalonProvider {
 				Double.toString(criteria.getBazaPlateMax()),
 				Integer.toString(criteria.getInTheLastNumberOfDays()),
 				Integer.toString(criteria.getNumberOfCompletedTreatmentsThreshold()),
-				Double.toString(criteria.getMoneyEarnedThreshold())
+				Double.toString(criteria.getMoneyEarnedThreshold()),
 				
-				//set
+				usernamesString
 		};
 	};
 	
@@ -69,7 +73,12 @@ public class SalonProvider {
 		criteria.setInTheLastNumberOfDays(Integer.parseInt(c[5]));
 		criteria.setNumberOfCompletedTreatmentsThreshold(Integer.parseInt(c[6]));
 		criteria.setMoneyEarnedThreshold(Double.parseDouble(c[7]));
-		//do the set
+		
+		criteria.setSpecialEmployeeUsernames(
+				new HashSet<>(
+						Arrays.asList( c[8].split(DataProvider.CSV_INNER_DELIMITER) )
+				)
+		);
 		
 		return criteria;
 	};
@@ -78,11 +87,11 @@ public class SalonProvider {
 	
 	public SalonProvider() {}
 	
-	public SalonProvider(String salonPath, String criteriaPath) {
-		this(new Salon(), salonPath, criteriaPath);
+	public SalonProvider(String salonPath) {
+		this(new Salon(), salonPath);
 	}
 	
-	public SalonProvider(Salon salon, String path, String criteriaPath) {
+	public SalonProvider(Salon salon, String path) {
 		setSalon(salon);
 		setSalonPath(path);
 	}
@@ -104,25 +113,62 @@ public class SalonProvider {
 		this.salonPath = path;
 	}
 	
-	public String getCriteriaPath() {
-		return criteriaPath;
-	}
 
-	public void setCriteriaPath(String criteriaPath) {
-		this.criteriaPath = criteriaPath;
+	
+	
+	
+	private static String workingDaysToCSV(Set<Dan> workingDays) {
+		String[] days = new String[workingDays.size()];
+		
+		if(days.length == 0) {
+			return NO_DAYS;
+		}
+		
+		int index = 0;
+		for(Dan day : workingDays) {
+			days[index++] = day.name();
+		}
+		
+		return String.join(DataProvider.CSV_INNER_DELIMITER, days);
 	}
+	
+	private static SortedSet<Dan> workingDaysFromCSV(String csvValue){
+		SortedSet<Dan> days = new TreeSet<>();
+		
+		if(NO_DAYS.equals(csvValue)) {
+			return days;
+		}
+		
+		String[] daysStrings = csvValue.split(DataProvider.CSV_INNER_DELIMITER);
+		for(String dayString : daysStrings) {
+			days.add(Dan.valueOf(dayString));
+		}
+		
+		return days;
+	}
+	
 
 	
 	
 	public void saveData() throws IOException {
-		DataProvider.writeToCsv(Collections.singletonList(TO_CSV.convert(getSalon())), salonPath, DataProvider.CSV_DELIMITER);
-		//DataProvider.writeToCsv(Collections.singletonList( CRITERIA_TO_CSV.convert(getSalon().getBonusCriteria()) ), getCriteriaPath(), DataProvider.CSV_DELIMITER);
+		ArrayList<String[]> dataToSave = new ArrayList<>();
+		
+		dataToSave.add(TO_CSV.convert(this.salon));
+		
+		BonusCriteria criteria = this.salon.getBonusCriteria();
+		dataToSave.add( CRITERIA_TO_CSV.convert(criteria == null ? new BonusCriteria() : criteria) );
+		
+		DataProvider.writeToCsv(dataToSave, getSalonPath(), DataProvider.CSV_DELIMITER);
 	}
 	
 	
 	private Salon loadSalon() throws IOException{
-		Salon salon = FROM_CSV.convert(DataProvider.loadFromCsv(salonPath, DataProvider.CSV_DELIMITER).get(0));	
-		salon.setBonusCriteria(CRITERIA_FROM_CSV.convert(DataProvider.loadFromCsv(getCriteriaPath(), DataProvider.CSV_DELIMITER).get(0)));
+		List<String[]> loadedData = DataProvider.loadFromCsv(salonPath, DataProvider.CSV_DELIMITER);
+		
+		Salon salon = FROM_CSV.convert(loadedData.get(0));	
+		
+		String[] criteriaStrings = loadedData.size() != 2 ? new String[0] : loadedData.get(1);		
+		salon.setBonusCriteria(criteriaStrings.length == 0 ? new BonusCriteria() : CRITERIA_FROM_CSV.convert(criteriaStrings));		
 		
 		return salon;
 	}

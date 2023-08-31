@@ -48,6 +48,7 @@ public class KozmeticarProvider extends XDataProvider<Kozmeticar, String> {
 		}
 	};
 	
+	private static final String NO_TRETMANI = "NEMA_TRETMANA";
 	
 	public static final Converter<Kozmeticar, String[]> TO_CSV = kozmeticar -> {
 		String[] k = new String[12];

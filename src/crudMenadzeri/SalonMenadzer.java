@@ -60,6 +60,10 @@ public class SalonMenadzer {
 		return salon.getWorkingDays().remove(dan);
 	}
 	
+	public boolean isSalonOpen(Dan dan) {
+		return salon.getWorkingDays().contains(dan);
+	}
+	
 	
 	
 	public void addExpense(Number newExpense) {

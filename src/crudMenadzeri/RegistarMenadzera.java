@@ -27,14 +27,17 @@ import dataProvajderi.SalonProvider;
 import dataProvajderi.TipTretmanaProvider;
 import dataProvajderi.ZakazanTretmanProvider;
 import entiteti.BonusCriteria;
+import entiteti.Dan;
 import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
 import entiteti.NivoStrucneSpreme;
+import entiteti.Salon;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
 import entiteti.Zaposleni;
+import entiteti.BonusCriteria.KozmeticarIzvjestaj;
 import entiteti.KozmetickiTretman.TipTretmana;
 import helpers.Query;
 import helpers.Settings;
@@ -122,18 +125,66 @@ public class RegistarMenadzera {
 	
 	public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum){
 		SortedSet<Integer> freeHours = new TreeSet<>();
-		for(int i = 0; i <= 23; i++) {
+		
+		Dan dan = null;
+		switch(datum.getDayOfWeek()) {
+			case MONDAY:
+				dan = Dan.PONEDELJAK;
+				break;
+			case TUESDAY:
+				dan = Dan.UTORAK;
+				break;
+			case WEDNESDAY:
+				dan = Dan.SRIJEDA;
+				break;
+			case THURSDAY:
+				dan = Dan.CETVRTAK;
+				break;
+			case FRIDAY:
+				dan = Dan.PETAK;
+				break;
+			case SATURDAY:
+				dan = Dan.SUBOTA;
+				break;
+			case SUNDAY:
+				dan = Dan.NEDELJA;
+			default:
+				// nothing
+		}
+		
+
+		if(dan == null || !getSalonMenadzer().isSalonOpen(dan)) {
+			return freeHours;
+		}
+		
+		Salon salon = getSalonMenadzer().read();
+		for(int i = salon.getOpeningHour(); i < salon.getClosingHour(); i++) {
 			freeHours.add(i);
 		}
 		
 		List<ZakazanTretman> zakazaniTretmaniZaDatum = getZakazanTretmanMenadzer().read(
 															new Query<>(
-																 zt -> kozmeticar.equals(zt.getKozmeticar()) && datum.equals(zt.getDatum())
+																 zt -> kozmeticar.equals(zt.getKozmeticar()) && datum.equals(zt.getDatum()) && StatusTretmana.ZAKAZAN == zt.getStatus()
 															)
 														);		
 		
-		zakazaniTretmaniZaDatum.forEach(zt -> {
-			freeHours.remove(zt.getVrijeme().getHour());  // TODO check this
+		ArrayList<Integer> hoursToRemove = new ArrayList<>();
+		zakazaniTretmaniZaDatum.forEach(zt -> {  // TODO: recheck this
+			int startingHour = zt.getVrijeme().getHour();
+			hoursToRemove.add(startingHour);
+			
+			int trajanje = zt.getTrajanje();
+			if(trajanje > 60) {
+				int brojSati = (trajanje % 60 == 0 ? trajanje / 60 : trajanje / 60 + 1); // will be at least 2
+				
+				int tretmanZauzima = startingHour + brojSati;
+				while(++startingHour <= tretmanZauzima) {
+					hoursToRemove.add(startingHour);
+				}
+			}
+			
+			freeHours.removeAll(hoursToRemove);
+			hoursToRemove.clear();
 		});
 		
 		return freeHours;
@@ -179,8 +230,18 @@ public class RegistarMenadzera {
 	
 	
 	public void recheckEmployeeBonuses() {
+		BonusCriteria criteria = getSalonMenadzer().read().getBonusCriteria();
+		LocalDate now = LocalDate.now();
+		LocalDate beginingDateForKozmeticari = now.minusDays(criteria.getInTheLastNumberOfDays());
+		
+		List<KozmeticarIzvjestaj> lista = getKozmeticarMenadzer().izvjestajKozmeticaraZaDatume(now, beginingDateForKozmeticari);
+		Map<Kozmeticar, KozmeticarIzvjestaj> mapaIzvjestaja = new HashMap<>();
+		
+		lista.forEach(izvjestaj -> mapaIzvjestaja.put(izvjestaj.getKozmeticar(), izvjestaj));
+		
+		
 		Query<Zaposleni> bonusQuery = 
-				getSalonMenadzer().read().getBonusCriteria().getEmployeeCriteria(this::getIzvjestajForKozmeticar);
+				criteria.getEmployeeCriteria((kozmeticar, beginingDate, endDate) -> mapaIzvjestaja.get(kozmeticar));
 				
 		
 		getKozmeticarMenadzer().update(
@@ -199,6 +260,7 @@ public class RegistarMenadzera {
 			);
 	}
 	
+	
 	public void recheckEmployeeBonuses(Set<String> specialEmployeeUsernames, boolean ignoreIfHadBonusLastTime, int godineStazaThreshold, 
 			NivoStrucneSpreme nivoStrucneSpremeThreshold, double bazaPlateMin, double bazaPlateMax, int inTheLastNumberOfDays,
 			int numberOfCompletedTreatmentsThreshold, double moneyEarnedThreshold) {
@@ -216,38 +278,6 @@ public class RegistarMenadzera {
 	
 	
 	
-	public BonusCriteria.KozmeticarIzvjestaj getIzvjestajForKozmeticar(Kozmeticar kozmeticar, LocalDate beginingDate, LocalDate endDate){
-		Map<StatusTretmana, Integer> numberOfTreatmentsMap = new HashMap<>();
-		Map<StatusTretmana, Number> moneyEarnedMap = new HashMap<>();
-		
-		for(StatusTretmana status : new StatusTretmana[] {
-											StatusTretmana.ZAKAZAN, StatusTretmana.IZVRSEN, 
-											StatusTretmana.OTKAZAO_KLIJENT, StatusTretmana.OTKAZAO_SALON, 
-											StatusTretmana.NIJE_SE_POJAVIO}
-		   ) {
-			numberOfTreatmentsMap.put(status, 0);
-			moneyEarnedMap.put(status, 0d);
-		}
-		
-		List<ZakazanTretman> zakazaniTretmaniKozmeticaraZaDateDatume = 
-				getZakazanTretmanMenadzer().read(
-						new Query<>(tretman -> {
-							if(!kozmeticar.equals(tretman.getKozmeticar())) {
-								return false;
-							}
-							LocalDate datum = tretman.getDatum();
-							return (beginingDate.isBefore(datum) && endDate.isAfter(datum));
-						})
-				);
-		
-		for(ZakazanTretman tretman : zakazaniTretmaniKozmeticaraZaDateDatume) {
-			StatusTretmana status = tretman.getStatus();
-			numberOfTreatmentsMap.put(status, 1 + numberOfTreatmentsMap.get(status));
-			moneyEarnedMap.put(status, tretman.getCijena() + moneyEarnedMap.get(status).doubleValue());
-		}
-		
-		return new BonusCriteria.KozmeticarIzvjestaj(beginingDate, endDate, kozmeticar, numberOfTreatmentsMap, moneyEarnedMap);		
-	}
 	
 	
 	
@@ -278,7 +308,7 @@ public class RegistarMenadzera {
 		getTipTretmanaMenadzer().load();
 		getZakazanTretmanMenadzer().load();
 		
-		//getSalonMenadzer().load();
+		getSalonMenadzer().load();
 	}
 	
 	private void initializeMenadzers() {
@@ -319,7 +349,7 @@ public class RegistarMenadzera {
 		this.kozmetickiTretmanMenadzer = ktm;
 		this.tipTretmanaMenadzer = ttm;
 		
-		this.salonMenadzer = new SalonMenadzer(new SalonProvider(settings.getSalonFilePath(), settings.getCriteriaFilePath()));
+		this.salonMenadzer = new SalonMenadzer(new SalonProvider(settings.getSalonFilePath()));
 	}
 	
 	
@@ -410,20 +440,5 @@ public class RegistarMenadzera {
 
 	public void setSalonMenadzer(SalonMenadzer salonMenadzer) {
 		this.salonMenadzer = salonMenadzer;
-	}
-	
-	
-	
-	public static void main(String[] args) {
-		ArrayList<String[]> strings = new ArrayList<>();
-		
-		
-		String[] k = KozmeticarProvider.TO_CSV.convert(
-				new Kozmeticar(
-						
-				)
-	       );
-		
-		strings.add(k);
 	}
 }

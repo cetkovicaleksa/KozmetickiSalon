@@ -1,6 +1,8 @@
 package entiteti;
 
+import java.util.Arrays;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Salon implements Entitet{
 
@@ -15,13 +17,40 @@ public class Salon implements Entitet{
 	
 	//loyalty card for clients
 	private double loyaltyCardThreshold;
-	private double loyaltyCardDiscount;
+	private double loyaltyCardDiscount; // 0 <= loyaltyCardDiscount <= 1
 	
 	//for employees
-	private BonusCriteria bonusCriteria = new BonusCriteria();	
+	private BonusCriteria bonusCriteria;	
 	
 	
-	// TODO Add constructors
+	public Salon() {
+		workingDays = new TreeSet<>();
+		loyaltyCardDiscount = 1;
+		bonusCriteria = new BonusCriteria();
+	}
+	
+	public Salon(
+			String naziv, int openingHour, int closingHour, SortedSet<Dan> workingDays, 
+			double income, double expenses, double loyaltyCardThreshold, 
+			double loyaltyCardDiscount, BonusCriteria bonusCriteria) {
+		setNaziv(naziv);
+		setOpeningHour(openingHour);
+		setClosingHour(closingHour);
+		setWorkingDays(workingDays);
+		setIncome(income);
+		setExpenses(expenses);
+		setLoyaltyCardThreshold(loyaltyCardThreshold);
+		setLoyaltyCardDiscount(loyaltyCardDiscount);
+		setBonusCriteria(bonusCriteria);
+	}
+	
+	public Salon(
+			String naziv, int openingHour, int closingHour,
+			double income, double expenses, double loyaltyCardThreshold, 
+			double loyaltyCardDiscount, BonusCriteria bonusCriteria, Dan... workingDays) {
+		
+		this(naziv, openingHour, closingHour, new TreeSet<>(Arrays.asList(workingDays)), income, expenses, loyaltyCardThreshold, loyaltyCardDiscount, bonusCriteria);
+	}
 	
 	
 	

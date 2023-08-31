@@ -75,6 +75,8 @@ public class GUIFactory {
 	
 	
 	
+	
+	
 	public KlijentGUI getKlijentGUI(Klijent klijent, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) {
 		return new KlijentGUI(new KlijentSalon() {
 
@@ -122,14 +124,7 @@ public class GUIFactory {
 			@Override
 			public SortedSet<Integer> getKozmeticarFreeHours(Kozmeticar kozmeticar, LocalDate datum,
 					TipTretmana tipTretmana) {
-				SortedSet<Integer> freeHours = registar.getKozmeticarFreeHours(kozmeticar, datum);
-				// TODO finish this
-				
-				for(Integer hour : freeHours) {
-					
-				}
-				
-				return freeHours;
+				return GUIFactory.getKozmeticarFreeHours(registar, kozmeticar, datum, tipTretmana);
 			}
 
 			@Override
@@ -261,4 +256,21 @@ public class GUIFactory {
 	}
 	
 
+	
+	private static SortedSet<Integer> getKozmeticarFreeHours(RegistarMenadzera registar, Kozmeticar kozmeticar, LocalDate datum, KozmetickiTretman.TipTretmana tretman){
+		SortedSet<Integer> freeHours = registar.getKozmeticarFreeHours(kozmeticar, datum);
+		
+		int trajanjeTretmana = tretman.getTrajanje(); // number of minutes
+		if(trajanjeTretmana <= 60 || freeHours.isEmpty()) {
+			return freeHours;
+		}
+		
+		int brojTermina = (trajanjeTretmana % 60 == 0 ? trajanjeTretmana / 60 : trajanjeTretmana / 60 + 1);
+		
+		for(Integer hour : freeHours) {
+			// TODO: need to remove all the hours that the treatment is too long to fit
+		}
+		
+		return freeHours;
+	}
 }

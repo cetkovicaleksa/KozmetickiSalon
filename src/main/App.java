@@ -34,9 +34,6 @@ public class App implements Runnable{
 	@Override
 	public void run() {
 		load();
-		
-		
-		
 		authenticator.login();
 	}
 	

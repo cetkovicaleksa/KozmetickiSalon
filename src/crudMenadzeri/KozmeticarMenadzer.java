@@ -1,20 +1,26 @@
 package crudMenadzeri;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import dataProvajderi.DataProvider;
 import dataProvajderi.IdNotUniqueException;
 import dataProvajderi.KozmeticarProvider;
+import entiteti.BonusCriteria;
 import entiteti.Kozmeticar;
 import entiteti.KozmetickiTretman;
+import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
+import entiteti.BonusCriteria.KozmeticarIzvjestaj;
 import helpers.Query;
 import helpers.Updater;
 
@@ -227,6 +233,66 @@ public class KozmeticarMenadzer extends KorisnikMenadzer<Kozmeticar> {
 		kozmeticari.forEach(kozmeticar -> {
 			kozmeticar.getTretmani().removeAll(tretmaniLista);
 		});
+	}
+	
+	
+	
+	public List<BonusCriteria.KozmeticarIzvjestaj> izvjestajKozmeticaraZaDatume(LocalDate beginingDate, LocalDate endDate){
+		List<BonusCriteria.KozmeticarIzvjestaj> izvjestaj = new ArrayList<>();
+		Map<Kozmeticar, Map<StatusTretmana, Integer>> brojTretmanaZaKozmeticaraMap = new HashMap<>();
+		Map<Kozmeticar, Map<StatusTretmana, Number>> zaradaPoStatusuZaKozmeticaraMap = new HashMap<>();
+				
+		List<ZakazanTretman> zakazaniTretmaniZaDateDatume = getZakazanTretmanMenadzer().read(
+				new Query<>(zakazanTretman -> {
+					LocalDate datum = zakazanTretman.getDatum();
+					return datum.isBefore(endDate) && datum.isAfter(beginingDate);
+				})
+		);
+		
+		zakazaniTretmaniZaDateDatume.forEach(zakazanTretman -> {
+			
+			Kozmeticar kozmeticar = zakazanTretman.getKozmeticar();
+			StatusTretmana status = zakazanTretman.getStatus();
+			double cijena = zakazanTretman.getCijena();
+			
+			// ako prvi put nailazimo na ovog kozmeticara pravimo nove mape za njega
+			Map<StatusTretmana, Integer> brojMapa = brojTretmanaZaKozmeticaraMap.computeIfAbsent(kozmeticar, k -> {
+				
+				Map<StatusTretmana, Integer> map = new HashMap<>();
+				brojTretmanaZaKozmeticaraMap.put(kozmeticar, map);
+				
+				for(StatusTretmana statusTretmana : StatusTretmana.values()) {
+					map.put(statusTretmana, 0);
+				}
+				
+				return map;				
+			});
+			
+			Map<StatusTretmana, Number> zaradaMapa = zaradaPoStatusuZaKozmeticaraMap.computeIfAbsent(kozmeticar, k -> {
+				
+				Map<StatusTretmana, Number> map = new HashMap<>();
+				zaradaPoStatusuZaKozmeticaraMap.put(kozmeticar, map);
+				
+				for(StatusTretmana statusTretmana : StatusTretmana.values()) {
+					map.put(statusTretmana, 0);
+				}
+				
+				return map;
+			});
+			
+			// povecavamo broj tretmana za status i zaradu za status tretmana
+			brojMapa.put(status, brojMapa.get(status) + 1);
+			zaradaMapa.put(status, zaradaMapa.get(status).doubleValue() + cijena);
+		});
+		
+		
+		
+		brojTretmanaZaKozmeticaraMap.forEach( (kozmeticar, mapa) -> izvjestaj.add(
+				new KozmeticarIzvjestaj(beginingDate, endDate, kozmeticar, mapa, zaradaPoStatusuZaKozmeticaraMap.get(kozmeticar))
+				) 
+		);
+	
+		return izvjestaj;
 	}
 
 }
