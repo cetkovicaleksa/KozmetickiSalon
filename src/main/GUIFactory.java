@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import crudMenadzeri.RegistarMenadzera;
+import entiteti.BonusCriteria.KozmeticarIzvjestaj;
 import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Kozmeticar;
@@ -26,13 +28,17 @@ import entiteti.Recepcioner;
 import entiteti.StatusTretmana;
 import entiteti.ZakazanTretman;
 import gui.KorisnikGUI;
+import gui.interfaces.IzvjestajiSalon;
 import gui.interfaces.KlijentSalon;
 import gui.interfaces.KozmeticarSalon;
 import gui.interfaces.LoggedOutSalon;
+import gui.interfaces.MenadzerSalon;
 import gui.interfaces.RecepcionerSalon;
 import gui.klijent.KlijentGUI;
 import gui.kozmeticar.KozmeticarGUI;
+import gui.menadzer.MenadzerGUI;
 import gui.recepcioner.RecepcionerGUI;
+import helpers.Query;
 import helpers.ThreeArgumentFunction;
 
 public class GUIFactory {
@@ -130,7 +136,13 @@ public class GUIFactory {
 			@Override
 			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, LocalDate datum,
 					LocalTime vrijeme) {
-				registar.zakaziTretman(tipTretmana, kozmeticar, getLoggedInKorisnik(), datum, vrijeme);
+				// scheduling treatment but making sure that the user is the logged in client and
+				// the price is adjusted if the client has the loyalty card
+				
+				registar.zakaziTretman(
+						tipTretmana, kozmeticar, getLoggedInKorisnik(), datum, vrijeme, 
+						getPrice(tipTretmana), tipTretmana.getTrajanje()
+				);
 			}
 
 			@Override
@@ -138,8 +150,11 @@ public class GUIFactory {
 				zakazanTretman.setStatus(StatusTretmana.OTKAZAO_KLIJENT);
 				
 				// return 90% of money to client
-				zakazanTretman.setCijena(zakazanTretman.getCijena() * 0.1);
+				double cijena = zakazanTretman.getCijena() * 0.1;
+				zakazanTretman.setCijena(cijena);
 				
+				// adding the 10% of the money to the saloon for covering the expenses
+				registar.getSalonMenadzer().addIncome(cijena);								
 				// TODO: maby recheck if the client still satisfies the loyalty criteria
 			}
 		});
@@ -171,7 +186,9 @@ public class GUIFactory {
 
 			@Override
 			public void izvrsiTretman(ZakazanTretman tretman) {
-				tretman.setStatus(StatusTretmana.IZVRSEN);				
+				tretman.setStatus(StatusTretmana.IZVRSEN);	
+				// adding income to the salon
+				registar.getSalonMenadzer().addIncome(tretman.getCijena());
 			}
 
 			@Override
@@ -204,7 +221,10 @@ public class GUIFactory {
 			@Override
 			public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent, LocalDate datum,
 					LocalTime vrijeme) {
-				registar.zakaziTretman(tipTretmana, kozmeticar, klijent, datum, vrijeme);				
+				registar.zakaziTretman(
+						tipTretmana, kozmeticar, klijent, datum, vrijeme, 
+						getPrice(tipTretmana, klijent), tipTretmana.getTrajanje()
+				);				
 			}
 
 			@Override
@@ -222,7 +242,7 @@ public class GUIFactory {
 			public void otkaziTretman(ZakazanTretman zakazanTretman) {
 				zakazanTretman.setStatus(StatusTretmana.OTKAZAO_SALON);
 				
-				// return 100% of the money to the client
+				// return 100% of the money to the client, no income added to the salon
 				zakazanTretman.setCijena(0);
 			}
 
@@ -251,8 +271,77 @@ public class GUIFactory {
 	}
 	
 	
-	public KorisnikGUI getMenadzerGUI(Menadzer menadzer, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) {
-		throw new IllegalArgumentException();
+	public MenadzerGUI getMenadzerGUI(Menadzer menadzer, LoggedOutSalon loggedOutSalon, RegistarMenadzera registar) {
+		IzvjestajiSalon izvjestajSalon = GUIFactory.getIzvjestajSalon(registar);
+		
+		return new MenadzerGUI(new MenadzerSalon() {
+
+			@Override
+			public void logOut() {
+				loggedOutSalon.login();				
+			}
+
+			@Override
+			public void exit() {
+				loggedOutSalon.exit();
+			}
+
+			@Override
+			public Menadzer getLoggedInKorisnik() {
+				return menadzer;
+			}
+
+			@Override
+			public IzvjestajiSalon getIzvjestajiSalon() {
+				return izvjestajSalon;
+			}
+			
+		});
+	}
+	
+	
+	
+	private static IzvjestajiSalon getIzvjestajSalon(RegistarMenadzera registar) {
+		return new IzvjestajiSalon() {
+
+			@Override
+			public List<KozmeticarIzvjestaj> izvjestajBrojaTretmanaIZaradePoKozmeticaruZaOpsegDatuma(
+					LocalDate beginingDate, LocalDate endDate) {
+				return registar.getKozmeticarMenadzer().izvjestajKozmeticaraZaDatume(beginingDate, endDate);
+			}
+
+			@Override
+			public Map<StatusTretmana, Integer> izvjestajBrojaTretmanaPoRazlozima(LocalDate beginingDate,
+					LocalDate endDate) {
+				return registar.izvjestajBrojaTretmanaPoStatusima(beginingDate, endDate);
+			}
+
+			@Override
+			public Collection<Klijent> klijentiKojiImajuKarticuLojalnosti() {
+				return registar.getKlijentMenadzer().getKlijentiThatHaveLoyaltyCard();
+			}
+
+			@Override
+			public int brojIzvrsenihTretmanaZaTipTretmana(TipTretmana tipTretmana, LocalDate beginingDate, LocalDate endDate) {
+				return registar.izvjestajBrojaTretmanaPoStatusima(beginingDate, endDate, tipTretmana).get(StatusTretmana.IZVRSEN);
+			}
+
+			@Override
+			public Number zaradaZaTipTretmana(TipTretmana tipTretmana, LocalDate beginingDate, LocalDate endDate) {
+				Map<StatusTretmana, Double> izvjestajMapa = 
+						registar.izvjestajZaradeTretmanaPoStatusima(beginingDate, endDate, tipTretmana);
+				
+				izvjestajMapa.remove(StatusTretmana.ZAKAZAN); // salon did not get any income only on scheduled treatments
+				
+				double zarada = 0;
+				for(Double zaradaZaStatus : izvjestajMapa.values()) {
+					zarada += zaradaZaStatus.doubleValue();
+				}
+				
+				return zarada;
+			}
+			
+		};
 	}
 	
 

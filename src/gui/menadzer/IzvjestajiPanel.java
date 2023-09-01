@@ -7,6 +7,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import gui.interfaces.IzvjestajiSalon;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class IzvjestajiPanel extends JPanel {
@@ -16,12 +17,15 @@ public class IzvjestajiPanel extends JPanel {
 	private IzvjestajZakazanihTretmanaPoStatusu izvjestajZakazanihTretmanaPoStatusu;
 	private JButton openIzvjestajiZakazanihTretmanaPoStatusu;
 	
+
+	
 	
 	
 	public IzvjestajiPanel(IzvjestajiSalon salon) {
 		this.izvjestajiSalon = salon;
 		
 		initialize();
+		setupLayout();
 		setupListeners();
 	}
 	
@@ -32,17 +36,23 @@ public class IzvjestajiPanel extends JPanel {
 	}
 	
 	
+	private void setupLayout() {
+		setLayout(new MigLayout("fill, center, wrap 1", "[grow, center]"));
+		add(openIzvjestajiZakazanihTretmanaPoStatusu, "center");
+	}
+	
+	
 	
 	private void setupListeners() {
 		this.openIzvjestajiZakazanihTretmanaPoStatusu.addActionListener(ae -> {
-			this.izvjestajZakazanihTretmanaPoStatusu.setLocationRelativeTo(null);
+			//this.izvjestajZakazanihTretmanaPoStatusu.setLocationRelativeTo(null);
 			this.izvjestajZakazanihTretmanaPoStatusu.setVisible(true);
 			
 			this.izvjestajZakazanihTretmanaPoStatusu.addWindowListener(new WindowListener() {
 
 				@Override
 				public void windowOpened(WindowEvent e) {
-					openIzvjestajiZakazanihTretmanaPoStatusu.setEnabled(false);					
+					IzvjestajiPanel.this.setEnabled(false);					
 				}
 
 				@Override
@@ -52,7 +62,7 @@ public class IzvjestajiPanel extends JPanel {
 
 				@Override
 				public void windowClosed(WindowEvent e) {
-					openIzvjestajiZakazanihTretmanaPoStatusu.setEnabled(true);					
+					IzvjestajiPanel.super.setEnabled(true);					
 				}
 
 				@Override

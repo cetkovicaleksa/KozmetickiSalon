@@ -3,12 +3,13 @@ package main;
 import java.io.IOException;
 
 import crudMenadzeri.RegistarMenadzera;
+import gui.interfaces.KozmetickiSalon;
 import helpers.Settings;
 
-public class App implements Runnable{
+public class App implements Runnable, KozmetickiSalon{
 	
 	private RegistarMenadzera registar;
-	private final Authenticator authenticator = new Authenticator(this::getRegistar, this::save);
+	private final Authenticator authenticator = new Authenticator(this, this::getRegistar);
 
 	
 	public App() {
@@ -48,7 +49,8 @@ public class App implements Runnable{
 	}
 	
 	
-	public void save() {
+	@Override
+	public void exit() {
 		try {
 			registar.save();
 		}catch (IOException e) {

@@ -32,5 +32,9 @@ public class KlijentMenadzer extends KorisnikMenadzer<Klijent> {
 		super.removeKlijentiFromZakazaniTretmani(klijenti);
 		return true;
 	}
-
+	
+	
+	public List<Klijent> getKlijentiThatHaveLoyaltyCard(){
+		return ((KlijentProvider) super.getMainProvider()).get( new Query<>(klijent -> klijent.getHasLoyaltyCard())	);
+	}
 }

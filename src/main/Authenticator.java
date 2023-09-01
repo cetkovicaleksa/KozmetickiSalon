@@ -14,6 +14,7 @@ import dataProvajderi.IdNotUniqueException;
 import entiteti.Klijent;
 import entiteti.Korisnik;
 import entiteti.Pol;
+import gui.interfaces.KozmetickiSalon;
 import gui.interfaces.LoggedOutSalon;
 import gui.login.LoginGUI;
 import helpers.PasswordMissmatchException;
@@ -23,15 +24,19 @@ import helpers.UsernameNotFoundException;
 public class Authenticator implements LoggedOutSalon{
 	
 	private Supplier<RegistarMenadzera> registarSupplier;
-	private Runnable save;
+	private KozmetickiSalon kozmetickiSalon;
 	private GUIFactory guiFactory;
 	
 	
 	
-	public Authenticator(Supplier<RegistarMenadzera> registarSupplier, Runnable save) {
-		this.registarSupplier = registarSupplier;
-		this.save = save;
+	public Authenticator() {
 		this.guiFactory = GUIFactory.getInstance();
+	}
+	
+	public Authenticator(KozmetickiSalon kozmetickiSalon, Supplier<RegistarMenadzera> registarSupplier) {
+		this();
+		this.registarSupplier = registarSupplier;
+		this.kozmetickiSalon = kozmetickiSalon;
 	}
 	
 	
@@ -44,7 +49,7 @@ public class Authenticator implements LoggedOutSalon{
 
 	@Override
 	public void exit() {
-		save.run();
+		kozmetickiSalon.exit();
 	}
 	
 	

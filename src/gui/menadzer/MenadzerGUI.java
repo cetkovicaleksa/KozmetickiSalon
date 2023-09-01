@@ -1,27 +1,32 @@
 package gui.menadzer;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import gui.KorisnikGUI;
 import gui.interfaces.IzvjestajiSalon;
 import gui.interfaces.LoggedInSalon;
+import gui.interfaces.MenadzerSalon;
 
 @SuppressWarnings("serial")
 public class MenadzerGUI extends KorisnikGUI{
 	
-	private LoggedInSalon menadzerSalon;
-	private IzvjestajiSalon izvjestajiSalon;
+	private MenadzerSalon menadzerSalon;
 	
 	private JTabbedPane tabbedPane;
 	
-	private JPanel izvjestajiPane;
+	private IzvjestajiPanel izvjestajiPane;
 	
 	
 	
-	public MenadzerGUI(LoggedInSalon menadzerSalon, IzvjestajiSalon izvjestajSalon) {
+	public MenadzerGUI(MenadzerSalon menadzerSalon) {
 		this.menadzerSalon = menadzerSalon;
-		this.izvjestajiSalon = izvjestajiSalon;
+		
+		setSize(800, 600);
+		setLocationRelativeTo(null);
+		setTitle("Menadzer: " + menadzerSalon.getLoggedInKorisnik());
 		
 		initialize();		
 	}
@@ -35,6 +40,11 @@ public class MenadzerGUI extends KorisnikGUI{
 	
 	
 	private void initialize() {
-		this.izvjestajiPane = new IzvjestajiPanel(izvjestajiSalon);
+		this.izvjestajiPane = new IzvjestajiPanel(menadzerSalon.getIzvjestajiSalon());
+		
+		this.tabbedPane = new JTabbedPane();
+		tabbedPane.add("Izvjestaji", izvjestajiPane);
+		
+		super.add(tabbedPane, BorderLayout.CENTER);
 	}
 }

@@ -28,6 +28,21 @@ public class ZakazanTretman implements Entitet {
     }
     
     public ZakazanTretman(
+    		KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent,
+    		LocalDate datum, LocalTime vrijeme, double cijena, int trajanje) {
+    	
+    	this();
+    	setTipTretmana(tipTretmana);
+    	setCijena(cijena);
+    	setTrajanje(trajanje);
+    	
+    	setKozmeticar(kozmeticar);
+    	setKlijent(klijent);
+    	setDatum(datum);
+    	setVrijeme(vrijeme);
+    }
+    
+    public ZakazanTretman(
     						KozmetickiTretman.TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent,
     						LocalDate datum, LocalTime vrijeme, StatusTretmana status
     					 ) {    	

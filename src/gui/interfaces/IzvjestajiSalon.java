@@ -7,6 +7,7 @@ import java.util.Map;
 
 import entiteti.BonusCriteria;
 import entiteti.Klijent;
+import entiteti.KozmetickiTretman;
 import entiteti.StatusTretmana;
 
 public interface IzvjestajiSalon {
@@ -20,5 +21,9 @@ public interface IzvjestajiSalon {
 	/**Svi klijenti koji imaju karticu lojalnosti.*/
 	public Collection<Klijent> klijentiKojiImajuKarticuLojalnosti();
 	
-	// TODO: za tip tretmana dati broj zakazanih tretmana i zaradu za opseg datuma
+	
+	public int brojIzvrsenihTretmanaZaTipTretmana(KozmetickiTretman.TipTretmana tipTretmana, LocalDate beginingDate, LocalDate endDate);
+	
+	
+	public Number zaradaZaTipTretmana(KozmetickiTretman.TipTretmana tipTretmana, LocalDate beginingDate, LocalDate endDate);
 }

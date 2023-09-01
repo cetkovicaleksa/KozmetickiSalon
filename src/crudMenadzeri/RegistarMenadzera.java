@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +99,71 @@ public class RegistarMenadzera {
 	}
 	
 	
+	public Map<StatusTretmana, Integer> izvjestajBrojaTretmanaPoStatusima(LocalDate beginingDate,
+			LocalDate endDate, TipTretmana... tipoviTretmana){
+		
+		Iterator<ZakazanTretman> zakazaniTretmaniIterator = getZakazanTretmanMenadzer().readAll();
+		
+		Predicate<ZakazanTretman> filter;
+		if(tipoviTretmana.length == 0) {
+			filter = zakazanTretman -> true;
+		}else {
+			Set<TipTretmana> filterTretmana = new HashSet<>(Arrays.asList(tipoviTretmana));
+			filter = zakazanTretman -> filterTretmana.contains(zakazanTretman.getTipTretmana());
+		}
+		
+		
+		Map<StatusTretmana, Integer> izvjestajMapa = new EnumMap<>(StatusTretmana.class);
+		izvjestajMapa.forEach((status, value) -> izvjestajMapa.put(status, 0));
+		
+		while(zakazaniTretmaniIterator.hasNext()) {
+			ZakazanTretman zakazanTretman = zakazaniTretmaniIterator.next();
+			LocalDate datum = zakazanTretman.getDatum();
+			
+			if(!filter.test(zakazanTretman) || datum.isBefore(beginingDate) || datum.isAfter(endDate)) {
+				continue;
+			}
+			
+			izvjestajMapa.computeIfPresent( zakazanTretman.getStatus(), (statusTretmana, brojTretmana) -> brojTretmana + 1 );
+		}
+		
+		return izvjestajMapa;
+	}
+	
+	
+	public Map<StatusTretmana, Double> izvjestajZaradeTretmanaPoStatusima(LocalDate beginingDate,
+			LocalDate endDate, TipTretmana... tipoviTretmana){
+		
+		Iterator<ZakazanTretman> zakazaniTretmaniIterator = getZakazanTretmanMenadzer().readAll();
+		
+		Predicate<ZakazanTretman> filter;
+		if(tipoviTretmana.length == 0) {
+			filter = zakazanTretman -> true;
+		}else {
+			Set<TipTretmana> filterTretmana = new HashSet<>(Arrays.asList(tipoviTretmana));
+			filter = zakazanTretman -> filterTretmana.contains(zakazanTretman.getTipTretmana());
+		}
+		
+		Map<StatusTretmana, Double> izvjestajMapa = new EnumMap<>(StatusTretmana.class);
+		izvjestajMapa.forEach((status, zarada) -> izvjestajMapa.put(status, 0d));
+		
+		while(zakazaniTretmaniIterator.hasNext()) {
+			ZakazanTretman zakazanTretman = zakazaniTretmaniIterator.next();
+			LocalDate datum = zakazanTretman.getDatum();
+			
+			if(!filter.test(zakazanTretman) || datum.isBefore(beginingDate) || datum.isAfter(endDate)) {
+				continue;
+			}
+			
+			izvjestajMapa.computeIfPresent( 
+					zakazanTretman.getStatus(), 
+					(statusTretmana, brojTretmana) -> brojTretmana + zakazanTretman.getCijena()
+			);
+		}
+		
+		return izvjestajMapa;
+	}
+	
 	
 	public SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> getRasporedKozmeticara(Kozmeticar kozmeticar) {
 		List<ZakazanTretman> zakazaniTretmaniKozmeticara = getZakazanTretmanMenadzer().read(
@@ -104,16 +172,10 @@ public class RegistarMenadzera {
 		
 		SortedMap<LocalDate, SortedMap<LocalTime, ZakazanTretman>> raspored = new TreeMap<>();
 		
-		zakazaniTretmaniKozmeticara.forEach(tretman -> {
-			LocalDate datum = tretman.getDatum();			
-			
-			raspored.computeIfAbsent( datum, k -> {  // TODO seems stupid 
-													SortedMap<LocalTime, ZakazanTretman> map = new TreeMap<>();
-													raspored.put(datum, map);
-													return map;
-												   } 
-			).put(tretman.getVrijeme(), tretman);
-		});
+		zakazaniTretmaniKozmeticara.forEach(tretman -> 
+				raspored.computeIfAbsent( tretman.getDatum(), k -> new TreeMap<>() )
+						.put(tretman.getVrijeme(), tretman)
+		);
 		
 		return raspored;
 	}
@@ -191,11 +253,15 @@ public class RegistarMenadzera {
 	}
 	
 	
+	public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent, LocalDate datum,
+			LocalTime vrijeme) {
+		zakaziTretman(tipTretmana, kozmeticar, klijent, datum, vrijeme, tipTretmana.getCijena(), tipTretmana.getTrajanje());
+	}
 	
 	public void zakaziTretman(TipTretmana tipTretmana, Kozmeticar kozmeticar, Korisnik klijent, LocalDate datum,
-					LocalTime vrijeme) {
+					LocalTime vrijeme, Number cijena, int trajanje) {		
 		getZakazanTretmanMenadzer().create(
-				new ZakazanTretman(tipTretmana, kozmeticar, klijent, datum, vrijeme)
+				new ZakazanTretman(tipTretmana, kozmeticar, klijent, datum, vrijeme, cijena.doubleValue(), trajanje)
 		);				
 	}
 	
@@ -207,6 +273,10 @@ public class RegistarMenadzera {
 		
 		while(iter.hasNext()) {
 			ZakazanTretman tretman = iter.next();
+			if(tretman.getStatus() == StatusTretmana.ZAKAZAN) {
+				continue;
+			}
+			
 			Korisnik korisnik = tretman.getKlijent();
 			
 			if(korisnik instanceof Klijent) {

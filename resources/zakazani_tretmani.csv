@@ -1,11 +1,13 @@
-Obrve za oblikovanje_Tretman obrva	majamilosevic	cetkovic	0.0	30	2023-08-31	04:00	OTKAZAO_SALON
-Klasicni manikir_Manikir	ivanadimitrijevic	cetkovic	2.5	30	2023-09-13	05:00	OTKAZAO_KLIJENT
+Obrve za oblikovanje_Tretman obrva	majamilosevic	cetkovic	0.0	30	2023-08-31	04:00	ZAKAZAN
+Klasicni manikir_Manikir	ivanadimitrijevic	cetkovic	2.5	30	2023-09-13	05:00	ZAKAZAN
 Dubinska masaza_Masaza ledja	majamilosevic	cetkovic	90.0	60	2023-09-05	10:00	IZVRSEN
 Klasicni manikir_Manikir	ivanadimitrijevic	cetkovic	2.5	30	2023-09-13	06:00	OTKAZAO_KLIJENT
 Klasicni manikir_Manikir	ivanadimitrijevic	cetkovic	2.5	30	2023-09-13	07:00	OTKAZAO_KLIJENT
 Klasicni manikir_Manikir	ivanadimitrijevic	cetkovic	25.0	30	2023-09-13	08:00	ZAKAZAN
 Osnovni tretman lica_Tretman lica	majaradic1	cetkovic	50.0	60	2023-09-13	05:00	ZAKAZAN
-Bojenje obrva_Tretman obrva	majamilosevic	cetkovic	15.0	15	2023-08-31	07:00	ZAKAZAN
+Bojenje obrva_Tretman obrva	majamilosevic	cetkovic	1.5	15	2023-08-31	07:00	OTKAZAO_KLIJENT
 Relaksaciona masaza_Tretman tela	sarastojanovic	cetkovic	8.0	75	2023-08-31	08:00	OTKAZAO_KLIJENT
 Relaksaciona masaza_Tretman tela	sarastojanovic	cetkovic	8.0	75	2023-08-31	12:00	OTKAZAO_KLIJENT
 Relaksaciona masaza_Tretman tela	sarastojanovic	cetkovic	80.0	75	2023-08-31	09:00	ZAKAZAN
+Masaza sa aromaterapijom_Masaza ledja	majamilosevic	cetkovic	65.0	45	2023-09-30	09:00	IZVRSEN
+Masaza sa aromaterapijom_Masaza ledja	majamilosevic	cetkovic	65.0	45	2023-09-28	07:00	ZAKAZAN
